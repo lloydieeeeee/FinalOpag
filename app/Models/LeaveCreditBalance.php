@@ -9,9 +9,8 @@ class LeaveCreditBalance extends Model
     protected $table      = 'leave_credit_balance';  // NOT pluralized
     protected $primaryKey = 'credit_balance_id';
 
-    // app/Models/LeaveCreditBalance.php
-// app/Models/LeaveCreditBalance.php
     protected $fillable = [
+        'user_id', // ── ADDED ──
         'employee_id',
         'leave_type_id',
         'year',
@@ -20,7 +19,7 @@ class LeaveCreditBalance extends Model
         'remaining_balance',
         'vacation_balance',
         'sick_balance',
-];
+    ];
 
     protected $casts = [
         'total_accrued'     => 'decimal:2',
@@ -31,7 +30,8 @@ class LeaveCreditBalance extends Model
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class, 'employee_id', 'employee_id');
+        // ── UPDATED to user_id ──
+        return $this->belongsTo(Employee::class, 'user_id', 'user_id');
     }
 
     public function leaveType()

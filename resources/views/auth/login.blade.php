@@ -159,88 +159,83 @@
                 </div>
             @endif
 
-            {{--
-  resources/views/auth/login.blade.php
-  Replace the ERROR ALERT section with this — shows specific login errors
---}}
+            <!-- ── ERROR ALERT ── -->
+            @if($errors->any())
+                <div id="alertBox" class="alert-box flex gap-3 rounded-xl border p-4 mb-6 text-left
+                    @if(str_contains($errors->first(), 'deactivated'))
+                        border-orange-200 bg-orange-50
+                    @else
+                        border-red-200 bg-red-50
+                    @endif">
 
-<!-- ── ERROR ALERT ── -->
-@if($errors->any())
-    <div id="alertBox" class="alert-box flex gap-3 rounded-xl border p-4 mb-6 text-left
-        @if(str_contains($errors->first(), 'deactivated'))
-            border-orange-200 bg-orange-50
-        @else
-            border-red-200 bg-red-50
-        @endif">
+                    {{-- Icon: deactivated = lock, wrong password = warning, not found = question --}}
+                    @if(str_contains($errors->first(), 'deactivated'))
+                    <svg class="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0
+                                 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                    @elseif(str_contains($errors->first(), 'password'))
+                    <svg class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1
+                                 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                    @else
+                    <svg class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    @endif
 
-        {{-- Icon: deactivated = lock, wrong password = warning, not found = question --}}
-        @if(str_contains($errors->first(), 'deactivated'))
-        <svg class="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0
-                     002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-        </svg>
-        @elseif(str_contains($errors->first(), 'password'))
-        <svg class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1
-                     1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-        </svg>
-        @else
-        <svg class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-        </svg>
-        @endif
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold
+                            @if(str_contains($errors->first(), 'deactivated')) text-orange-700
+                            @else text-red-700 @endif">
+                            @if(str_contains($errors->first(), 'deactivated'))
+                                Account Deactivated
+                            @elseif(str_contains($errors->first(), 'password'))
+                                Wrong Password
+                            @else
+                                Account Not Found
+                            @endif
+                        </p>
+                        <p class="text-sm mt-0.5
+                            @if(str_contains($errors->first(), 'deactivated')) text-orange-600
+                            @else text-red-600 @endif">
+                            {{ $errors->first('login') }}
+                        </p>
+                    </div>
 
-        <div class="flex-1">
-            <p class="text-sm font-semibold
-                @if(str_contains($errors->first(), 'deactivated')) text-orange-700
-                @else text-red-700 @endif">
-                @if(str_contains($errors->first(), 'deactivated'))
-                    Account Deactivated
-                @elseif(str_contains($errors->first(), 'password'))
-                    Wrong Password
-                @else
-                    Account Not Found
-                @endif
-            </p>
-            <p class="text-sm mt-0.5
-                @if(str_contains($errors->first(), 'deactivated')) text-orange-600
-                @else text-red-600 @endif">
-                {{ $errors->first('login') }}
-            </p>
-        </div>
-
-        <button onclick="dismissAlert()" class="ml-auto flex-shrink-0
-            @if(str_contains($errors->first(), 'deactivated')) text-orange-400 hover:text-orange-600
-            @else text-red-400 hover:text-red-600 @endif transition">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-        </button>
-    </div>
-@endif
+                    <button onclick="dismissAlert()" class="ml-auto flex-shrink-0
+                        @if(str_contains($errors->first(), 'deactivated')) text-orange-400 hover:text-orange-600
+                        @else text-red-400 hover:text-red-600 @endif transition">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            @endif
 
             <!-- ── LOGIN FORM ── -->
             <form method="POST" action="{{ route('login.post') }}" class="text-left">
                 @csrf
 
-                <!-- Employee ID -->
+                <!-- Username -->
                 <div class="input-group">
                     <input required
                            type="text"
-                           name="employee_id"
-                           value="{{ old('employee_id') }}"
+                           name="username"
+                           value="{{ old('username') }}"
                            autocomplete="off"
-                           id="employee_id"
+                           id="username"
                            class="input"
                            placeholder=""
-                           data-placeholder="e.g. 1, 2, 3..."
+                           data-placeholder="Enter your username"
                            onfocus="showPlaceholder(this)"
                            oninput="hidePlaceholderOnType(this)"
                            onblur="removePlaceholderIfEmpty(this)">
-                    <label class="user-label" for="employee_id">Employee ID</label>
+                    <label class="user-label" for="username">Username</label>
                 </div>
 
                 <!-- Password -->

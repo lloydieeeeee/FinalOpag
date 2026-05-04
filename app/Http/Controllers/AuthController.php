@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\UserCredential;
+use App\Models\Employee;
 
 class AuthController extends Controller
 {
@@ -16,32 +17,45 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // 1. Validate 'username' instead of 'employee_id'
         $request->validate([
-            'employee_id' => 'required',
-            'password'    => 'required',
+            'username' => 'required', 
+            'password' => 'required',
         ]);
 
-       $credential = UserCredential::where('employee_id', $request->employee_id)->first();
+        // 2. FIRST, find the employee by the new username in the employee table
+        $employee = Employee::where('username', $request->username)->first();
 
-        if (!$credential) {
+        if (!$employee) {
             return back()->withErrors(['login' => 'No account found with that username.'])->withInput();
         }
+
+        // 3. THEN, get their associated credentials
+        $credential = $employee->credential;
+
+        if (!$credential) {
+            return back()->withErrors(['login' => 'No login credentials set up for this employee.'])->withInput();
+        }
+
         if (!$credential->is_active) {
             return back()->withErrors(['login' => 'This account has been deactivated. Please contact your administrator.'])->withInput();
         }
+
         if (!Hash::check($request->password, $credential->password_hash)) {
             return back()->withErrors(['login' => 'Incorrect password. Please try again.'])->withInput();
         }
 
+        // 4. Log them in using the credential model
         Auth::login($credential);
         $request->session()->regenerate();
 
-        $realAccess = $credential->userAccess->user_access ?? 'employee';
+        $realAccess = $employee->access->user_access ?? 'employee';
 
-        // Store both real access and current view mode in session
-        $request->session()->put('employee_id',    $credential->employee_id);
-        $request->session()->put('user_access',     $realAccess);
-        $request->session()->put('view_as',         $realAccess); // current effective role
+        // 5. Store the stable user_id in the session
+        $request->session()->put('user_id',       $employee->user_id);
+        $request->session()->put('employee_id',   $employee->employee_id); // Keep this just in case old views need it
+        $request->session()->put('user_access',   $realAccess);
+        $request->session()->put('view_as',       $realAccess); 
 
         return redirect()->route('dashboard');
     }

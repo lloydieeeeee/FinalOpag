@@ -328,7 +328,7 @@
             </thead>
             <tbody id="empTbody">
                 @forelse($employees as $emp)
-                <tr style="border-bottom:1px solid #f9fafb;cursor:pointer;" class="emp-row" data-empid="{{ $emp->employee_id }}" onclick="openViewPanel({{ $emp->employee_id }})">
+                <tr style="border-bottom:1px solid #f9fafb;cursor:pointer;" class="emp-row" data-userid="{{ $emp->user_id }}" onclick="openViewPanel({{ $emp->user_id }})">
                     <td class="px-6 py-2.5 font-bold text-gray-800 font-mono">{{ $emp->formatted_employee_id }}</td>
                     <td class="px-4 py-2.5 text-gray-600">
                         {{ $emp->last_name }}, {{ $emp->first_name }}
@@ -347,13 +347,13 @@
                         @endif
                     </td>
                     <td class="px-6 py-2.5 text-right" style="white-space:nowrap;">
-                        <button class="action-btn" onclick="event.stopPropagation(); openViewPanel({{ $emp->employee_id }})" title="View Details" style="margin-right:4px;">
+                        <button class="action-btn" onclick="event.stopPropagation(); openViewPanel({{ $emp->user_id }})" title="View Details" style="margin-right:4px;">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                             </svg>
                         </button>
-                        <button class="action-btn" onclick="event.stopPropagation(); openEditPanel({{ $emp->employee_id }})" title="Edit Employee">
+                        <button class="action-btn" onclick="event.stopPropagation(); openEditPanel({{ $emp->user_id }})" title="Edit Employee">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
@@ -463,11 +463,6 @@
                                     Old / Existing Employee
                                 </button>
                             </div>
-                            {{--
-                                is_new_employee: '1' = New hire (auto-compute leave from hire date)
-                                                 '0' = Old/existing (manually entered VL/SL balances)
-                                Backend uses this flag to decide how to populate leave_credit_balance.
-                            --}}
                             <input type="hidden" id="f_is_new_employee" name="is_new_employee" value="">
                             <p class="error-msg" id="err_emp_type">Please select an employee type.</p>
                             <p class="id-hint" style="margin-top:4px;">
@@ -477,7 +472,7 @@
 
                         {{-- Employee ID --}}
                         <div>
-                            <label class="field-label">Employee ID <span class="req add-only">*</span></label>
+                            <label class="field-label">Employee ID <span class="req">*</span></label>
                             <input
                                 type="text"
                                 id="f_employee_id_display"
@@ -489,7 +484,7 @@
                                 data-lpignore="true">
                             <input type="hidden" id="f_employee_id_raw" name="employee_id">
                             <p class="error-msg" id="err_employee_id_display">Valid 7-digit ID required (e.g. 001-0001).</p>
-                            <p class="id-hint add-only">Numbers only · auto-formats as 000-0000</p>
+                            <p class="id-hint">Numbers only · auto-formats as 000-0000</p>
                         </div>
 
                         <div>
@@ -563,23 +558,6 @@
                             </select>
                         </div>
 
-                        {{-- ════════════════════════════════════════════════
-                             LEAVE BALANCE SECTION
-                             ════════════════════════════════════════════════
-                             Backend contract (EmployeeController@store):
-                             After saving the Employee, insert TWO rows into
-                             leave_credit_balance for the current year:
-                               - leave_type_id = 1 (Vacation Leave)  → vl_balance
-                               - leave_type_id = 2 (Sick Leave)       → sl_balance
-                             Both rows use the same value for total_accrued
-                             and remaining_balance, with total_used = 0.
-
-                             Fields sent to backend:
-                               is_new_employee  → '1' (new) or '0' (old)
-                               vl_balance       → VL amount (4 decimal places)
-                               sl_balance       → SL amount (4 decimal places)
-                        --}}
-
                         {{-- ── NEW EMPLOYEE: Leave Balance Auto-Preview ── --}}
                         <div class="col-span-2 add-only" id="leavePreviewWrap">
                             <div id="leavePreviewCard">
@@ -595,11 +573,6 @@
                                 <div id="lpContent">
                                     <div class="lp-nodate">Enter a hire date above to compute initial leave balances.</div>
                                 </div>
-                                {{--
-                                    These two hidden fields are submitted to the backend.
-                                    vl_balance → inserted into leave_credit_balance (leave_type_id=1)
-                                    sl_balance → inserted into leave_credit_balance (leave_type_id=2)
-                                --}}
                                 <input type="hidden" id="f_vl_balance" name="vl_balance" value="0">
                                 <input type="hidden" id="f_sl_balance" name="sl_balance" value="0">
                             </div>
@@ -618,7 +591,6 @@
                                     </div>
                                 </div>
                                 <div class="ob-grid">
-                                    {{-- VL input (visible) → syncs to hidden f_vl_balance on blur --}}
                                     <div class="ob-field">
                                         <div class="ob-field-top">
                                             <span class="ob-type-badge vl">VL</span>
@@ -640,7 +612,6 @@
                                         </div>
                                         <p class="ob-hint">Saved as <code style="font-size:10px;background:#eff6ff;padding:1px 4px;border-radius:3px;">remaining_balance</code> &amp; <code style="font-size:10px;background:#eff6ff;padding:1px 4px;border-radius:3px;">total_accrued</code></p>
                                     </div>
-                                    {{-- SL input (visible) → syncs to hidden f_sl_balance on blur --}}
                                     <div class="ob-field">
                                         <div class="ob-field-top">
                                             <span class="ob-type-badge sl">SL</span>
@@ -1118,7 +1089,7 @@ function autoFillPassword() {
 /* ════════════════════════════════════════════════
    EDIT PANEL
 ════════════════════════════════════════════════ */
-let panelMode = 'add', currentEmpId = null, currentIsActive = true;
+let panelMode = 'add', currentUserId = null, currentIsActive = true;
 let confirmCallback = null, savedFormState = null;
 
 const PERSIST_FIELDS = [
@@ -1138,7 +1109,7 @@ function saveFormState() {
     fields['_pw_manually_edited']       = document.getElementById('f_password').dataset.manuallyEdited || '';
     fields['_username_manually_edited'] = document.getElementById('f_username').dataset.manuallyEdited || '';
     fields['_emp_type'] = currentEmpType;
-    savedFormState = { mode: panelMode, empId: currentEmpId, isActive: currentIsActive, fields };
+    savedFormState = { mode: panelMode, userId: currentUserId, isActive: currentIsActive, fields };
 }
 
 function restoreFormState(state) {
@@ -1221,13 +1192,10 @@ function resetEmpTypeUI() {
 }
 
 function openAddPanel(){
-    panelMode='add';currentEmpId=null;
+    panelMode='add';currentUserId=null;
     if(savedFormState&&savedFormState.mode==='add'){
         _applyMeta('add',null,null);
         restoreFormState(savedFormState);
-        const idEl = document.getElementById('f_employee_id_display');
-        idEl.readOnly = false;
-        idEl.classList.remove('field-readonly');
     } else {
         resetForm();
         savedFormState=null;
@@ -1240,28 +1208,26 @@ function openAddPanel(){
     document.body.style.overflow='hidden';
 }
 
-function openEditPanel(empId){
-    panelMode='edit';currentEmpId=empId;
-    if(savedFormState&&savedFormState.mode==='edit'&&savedFormState.empId===empId){
+function openEditPanel(userId){
+    panelMode='edit';currentUserId=userId;
+    if(savedFormState&&savedFormState.mode==='edit'&&savedFormState.userId===userId){
         currentIsActive=savedFormState.isActive;
-        _applyMeta('edit',empId,currentIsActive);
+        _applyMeta('edit',userId,currentIsActive);
         restoreFormState(savedFormState);
-        const idEl = document.getElementById('f_employee_id_display');
-        idEl.readOnly = true;
-        idEl.classList.add('field-readonly');
         document.getElementById('empPanel').className='mode-edit open';
         document.getElementById('overlay').classList.add('show');
         document.body.style.overflow='hidden';
         return;
     }
     resetForm();savedFormState=null;
-    const emp=EMPLOYEES_DATA[empId];if(!emp){showToast('Error','Employee data not found.','error');return;}
-    currentIsActive=emp.is_active==1;_applyMeta('edit',empId,currentIsActive);
+    const emp=EMPLOYEES_DATA[userId];if(!emp){showToast('Error','Employee data not found.','error');return;}
+    currentIsActive=emp.is_active==1;_applyMeta('edit',userId,currentIsActive);
+    
+    // UPDATED: employee_id is now fully editable.
     const idf=document.getElementById('f_employee_id_display');
-    idf.value=emp.formatted_id??empId;
-    idf.readOnly=true;
-    idf.classList.add('field-readonly');
-    document.getElementById('f_employee_id_raw').value=empId;
+    idf.value=emp.formatted_id??emp.employee_id;
+    document.getElementById('f_employee_id_raw').value=emp.employee_id;
+    
     document.getElementById('f_first_name').value=emp.first_name??'';
     document.getElementById('f_middle_name').value=emp.middle_name??'';
     document.getElementById('f_last_name').value=emp.last_name??'';
@@ -1277,7 +1243,10 @@ function openEditPanel(empId){
     sdSet('dept',emp.department_id??'');sdSet('pos',emp.position_id??'');
     if(emp.salary){const n=parseFloat(emp.salary);document.getElementById('f_salary_display').value=n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});document.getElementById('f_salary').value=n.toFixed(2);}
     if(emp.access){const sel=document.getElementById('f_user_access');const val=emp.access.user_access??'employee';const opt=[...sel.options].find(o=>o.value===val);if(opt)sel.value=val;else sel.selectedIndex=0;}
-    if(emp.credential)document.getElementById('f_username').value=emp.credential.username??'';
+    
+    // UPDATED: Correctly pull username
+    document.getElementById('f_username').value=emp.username ?? '';
+
     document.getElementById('f_password').value='';
     document.getElementById('f_password').placeholder='Leave blank to keep current';
     document.getElementById('empPanel').className='mode-edit open';
@@ -1285,9 +1254,9 @@ function openEditPanel(empId){
     document.body.style.overflow='hidden';
 }
 
-function _applyMeta(mode,empId,isActive){
+function _applyMeta(mode,userId,isActive){
     if(mode==='edit'){
-        const emp=EMPLOYEES_DATA[empId]||{};
+        const emp=EMPLOYEES_DATA[userId]||{};
         document.getElementById('panelTitle').textContent='Edit Employee';
         document.getElementById('panelSubtitle').textContent='Editing: '+(emp.last_name||'')+', '+(emp.first_name||'');
         document.getElementById('submitBtn').textContent='Update Employee';
@@ -1322,6 +1291,8 @@ function resetForm(){
     sdReset('dept');sdReset('pos');
     document.querySelectorAll('.error-msg').forEach(e=>e.classList.remove('show'));
     document.querySelectorAll('.form-field,.phone-input,.sd-trigger,.ob-input').forEach(f=>f.classList.remove('field-error'));
+    
+    // Ensure ID is not locked
     const idEl = document.getElementById('f_employee_id_display');
     idEl.readOnly = false;
     idEl.classList.remove('field-readonly');
@@ -1346,39 +1317,34 @@ function validate(){
     if(!sal||isNaN(parseFloat(sal))){document.getElementById('f_salary_display').classList.add('field-error');document.getElementById('err_salary').classList.add('show');ok=false;}
     else{document.getElementById('f_salary_display').classList.remove('field-error');document.getElementById('err_salary').classList.remove('show');}
 
+    // UPDATED: ID is now validated for both Add and Edit
+    const rawId=document.getElementById('f_employee_id_raw').value;
+    const idEl=document.getElementById('f_employee_id_display'),idErr=document.getElementById('err_employee_id_display');
+    if(!rawId||rawId.length!==7){
+        idEl.classList.add('field-error');
+        idErr.textContent='Employee ID must be exactly 7 digits (format: 000-0000).';
+        idErr.classList.add('show');
+        ok=false;
+    } else {
+        idEl.classList.remove('field-error');
+        idErr.classList.remove('show');
+    }
+
     if(panelMode==='add'){
-        // Employee type required
         if(!currentEmpType){document.getElementById('err_emp_type').classList.add('show');ok=false;}
         else{document.getElementById('err_emp_type').classList.remove('show');}
 
-        // Employee ID required (7 digits)
-        const rawId=document.getElementById('f_employee_id_raw').value;
-        const idEl=document.getElementById('f_employee_id_display'),idErr=document.getElementById('err_employee_id_display');
-        if(!rawId||rawId.length!==7){
-            idEl.classList.add('field-error');
-            idErr.textContent='Employee ID must be exactly 7 digits (format: 000-0000).';
-            idErr.classList.add('show');
-            ok=false;
-        } else {
-            idEl.classList.remove('field-error');
-            idErr.classList.remove('show');
-        }
-
-        // Username required
         const uEl=document.getElementById('f_username'),uErr=document.getElementById('err_username');
         if(!uEl.value.trim()){uEl.classList.add('field-error');uErr.textContent='Username is required.';uErr.classList.add('show');ok=false;}
         else{uEl.classList.remove('field-error');uErr.classList.remove('show');}
 
-        // Password required
         const pEl=document.getElementById('f_password'),pErr=document.getElementById('err_password');
         if(!pEl.value.trim()){pEl.classList.add('field-error');pErr.textContent='Password is required (min 6 characters).';pErr.classList.add('show');ok=false;}
         else{pEl.classList.remove('field-error');pErr.classList.remove('show');}
 
-        // For old employees: flush visible inputs → hidden fields before submit
         if (currentEmpType === 'old') {
             const vlDisp = document.getElementById('f_vl_current_display');
             const slDisp = document.getElementById('f_sl_current_display');
-            // Force finalize (in case user never blurred)
             if (vlDisp) finalizeBalanceInput(vlDisp, 'f_vl_balance');
             if (slDisp) finalizeBalanceInput(slDisp, 'f_sl_balance');
         }
@@ -1389,11 +1355,12 @@ function validate(){
 function submitForm(){
     if(!validate())return;
     const btn=document.getElementById('submitBtn'),isEdit=panelMode==='edit';
-    const url=isEdit?UPDATE_URL+'/'+currentEmpId:STORE_URL;
+    const url=isEdit?UPDATE_URL+'/'+currentUserId:STORE_URL;
     btn.textContent='Saving…';btn.disabled=true;
     const body=new FormData(document.getElementById('empForm'));
     if(isEdit)body.append('_method','PUT');
-    if(!isEdit)body.set('employee_id',document.getElementById('f_employee_id_raw').value);
+    body.set('employee_id',document.getElementById('f_employee_id_raw').value);
+    
     fetch(url,{method:'POST',headers:{'X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},body})
     .then(r=>r.json())
     .then(data=>{
@@ -1419,7 +1386,7 @@ function submitForm(){
 }
 
 function confirmToggleStatus(){
-    if(!currentEmpId)return;
+    if(!currentUserId)return;
     const d=currentIsActive,color=d?'#ef4444':'#16a34a',bg=d?'#fee2e2':'#dcfce7';
     const path=d?'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636':'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z';
     document.getElementById('confirmIconWrap').innerHTML='<svg class="w-8 h-8" fill="none" stroke="'+color+'" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="'+path+'"/></svg>';
@@ -1430,7 +1397,7 @@ function confirmToggleStatus(){
     confirmCallback=doToggleStatus;document.getElementById('confirmModal').classList.add('show');
 }
 function doToggleStatus(){
-    fetch(UPDATE_URL+'/'+currentEmpId+'/toggle-status',{method:'POST',headers:{'X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},body:new FormData()})
+    fetch(UPDATE_URL+'/'+currentUserId+'/toggle-status',{method:'POST',headers:{'X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},body:new FormData()})
     .then(r=>r.json())
     .then(data=>{if(data.success){savedFormState=null;closePanel();closeConfirm();showToast(currentIsActive?'Employee Deactivated':'Employee Activated',data.message,currentIsActive?'warning':'success');setTimeout(()=>location.reload(),1800);}else{showToast('Error',data.message||'Could not update status.','error');}})
     .catch(()=>showToast('Network Error','Please check your connection.','error'));
@@ -1441,10 +1408,10 @@ document.getElementById('confirmOkBtn').addEventListener('click',()=>{if(confirm
 /* ════════════════════════════════════════════════
    VIEW PANEL
 ════════════════════════════════════════════════ */
-let vpCurrentEmpId = null, vpActiveTab = 'personal', vpDataCache = {};
+let vpCurrentUserId = null, vpActiveTab = 'personal', vpDataCache = {};
 
-function openViewPanel(empId) {
-    vpCurrentEmpId = empId;
+function openViewPanel(userId) {
+    vpCurrentUserId = userId;
     vpActiveTab    = 'personal';
     setVpLoader(true);
     switchVpTab('personal', false);
@@ -1455,10 +1422,10 @@ function openViewPanel(empId) {
     document.getElementById('viewPanel').classList.add('open');
     document.getElementById('overlay').classList.add('show');
     document.body.style.overflow = 'hidden';
-    if (vpDataCache[empId]) { renderViewPanel(vpDataCache[empId]); return; }
-    fetch(SHOW_URL + '/' + empId + '/show', { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+    if (vpDataCache[userId]) { renderViewPanel(vpDataCache[userId]); return; }
+    fetch(SHOW_URL + '/' + userId + '/show', { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
     .then(r => r.json())
-    .then(data => { if (data.success) { vpDataCache[empId] = data; renderViewPanel(data); } else { setVpLoader(false); showToast('Error', 'Could not load employee details.', 'error'); } })
+    .then(data => { if (data.success) { vpDataCache[userId] = data; renderViewPanel(data); } else { setVpLoader(false); showToast('Error', 'Could not load employee details.', 'error'); } })
     .catch(() => { setVpLoader(false); showToast('Network Error', 'Please check your connection.', 'error'); });
 }
 function closeViewPanel() {
@@ -1466,7 +1433,7 @@ function closeViewPanel() {
     document.getElementById('overlay').classList.remove('show');
     document.body.style.overflow = '';
 }
-function openEditFromView() { closeViewPanel(); setTimeout(() => openEditPanel(vpCurrentEmpId), 120); }
+function openEditFromView() { closeViewPanel(); setTimeout(() => openEditPanel(vpCurrentUserId), 120); }
 
 function setVpLoader(show) {
     document.getElementById('vpLoader').style.display = show ? 'flex' : 'none';
@@ -1520,7 +1487,6 @@ function renderLeaveBalances(balances) {
         wrap.innerHTML = '<div class="vp-empty"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>No leave balance records found.</div>';
         return;
     }
-    // Group by year (descending), then show each leave_credit_balance row as a card
     const byYear = {};
     balances.forEach(b => { (byYear[b.year] = byYear[b.year]||[]).push(b); });
     let html = '';
@@ -1574,7 +1540,7 @@ function showToast(title,msg,type){
 }
 function togglePw(){const pw=document.getElementById('f_password'),eo=document.getElementById('eyeOpen'),ec=document.getElementById('eyeClosed');if(pw.type==='password'){pw.type='text';eo.classList.add('hidden');ec.classList.remove('hidden');}else{pw.type='password';eo.classList.remove('hidden');ec.classList.add('hidden');}}
 function updateFooterCount(visible,total){const rc=document.getElementById('resultCount'),fc=document.getElementById('footerCount');if(rc)rc.textContent=visible===total?total+' employees':visible+' of '+total+' shown';if(fc)fc.textContent=visible===total?'Showing all '+total+' employee'+(total!==1?'s':''):'Showing '+visible+' of '+total+' employee'+(total!==1?'s':'');}
-function filterTable(){const raw=document.getElementById('searchInput').value,q=raw.trim().toLowerCase(),rows=document.querySelectorAll('#empTbody .emp-row'),noRes=document.getElementById('noResultsRow'),clear=document.getElementById('clearSearch');if(clear)clear.style.display=q?'block':'none';let visible=0;rows.forEach(row=>{let match=false;if(!q){match=true;}else{if(row.textContent.toLowerCase().includes(q)){match=true;}if(!match){const empId=row.dataset.empid,emp=empId?EMPLOYEES_DATA[empId]:null;if(emp){const searchable=[emp.first_name,emp.middle_name,emp.last_name,emp.extension_name,emp.birthday,emp.address,emp.contact_number,emp.pagibig_id,emp.gsis_id,emp.philhealth_id,emp.formatted_id,emp.credential?.username,emp.access?.user_access,emp.is_active?'active':'inactive'].filter(Boolean).join(' ').toLowerCase();if(searchable.includes(q))match=true;}}}row.style.display=match?'':'none';if(match)visible++;});if(noRes)noRes.style.display=(q&&visible===0)?'':'none';updateFooterCount(visible,rows.length);}
+function filterTable(){const raw=document.getElementById('searchInput').value,q=raw.trim().toLowerCase(),rows=document.querySelectorAll('#empTbody .emp-row'),noRes=document.getElementById('noResultsRow'),clear=document.getElementById('clearSearch');if(clear)clear.style.display=q?'block':'none';let visible=0;rows.forEach(row=>{let match=false;if(!q){match=true;}else{if(row.textContent.toLowerCase().includes(q)){match=true;}if(!match){const userId=row.dataset.userid,emp=userId?EMPLOYEES_DATA[userId]:null;if(emp){const searchable=[emp.first_name,emp.middle_name,emp.last_name,emp.extension_name,emp.birthday,emp.address,emp.contact_number,emp.pagibig_id,emp.gsis_id,emp.philhealth_id,emp.formatted_id,emp.credential?.username,emp.access?.user_access,emp.is_active?'active':'inactive'].filter(Boolean).join(' ').toLowerCase();if(searchable.includes(q))match=true;}}}row.style.display=match?'':'none';if(match)visible++;});if(noRes)noRes.style.display=(q&&visible===0)?'':'none';updateFooterCount(visible,rows.length);}
 function clearSearchInput(){document.getElementById('searchInput').value='';filterTable();document.getElementById('searchInput').focus();}
 const sortState={};
 function sortTable(col){const tbody=document.getElementById('empTbody'),rows=Array.from(tbody.querySelectorAll('.emp-row')),prev=sortState[col]||null,dir=prev==='asc'?'desc':'asc';document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('asc','desc'));document.querySelectorAll('th:nth-child('+(col+1)+') .sort-btn').forEach(b=>b.classList.add(dir));Object.keys(sortState).forEach(k=>delete sortState[k]);sortState[col]=dir;rows.sort((a,b)=>{const av=a.cells[col]?.textContent.trim()??'',bv=b.cells[col]?.textContent.trim()??'',cmp=av.localeCompare(bv,undefined,{numeric:true,sensitivity:'base'});return dir==='asc'?cmp:-cmp;});rows.forEach(r=>tbody.appendChild(r));}

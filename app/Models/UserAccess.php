@@ -9,6 +9,7 @@ class UserAccess extends Model
     protected $primaryKey = 'access_id';
 
     protected $fillable = [
+        'user_id', // ── ADDED ──
         'employee_id',
         'user_access',
         'is_active',
@@ -16,6 +17,7 @@ class UserAccess extends Model
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class, 'employee_id', 'employee_id');
+        // ── UPDATED to user_id ──
+        return $this->belongsTo(Employee::class, 'user_id', 'user_id');
     }
 }

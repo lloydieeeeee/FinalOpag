@@ -13,6 +13,7 @@ class LeaveCard extends Model
     public    $timestamps = true;
 
     protected $fillable = [
+        'user_id', // ── ADDED ──
         'employee_id', 'year', 'opening_vl', 'opening_sl', 'created_by',
     ];
 
@@ -24,7 +25,8 @@ class LeaveCard extends Model
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class, 'employee_id');
+        // ── UPDATED to user_id ──
+        return $this->belongsTo(Employee::class, 'user_id', 'user_id');
     }
 
     public function entries()
@@ -37,8 +39,6 @@ class LeaveCard extends Model
 // ============================================================
 // app/Models/LeaveCardEntry.php  (separate file in production)
 // ============================================================
-namespace App\Models;
-
 namespace App\Models;
  
 use Illuminate\Database\Eloquent\Model;

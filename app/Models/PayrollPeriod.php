@@ -37,7 +37,11 @@ class PayrollPeriod extends Model
      */
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(Employee::class, 'created_by', 'employee_id');
+        // ADDED withDefault to protect against missing employees
+        return $this->belongsTo(Employee::class, 'created_by', 'employee_id')->withDefault([
+            'first_name' => 'Unknown',
+            'last_name' => 'User'
+        ]);
     }
 
     // ──────────────────────────────────────────────────────────────────────────

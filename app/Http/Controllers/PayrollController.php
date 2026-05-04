@@ -13,18 +13,12 @@ use Carbon\Carbon;
 
 class PayrollController extends Controller
 {
-    /**
-     * CNG WMPC sub-fields for real-time summing into loan_cngwmpc.
-     */
     const CNG_FIELDS = [
         'cng_capital_share', 'cng_kiddie_savings', 'cng_savings', 'cng_regular_loan',
         'cng_crisis_loan', 'cng_coop_canteen', 'cng_coop_store', 'cng_calamity_loan',
         'cng_abuloy', 'cng_handog', 'cng_b2b_loan', 'cng_petty_cash', 'cng_commodity_loan'
     ];
 
-    /**
-     * Helper to verify if logged in user is an Admin.
-     */
     private function isAdmin(): bool
     {
         $user = Auth::user();
@@ -63,9 +57,6 @@ class PayrollController extends Controller
         return $out;
     }
 
-    /**
-     * FALLBACK MAPPER: Maps data from dynamic_deductions JSON to hard columns if columns are empty.
-     */
     private function mapOldCngData($records)
     {
         if (empty($records)) return $records;
@@ -322,7 +313,17 @@ class PayrollController extends Controller
             if ($request->has($col)) $record->$col = round((float) $request->input($col), 2);
         }
         if ($request->has('allowance_ra')) $record->allowance_rata = round((float) $request->input('allowance_ra'), 2);
-        if ($request->has('other_deduction_label')) $record->other_deduction_label = substr(trim($request->input('other_deduction_label', '')), 0, 100);
+        
+        // ADDED BACK: Save all your custom text labels that were missing!
+        $labels = [
+            'label_loan_lbp', 'label_loan_dbp', 'label_loan_cngwmpc', 'label_loan_paracle',
+            'label_pera', 'label_rata', 'label_ta', 'label_allowance_other', 'other_deduction_label'
+        ];
+        foreach ($labels as $lbl) {
+            if ($request->has($lbl)) {
+                $record->$lbl = substr(trim($request->input($lbl, '')), 0, 100);
+            }
+        }
 
         $cngSum = 0;
         foreach(self::CNG_FIELDS as $f) { $cngSum += (float) $record->$f; }
@@ -359,13 +360,9 @@ class PayrollController extends Controller
         return $pdf->stream("payroll_{$period->period_label}.pdf");
     }
 
-    /**
-     * RENAMED to payslipPdf to fix the "Undefined Method" error.
-     * This handles both "All Payslips" and "Single Payslip" depending on emp_id input.
-     */
-    public function payslipPdf(Request $request, $period)
+    public function payslipAllPdf(Request $request, $id)
     {
-        if (!$period instanceof PayrollPeriod) $period = PayrollPeriod::findOrFail($period);
+        $period = PayrollPeriod::findOrFail($id);
         $query = PayrollRecord::with(['employee', 'period'])
             ->where('period_id', $period->period_id)
             ->orderBy('employee_id');
@@ -379,6 +376,26 @@ class PayrollController extends Controller
         $pdf->setPaper('letter', 'portrait');
         $pdf->loadView('payroll.payslip-pdf', compact('records'));
         return $pdf->stream("payslips_{$period->period_label}.pdf");
+    }
+
+    public function payslipPdf(Request $request, $period)
+    {
+        $periodObj = PayrollPeriod::findOrFail($period);
+        $user = Auth::user();
+        
+        $empId = $request->input('emp_id', optional($user->employee)->employee_id);
+
+        $records = PayrollRecord::with(['employee', 'period'])
+            ->where('period_id', $periodObj->period_id)
+            ->where('employee_id', $empId)
+            ->get();
+            
+        $records = $this->mapOldCngData($records); 
+
+        $pdf = app('dompdf.wrapper');
+        $pdf->setPaper('letter', 'portrait');
+        $pdf->loadView('payroll.payslip-pdf', compact('records'));
+        return $pdf->stream("payslip_{$periodObj->period_label}.pdf");
     }
 
     public function payslip(Request $request)
@@ -430,5 +447,41 @@ class PayrollController extends Controller
         }
 
         return view('payroll.payslip-manage', compact('periods', 'selectedPeriodId', 'records'));
+    }
+
+    // ── RESTORED REMITTANCES METHODS ──
+    public function remittances(Request $request)
+    {
+        $periods = PayrollPeriod::orderByDesc('year')->orderByDesc('month')->get();
+        $selectedPeriodId = $request->input('period_id', optional($periods->first())->period_id);
+        $selectedPeriod = $periods->find($selectedPeriodId);
+
+        $records = collect();
+        if ($selectedPeriodId) {
+            $records = PayrollRecord::with(['employee.position', 'employee.department'])
+                ->where('period_id', $selectedPeriodId)
+                ->orderBy('employee_id')
+                ->get();
+            $records = $this->mapOldCngData($records); 
+        }
+
+        return view('payroll.remittances', compact('periods', 'selectedPeriod', 'records'));
+    }
+
+    public function remittancePdf($periodId, $type)
+    {
+        $period = PayrollPeriod::findOrFail($periodId);
+        $records = PayrollRecord::with(['employee.position'])
+            ->where('period_id', $period->period_id)
+            ->orderBy('employee_id')
+            ->get();
+            
+        $records = $this->mapOldCngData($records); 
+
+        $pdf = app('dompdf.wrapper');
+        $pdf->setPaper('legal', 'landscape');
+        $pdf->loadView('payroll.remittance-pdf', compact('period', 'records', 'type'));
+        
+        return $pdf->stream("remittance_{$type}_{$period->period_label}.pdf");
     }
 }

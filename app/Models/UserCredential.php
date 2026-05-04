@@ -9,6 +9,7 @@ class UserCredential extends Authenticatable
     protected $primaryKey = 'credential_id';
 
     protected $fillable = [
+        'user_id', // ── ADDED ──
         'employee_id',
         'username',
         'password_hash',
@@ -27,12 +28,14 @@ class UserCredential extends Authenticatable
     // ── Relationships ──
     public function employee()
     {
-        return $this->belongsTo(Employee::class, 'employee_id', 'employee_id');
+        // ── UPDATED to user_id ──
+        return $this->belongsTo(Employee::class, 'user_id', 'user_id');
     }
 
     public function userAccess()
     {
-        return $this->hasOne(UserAccess::class, 'employee_id', 'employee_id')
+        // ── UPDATED to user_id ──
+        return $this->hasOne(UserAccess::class, 'user_id', 'user_id')
                     ->where('is_active', 1);
     }
 }

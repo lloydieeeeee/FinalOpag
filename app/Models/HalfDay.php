@@ -14,6 +14,7 @@ class HalfDay extends Model
     public    $timestamps = false; // table uses created_at/updated_at but not Laravel default
 
     protected $fillable = [
+        'user_id', // ── ADDED ──
         'employee_id',
         'leave_type_id',
         'credit_balance_id',
@@ -34,7 +35,8 @@ class HalfDay extends Model
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class, 'employee_id', 'employee_id');
+        // ── UPDATED to user_id ──
+        return $this->belongsTo(Employee::class, 'user_id', 'user_id');
     }
 
     public function leaveType()
@@ -49,6 +51,7 @@ class HalfDay extends Model
 
     public function approvedBy()
     {
+        // Left as employee_id since the migration didn't alter the approved_by tracking
         return $this->belongsTo(Employee::class, 'approved_by', 'employee_id');
     }
 }
@@ -66,4 +69,3 @@ class HalfDay extends Model
 //     Route::post('/halfday/{id}/cancel', [HalfDayController::class, 'cancel'])->name('halfday.cancel');
 //
 // });
-

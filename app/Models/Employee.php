@@ -7,11 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Employee extends Model
 {
     protected $table      = 'employee';
-    protected $primaryKey = 'employee_id';
-    public    $incrementing = false;   // employee_id is not auto-increment
+    
+    // ── UPDATED: Primary Key Settings ──────────────
+    protected $primaryKey = 'user_id';
+    public    $incrementing = true;  // user_id is auto-increment
     protected $keyType    = 'int';
 
     protected $fillable = [
+        // ── ADDED: username & user_id ──────────────
+        'user_id',
+        'username',
         'employee_id',
         'first_name',
         'middle_name',
@@ -45,33 +50,32 @@ class Employee extends Model
 
     public function credential()
     {
-        return $this->hasOne(UserCredential::class, 'employee_id', 'employee_id');
+        return $this->hasOne(UserCredential::class, 'user_id', 'user_id');
     }
 
     public function access()
     {
-        return $this->hasOne(UserAccess::class, 'employee_id', 'employee_id');
+        return $this->hasOne(UserAccess::class, 'user_id', 'user_id');
     }
 
     public function leaveApplications()
     {
-        return $this->hasMany(LeaveApplication::class, 'employee_id', 'employee_id');
+        return $this->hasMany(LeaveApplication::class, 'user_id', 'user_id');
     }
 
     public function creditBalances()
     {
-        return $this->hasMany(LeaveCreditBalance::class, 'employee_id', 'employee_id');
+        return $this->hasMany(LeaveCreditBalance::class, 'user_id', 'user_id');
     }
 
-    // ── ADDED: Half-day applications ──────────────
     public function halfDays()
     {
-        return $this->hasMany(HalfDay::class, 'employee_id', 'employee_id');
+        return $this->hasMany(HalfDay::class, 'user_id', 'user_id');
     }
 
-    // ── ADDED: Payroll records ─────────────────────
     public function payrollRecords()
     {
+        // Payroll was NOT migrated to user_id in the SQL script, so this stays employee_id
         return $this->hasMany(PayrollRecord::class, 'employee_id', 'employee_id');
     }
 

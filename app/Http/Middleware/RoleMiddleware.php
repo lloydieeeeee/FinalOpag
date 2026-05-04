@@ -19,9 +19,10 @@ class RoleMiddleware
         // The effective role is controlled by 'view_as' (set in AuthController)
         $viewAs = session('view_as');
 
-        // If no session yet, fall back to the DB role
+        // If no session yet, fall back to the DB role. 
+        // (Assumes auth()->user() returns UserCredential model based on your setup)
         if (!$viewAs) {
-            $viewAs = auth()->user()?->employee?->access?->user_access ?? 'employee';
+            $viewAs = auth()->user()?->userAccess?->user_access ?? 'employee';
         }
 
         if ($viewAs !== $role) {

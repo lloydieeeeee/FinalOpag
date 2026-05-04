@@ -11,6 +11,7 @@ class AccrualLog extends Model
     protected $primaryKey = 'accrual_log_id';
 
     protected $fillable = [
+        'user_id', // ── ADDED ──
         'employee_id',
         'leave_type_id',
         'credit_balance_id',
