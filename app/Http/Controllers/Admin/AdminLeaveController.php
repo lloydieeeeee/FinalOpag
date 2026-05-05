@@ -12,9 +12,9 @@ use App\Models\LeaveApplication;
 use App\Models\LeaveCreditBalance;
 use App\Models\LeaveType;
 use App\Models\Notification;
-use App\Models\LeaveDetailGroup;          // ← ADD
+use App\Models\LeaveDetailGroup;          
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;        // ← ADD
+use Illuminate\Support\Facades\DB;        
 
 class AdminLeaveController extends Controller
 {
@@ -198,11 +198,11 @@ class AdminLeaveController extends Controller
 
         $year = $app->start_date ? $app->start_date->year : now()->year;
 
-        $vlBalance = LeaveCreditBalance::where('employee_id', $app->employee_id)
+        $vlBalance = LeaveCreditBalance::where('user_id', $app->user_id) // ── UPDATED ──
             ->whereHas('leaveType', fn($q) => $q->where('type_code', 'VL'))
             ->where('year', $year)->first();
 
-        $slBalance = LeaveCreditBalance::where('employee_id', $app->employee_id)
+        $slBalance = LeaveCreditBalance::where('user_id', $app->user_id) // ── UPDATED ──
             ->whereHas('leaveType', fn($q) => $q->where('type_code', 'SL'))
             ->where('year', $year)->first();
 

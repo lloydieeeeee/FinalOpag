@@ -1,5 +1,5 @@
 <?php
-
+// app/Http/Controllers/HalfDayController.php
 namespace App\Http\Controllers;
 
 use App\Models\HalfDay;
@@ -14,12 +14,13 @@ use Illuminate\Support\Facades\Log;
 class HalfDayController extends Controller
 {
     private function getOfficeHead()
-{
-    return DB::table('signatory_options')->where('id', 2)->first();
-}
+    {
+        return DB::table('signatory_options')->where('id', 2)->first();
+    }
 
     public function index()
     {
+        // $employee contains the user_id (since primaryKey changed in Model)
         $employee    = Auth::user()->employee;
         $currentYear = now()->year;
 
@@ -27,19 +28,19 @@ class HalfDayController extends Controller
             ->whereIn(DB::raw('LOWER(TRIM(type_name))'), ['vacation leave', 'sick leave'])
             ->get();
 
-        $creditBalances = LeaveCreditBalance::where('employee_id', $employee->employee_id)
+        $creditBalances = LeaveCreditBalance::where('user_id', $employee->user_id) // ── UPDATED ──
             ->where('year', $currentYear)
             ->get()
             ->keyBy('leave_type_id');
 
-        $halfDays = HalfDay::where('employee_id', $employee->employee_id)
+        $halfDays = HalfDay::where('user_id', $employee->user_id) // ── UPDATED ──
             ->with('leaveType')
             ->latest('application_date')
             ->get();
 
         $officeHead = $this->getOfficeHead(); 
 
-        $leaveRanges = \App\Models\LeaveApplication::where('employee_id', $employee->employee_id)
+        $leaveRanges = \App\Models\LeaveApplication::where('user_id', $employee->user_id) // ── UPDATED ──
             ->where('is_monetization', 0)
             ->whereNotIn('status', ['CANCELLED', 'REJECTED'])
             ->whereNotNull('start_date')
@@ -52,7 +53,7 @@ class HalfDayController extends Controller
             ->values()
             ->toArray();
 
-        $existingHalfDays = HalfDay::where('employee_id', $employee->employee_id)
+        $existingHalfDays = HalfDay::where('user_id', $employee->user_id) // ── UPDATED ──
             ->whereNotIn('status', ['CANCELLED', 'REJECTED'])
             ->get(['date_of_absence', 'time_period'])
             ->map(fn($h) => [
@@ -78,7 +79,7 @@ class HalfDayController extends Controller
 
         $halfDay = HalfDay::with('leaveType')
             ->where('half_day_id', $id)
-            ->where('employee_id', $employee->employee_id)
+            ->where('user_id', $employee->user_id) // ── UPDATED ──
             ->firstOrFail();
 
         $officeHead = $this->getOfficeHead();
@@ -115,7 +116,7 @@ class HalfDayController extends Controller
         }
 
         $balance = LeaveCreditBalance::where('credit_balance_id', $request->credit_balance_id)
-            ->where('employee_id', $employee->employee_id)
+            ->where('user_id', $employee->user_id) // ── UPDATED ──
             ->first();
 
         if (!$balance) {
@@ -127,14 +128,14 @@ class HalfDayController extends Controller
 
         // Remove old cancelled/rejected duplicates so employee can re-file
         DB::table('half_day')
-            ->where('employee_id',     $employee->employee_id)
+            ->where('user_id',         $employee->user_id) // ── UPDATED ──
             ->where('date_of_absence', $request->date_of_absence)
             ->where('time_period',     $request->time_period)
             ->whereIn('status',        ['CANCELLED', 'REJECTED'])
             ->delete();
 
         // Block if ANY active half-day already exists on this date (AM or PM)
-        $sameDateExists = HalfDay::where('employee_id', $employee->employee_id)
+        $sameDateExists = HalfDay::where('user_id', $employee->user_id) // ── UPDATED ──
             ->where('date_of_absence', $request->date_of_absence)
             ->whereNotIn('status', ['CANCELLED', 'REJECTED'])
             ->exists();
@@ -146,7 +147,7 @@ class HalfDayController extends Controller
             ], 422);
         }
 
-        $exists = HalfDay::where('employee_id',     $employee->employee_id)
+        $exists = HalfDay::where('user_id',         $employee->user_id) // ── UPDATED ──
             ->where('date_of_absence', $request->date_of_absence)
             ->where('time_period',     $request->time_period)
             ->whereNotIn('status',     ['CANCELLED', 'REJECTED'])
@@ -160,7 +161,9 @@ class HalfDayController extends Controller
         }
 
         try {
+            // ── UPDATED: Insert both user_id to fix constraint! ──
             $halfDayId = DB::table('half_day')->insertGetId([
+                'user_id'           => $employee->user_id,
                 'employee_id'       => $employee->employee_id,
                 'leave_type_id'     => $request->leave_type_id,
                 'credit_balance_id' => $request->credit_balance_id,
@@ -186,7 +189,7 @@ class HalfDayController extends Controller
             foreach ($adminIds as $adminEmpId) {
                 DB::table('notifications')->insert([
                     'recipient_id'   => $adminEmpId,
-                    'sender_id'      => $employee->employee_id,
+                    'sender_id'      => $employee->employee_id, // Legacy sender tracking
                     'type'           => 'halfday_pending',
                     'title'          => 'New Half Day Application',
                     'message'        => "{$empName} filed a {$request->time_period} half day ({$ltName}) for {$absDate}.",
@@ -214,7 +217,7 @@ class HalfDayController extends Controller
     {
         $employee = Auth::user()->employee;
         $halfDay  = HalfDay::where('half_day_id', $id)
-            ->where('employee_id', $employee->employee_id)
+            ->where('user_id', $employee->user_id) // ── UPDATED ──
             ->firstOrFail();
 
         if ($halfDay->status !== 'PENDING') {

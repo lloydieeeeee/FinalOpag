@@ -1,5 +1,5 @@
 <?php
-
+// app/Http/Controllers/Admin/AdminHalfDayController.php
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -80,8 +80,8 @@ class AdminHalfDayController extends Controller
         $newStatus = $request->input('status');
         $reason    = $request->input('reason');
 
-        // ── Guard 1: employee must exist ──────────────────────────────────────
-        if (!$hd->employee_id || !$hd->employee) {
+        // ── Guard 1: employee must exist ── (UPDATED: Check user_id)
+        if (!$hd->user_id || !$hd->employee) {
             return response()->json([
                 'success' => false,
                 'message' => 'This record has no linked employee. Please fix the data before changing status.',
@@ -107,7 +107,7 @@ class AdminHalfDayController extends Controller
         // ── Guard 4: check sufficient balance before approving ────────────────
         // We only check here — the actual deduction is done by the DB trigger.
         if ($newStatus === 'APPROVED') {
-            $credit = LeaveCreditBalance::where('employee_id',   $hd->employee_id)
+            $credit = LeaveCreditBalance::where('user_id',   $hd->user_id) // ── UPDATED ──
                                         ->where('leave_type_id', $hd->leave_type_id)
                                         ->first();
 
@@ -133,7 +133,7 @@ class AdminHalfDayController extends Controller
             $updates = [
                 'status'        => $newStatus,
                 'updated_at'    => Carbon::now(),
-                'approved_by'   => auth()->user()->employee_id ?? auth()->id(),
+                'approved_by'   => auth()->user()->employee_id ?? auth()->id(), // Using Legacy Employee ID for approved_by tracking
                 'approved_date' => Carbon::now()->toDateString(),
             ];
 

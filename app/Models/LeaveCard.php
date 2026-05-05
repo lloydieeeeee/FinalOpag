@@ -25,7 +25,7 @@ class LeaveCard extends Model
 
     public function employee()
     {
-        // ── UPDATED to user_id ──
+        // ── UPDATED to join via user_id ──
         return $this->belongsTo(Employee::class, 'user_id', 'user_id');
     }
 

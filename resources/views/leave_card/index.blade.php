@@ -942,7 +942,21 @@ async function loadYearData() {
         const res  = await fetch(`${LC_BASE_URL}/${currentEmployeeId}/${currentYear}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
         });
+
+        // ── DEBUG: log HTTP status so any 500/404 is immediately visible ──
+        console.log('[LeaveCard] fetch status:', res.status, res.url);
+
+        if (!res.ok) {
+            // Non-2xx response — parse error message if JSON, otherwise use status text
+            let errMsg = `HTTP ${res.status}`;
+            try { const errData = await res.json(); errMsg = errData.message || errMsg; } catch {}
+            throw new Error(errMsg);
+        }
+
         const data = await res.json();
+
+        // ── DEBUG: log full payload so we can see what the server returned ──
+        console.log('[LeaveCard] payload:', data);
 
         dbCurrentVl     = data.current_vl;
         dbCurrentSl     = data.current_sl;
@@ -955,22 +969,27 @@ async function loadYearData() {
             _oldBalFound = data.old_balance.found            ?? false;
         }
 
+        // ── Restore importedLeaveIds / excludedLeaveIds from saved entries.
+        //    The controller ALWAYS returns entries:[] (even for no-card),
+        //    so this loop runs in both the saved-card and blank-card paths.
+        (data.entries || []).forEach(e => {
+            const isExcluded = (e.date_particulars === '--- EXCLUDED ---');
+            if (e.leave_application_id) {
+                const lid = String(e.leave_application_id);
+                if (isExcluded) excludedLeaveIds.add(lid);
+                else importedLeaveIds.add(lid);
+            }
+            if (e.half_day_id) {
+                const hdKey = `hd_${e.half_day_id}`;
+                if (isExcluded) excludedLeaveIds.add(hdKey);
+                else importedLeaveIds.add(hdKey);
+            }
+        });
+
         if (data.success) {
             populateEditor(data);
-            (data.entries || []).forEach(e => {
-                const isExcluded = (e.date_particulars === '--- EXCLUDED ---');
-                if (e.leave_application_id) {
-                    const lid = String(e.leave_application_id);
-                    if (isExcluded) excludedLeaveIds.add(lid);
-                    else importedLeaveIds.add(lid);
-                }
-                if (e.half_day_id) {
-                    const hdKey = `hd_${e.half_day_id}`;
-                    if (isExcluded) excludedLeaveIds.add(hdKey);
-                    else importedLeaveIds.add(hdKey);
-                }
-            });
         } else {
+            // No saved card yet — render blank editor so user can start filling in.
             populateEditorBlank(data.employee);
         }
 
@@ -1002,9 +1021,11 @@ async function loadYearData() {
         autoImportAll();
 
     } catch (e) {
+        // ── Always render the editor even on error so "Loading…" never gets stuck ──
+        populateEditorBlank(null);
         setImportStatus('error');
-        showLcToast('Error', 'Could not load leave card data.', 'error');
-        console.error('loadYearData error:', e); // ← add this so future errors are visible
+        showLcToast('Error', `Could not load leave card data: ${e.message}`, 'error');
+        console.error('[LeaveCard] loadYearData error:', e);
     }
 }
 
@@ -1217,13 +1238,20 @@ function syncFromDb() {
 
 /* ════ POPULATE ════ */
 function populateEditorBlank(emp) {
-    if (!emp) return;
+    // FIX: Guard against null emp (called from catch block on network error)
     document.getElementById('lceTitle').textContent    = `Record of Leave of Absence — ${currentYear}`;
-    document.getElementById('lceSubtitle').textContent = `${emp.last_name}, ${emp.first_name}`;
+    document.getElementById('lceSubtitle').textContent = emp
+        ? `${emp.last_name}, ${emp.first_name}`
+        : 'Employee';
     document.getElementById('openingVL').value = _oldBalVl.toFixed(3);
     document.getElementById('openingSL').value = _oldBalSl.toFixed(3);
     currentCardId = null;
-    renderRows([]);
+    
+    // FIXED: Crucial step to clear the table completely before passing an empty array
+    const tbody = document.getElementById('lceSheetBody');
+    tbody.innerHTML = ''; 
+    
+    renderRows([]); 
     updateOpeningDisplay();
 }
 

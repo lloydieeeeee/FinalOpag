@@ -20,10 +20,12 @@ class LeaveApplicationController extends Controller
     // ─────────────────────────────────────────────────────────────
     public function index()
     {
+        // ── UPDATED: Pull BOTH user_id and employee_id from session ──
+        $userId     = session('user_id');
         $employeeId = session('employee_id');
 
         $employee = Employee::with(['position', 'department'])
-            ->where('employee_id', $employeeId)
+            ->where('user_id', $userId) // ── UPDATED to use user_id ──
             ->firstOrFail();
 
         $year = now()->year;
@@ -31,12 +33,13 @@ class LeaveApplicationController extends Controller
         $vlType    = LeaveType::where('type_code', 'VL')->first();
         $vlBalance = null;
         if ($vlType) {
-            $vlBalance = LeaveCreditBalance::where('employee_id', $employeeId)
+            $vlBalance = LeaveCreditBalance::where('user_id', $userId) // ── UPDATED ──
                 ->where('leave_type_id', $vlType->leave_type_id)
                 ->where('year', $year)
                 ->first();
             if (!$vlBalance) {
                 $vlBalance = LeaveCreditBalance::create([
+                    'user_id'           => $userId,      // ── ADDED ──
                     'employee_id'       => $employeeId,
                     'leave_type_id'     => $vlType->leave_type_id,
                     'year'              => $year,
@@ -50,12 +53,13 @@ class LeaveApplicationController extends Controller
         $slType    = LeaveType::where('type_code', 'SL')->first();
         $slBalance = null;
         if ($slType) {
-            $slBalance = LeaveCreditBalance::where('employee_id', $employeeId)
+            $slBalance = LeaveCreditBalance::where('user_id', $userId) // ── UPDATED ──
                 ->where('leave_type_id', $slType->leave_type_id)
                 ->where('year', $year)
                 ->first();
             if (!$slBalance) {
                 $slBalance = LeaveCreditBalance::create([
+                    'user_id'           => $userId,      // ── ADDED ──
                     'employee_id'       => $employeeId,
                     'leave_type_id'     => $slType->leave_type_id,
                     'year'              => $year,
@@ -66,11 +70,11 @@ class LeaveApplicationController extends Controller
             }
         }
 
-        $allBalances  = LeaveCreditBalance::where('employee_id', $employeeId)->where('year', $year)->get();
+        $allBalances  = LeaveCreditBalance::where('user_id', $userId)->where('year', $year)->get(); // ── UPDATED ──
         $totalBalance = $allBalances->sum('remaining_balance');
         $accrualRate  = '+1.25';
 
-        $creditBalancesJson = LeaveCreditBalance::where('employee_id', $employeeId)
+        $creditBalancesJson = LeaveCreditBalance::where('user_id', $userId) // ── UPDATED ──
             ->where('year', $year)->get()
             ->keyBy('leave_type_id')
             ->map(fn($b) => [
@@ -82,19 +86,19 @@ class LeaveApplicationController extends Controller
         $dailyRate = $employee->salary ? round($employee->salary / 22, 2) : 0;
 
         $leaveApps = LeaveApplication::with(['leaveType', 'approvedBy'])
-            ->where('employee_id', $employeeId)
+            ->where('user_id', $userId) // ── UPDATED ──
             ->where('is_monetization', 0)
             ->orderByDesc('application_date')->get();
 
         $monetizationApps = LeaveApplication::with(['leaveType', 'approvedBy'])
-            ->where('employee_id', $employeeId)
+            ->where('user_id', $userId) // ── UPDATED ──
             ->where('is_monetization', 1)
             ->orderByDesc('application_date')->get();
 
         $leaveTypes = LeaveType::where('is_active', 1)->orderBy('type_name')->get();
 
         // ── Conflict data for the blade calendar ──────────────────────────
-        $halfDayDates = HalfDay::where('employee_id', $employeeId)
+        $halfDayDates = HalfDay::where('user_id', $userId) // ── UPDATED ──
             ->whereNotIn('status', ['CANCELLED', 'REJECTED'])
             ->pluck('date_of_absence')
             ->map(fn($d) => \Carbon\Carbon::parse($d)->toDateString())
@@ -102,7 +106,7 @@ class LeaveApplicationController extends Controller
             ->values();
 
         // ── Max-days enforcement data ─────────────────────────────────────
-        $usedDaysThisYear = LeaveApplication::where('employee_id', $employeeId)
+        $usedDaysThisYear = LeaveApplication::where('user_id', $userId) // ── UPDATED ──
             ->where('is_monetization', 0)
             ->whereNotIn('status', ['CANCELLED', 'REJECTED'])
             ->whereYear('application_date', $year)
@@ -147,6 +151,7 @@ class LeaveApplicationController extends Controller
             'end_date'      => 'required|date|after_or_equal:start_date',
         ]);
 
+        $userId     = session('user_id'); // ── ADDED ──
         $employeeId = session('employee_id');
         $year       = now()->year;
         $leaveType  = LeaveType::findOrFail($request->leave_type_id);
@@ -168,7 +173,7 @@ class LeaveApplicationController extends Controller
         $end   = new \DateTime($selectedDates[count($selectedDates) - 1]);
 
         // ── Conflict: date range must not overlap an existing active leave ──
-        $overlapConflict = LeaveApplication::where('employee_id', $employeeId)
+        $overlapConflict = LeaveApplication::where('user_id', $userId) // ── UPDATED ──
             ->where('is_monetization', 0)
             ->whereNotIn('status', ['CANCELLED', 'REJECTED'])
             ->whereNotNull('start_date')
@@ -187,7 +192,7 @@ class LeaveApplicationController extends Controller
         // ── Conflict: no selected date may have an active half-day record ──
         $requestedDates = $selectedDates;
 
-        $halfDayConflict = HalfDay::where('employee_id', $employeeId)
+        $halfDayConflict = HalfDay::where('user_id', $userId) // ── UPDATED ──
             ->whereNotIn('status', ['CANCELLED', 'REJECTED'])
             ->whereIn(DB::raw('DATE(date_of_absence)'), $requestedDates)
             ->exists();
@@ -201,7 +206,7 @@ class LeaveApplicationController extends Controller
 
         // ── Max-days per year enforcement ─────────────────────────────────
         if ($leaveType->max_days !== null) {
-            $usedThisYear = LeaveApplication::where('employee_id', $employeeId)
+            $usedThisYear = LeaveApplication::where('user_id', $userId) // ── UPDATED ──
                 ->where('leave_type_id', $leaveType->leave_type_id)
                 ->where('is_monetization', 0)
                 ->whereNotIn('status', ['CANCELLED', 'REJECTED'])
@@ -221,7 +226,7 @@ class LeaveApplicationController extends Controller
 
         // ── Balance check ─────────────────────────────────────────────────
         $creditBalance = LeaveCreditBalance::firstOrCreate(
-            ['employee_id' => $employeeId, 'leave_type_id' => $leaveType->leave_type_id, 'year' => $year],
+            ['user_id' => $userId, 'employee_id' => $employeeId, 'leave_type_id' => $leaveType->leave_type_id, 'year' => $year], // ── UPDATED ──
             ['total_accrued' => 0, 'total_used' => 0, 'remaining_balance' => 0]
         );
 
@@ -232,7 +237,9 @@ class LeaveApplicationController extends Controller
             ], 422);
         }
 
+        // ── UPDATED: Insert both user_id and employee_id to fix constraint ──
         $application = LeaveApplication::create([
+            'user_id'           => $userId,
             'employee_id'       => $employeeId,
             'leave_type_id'     => $leaveType->leave_type_id,
             'credit_balance_id' => $creditBalance->credit_balance_id,
@@ -266,6 +273,7 @@ class LeaveApplicationController extends Controller
             'no_of_days'    => 'required|numeric|min:1|max:30',
         ]);
 
+        $userId        = session('user_id'); // ── ADDED ──
         $employeeId    = session('employee_id');
         $year          = now()->year;
         $leaveType     = LeaveType::findOrFail($request->leave_type_id);
@@ -274,14 +282,16 @@ class LeaveApplicationController extends Controller
             return response()->json(['success' => false, 'message' => 'Only accrual-based leave types can be monetized.'], 422);
         }
 
-        $creditBalance = LeaveCreditBalance::where('employee_id', $employeeId)
+        $creditBalance = LeaveCreditBalance::where('user_id', $userId) // ── UPDATED ──
             ->where('leave_type_id', $leaveType->leave_type_id)->where('year', $year)->first();
 
         if (!$creditBalance || $creditBalance->remaining_balance < $request->no_of_days) {
             return response()->json(['success' => false, 'message' => 'Insufficient leave balance for monetization.'], 422);
         }
 
+        // ── UPDATED: Insert both user_id and employee_id ──
         $application = LeaveApplication::create([
+            'user_id'           => $userId,
             'employee_id'       => $employeeId,
             'leave_type_id'     => $leaveType->leave_type_id,
             'credit_balance_id' => $creditBalance->credit_balance_id,
@@ -308,8 +318,8 @@ class LeaveApplicationController extends Controller
     // ─────────────────────────────────────────────────────────────
     public function cancel($id)
     {
-        $employeeId  = session('employee_id');
-        $application = LeaveApplication::where('leave_id', $id)->where('employee_id', $employeeId)->firstOrFail();
+        $userId      = session('user_id'); // ── UPDATED ──
+        $application = LeaveApplication::where('leave_id', $id)->where('user_id', $userId)->firstOrFail();
 
         if ($application->status !== 'PENDING') {
             return response()->json(['success' => false, 'message' => 'Only PENDING applications can be cancelled.'], 422);
@@ -324,7 +334,7 @@ class LeaveApplicationController extends Controller
     // ─────────────────────────────────────────────────────────────
     public function pdf($id)
     {
-        $employeeId = session('employee_id');
+        $userId = session('user_id'); // ── UPDATED ──
 
         $app = LeaveApplication::with([
                 'employee.position',
@@ -332,10 +342,10 @@ class LeaveApplicationController extends Controller
                 'leaveType',
             ])
             ->where('leave_id', $id)
-            ->where('employee_id', $employeeId)
+            ->where('user_id', $userId) // ── UPDATED ──
             ->firstOrFail();
 
-            // ── Decode stored selected dates ──────────────────────────────────
+        // ── Decode stored selected dates ──────────────────────────────────
         $leaveDates = collect();
         if (!empty($app->leave_dates)) {
             $raw = is_array($app->leave_dates) ? $app->leave_dates : json_decode($app->leave_dates, true);
@@ -347,11 +357,11 @@ class LeaveApplicationController extends Controller
 
         $year = $app->start_date ? $app->start_date->year : now()->year;
 
-        $vlBalance = LeaveCreditBalance::where('employee_id', $employeeId)
+        $vlBalance = LeaveCreditBalance::where('user_id', $userId) // ── UPDATED ──
             ->whereHas('leaveType', fn($q) => $q->where('type_code', 'VL'))
             ->where('year', $year)->first();
 
-        $slBalance = LeaveCreditBalance::where('employee_id', $employeeId)
+        $slBalance = LeaveCreditBalance::where('user_id', $userId) // ── UPDATED ──
             ->whereHas('leaveType', fn($q) => $q->where('type_code', 'SL'))
             ->where('year', $year)->first();
 

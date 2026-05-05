@@ -65,8 +65,15 @@ class LeaveCardController extends Controller
      * ═══════════════════════════════════════════════ */
     public function show(int $employeeId, int $year)
     {
+        // FIX: Employee PK is user_id, but the route parameter is employee_id.
+        // findOrFail() looks up by PK (user_id) so it always throws for a 6-digit
+        // employee_id like 160675. Use where('employee_id') instead.
         $employee = Employee::with(['position', 'department'])
-                            ->findOrFail($employeeId);
+                            ->where('employee_id', $employeeId)
+                            ->firstOrFail();
+
+        // Identify the user_id for leave_card queries
+        $userId = $employee->user_id;
 
         /* ── Live DB balance for the year ── */
         $vlBalance = LeaveCreditBalance::where('employee_id', $employeeId)
@@ -91,39 +98,39 @@ class LeaveCardController extends Controller
          * Falls back to 0 if no record exists.
          * ── */
        // Priority 1 — read previous year's closing balance from leave_credit_balance
-$prevYearVl = LeaveCreditBalance::where('employee_id', $employeeId)
-    ->where('leave_type_id', 1)
-    ->where('year', $year - 1)
-    ->first();
+        $prevYearVl = LeaveCreditBalance::where('employee_id', $employeeId)
+            ->where('leave_type_id', 1)
+            ->where('year', $year - 1)
+            ->first();
 
-$prevYearSl = LeaveCreditBalance::where('employee_id', $employeeId)
-    ->where('leave_type_id', 2)
-    ->where('year', $year - 1)
-    ->first();
+        $prevYearSl = LeaveCreditBalance::where('employee_id', $employeeId)
+            ->where('leave_type_id', 2)
+            ->where('year', $year - 1)
+            ->first();
 
-// Priority 2 — PDF-uploaded old balance record (prior office records)
-$oldBalanceRecord = DB::table('old_balance')
-    ->where('employee_id', $employeeId)
-    ->where('reference_year', $year)
-    ->whereNotNull('pdf_file')
-    ->first();
+        // Priority 2 — PDF-uploaded old balance record (prior office records)
+        $oldBalanceRecord = DB::table('old_balance')
+            ->where('employee_id', $employeeId)
+            ->where('reference_year', $year)
+            ->whereNotNull('pdf_file')
+            ->first();
 
-$oldBalanceHasPdf = $oldBalanceRecord && !empty($oldBalanceRecord->pdf_file);
+        $oldBalanceHasPdf = $oldBalanceRecord && !empty($oldBalanceRecord->pdf_file);
 
-if ($oldBalanceHasPdf) {
-    $oldBalanceVl    = (float) $oldBalanceRecord->old_vl_balance;
-    $oldBalanceSl    = (float) $oldBalanceRecord->old_sl_balance;
-    $oldBalanceFound = true;
-} elseif ($prevYearVl || $prevYearSl) {
-    // Use exact remaining balance — no rounding
-    $oldBalanceVl    = $prevYearVl ? (float) $prevYearVl->getRawOriginal('remaining_balance') : 0;
-    $oldBalanceSl    = $prevYearSl ? (float) $prevYearSl->getRawOriginal('remaining_balance') : 0;
-    $oldBalanceFound = true;
-} else {
-    $oldBalanceVl    = 0;
-    $oldBalanceSl    = 0;
-    $oldBalanceFound = false;
-}
+        if ($oldBalanceHasPdf) {
+            $oldBalanceVl    = (float) $oldBalanceRecord->old_vl_balance;
+            $oldBalanceSl    = (float) $oldBalanceRecord->old_sl_balance;
+            $oldBalanceFound = true;
+        } elseif ($prevYearVl || $prevYearSl) {
+            // Use exact remaining balance — no rounding
+            $oldBalanceVl    = $prevYearVl ? (float) $prevYearVl->getRawOriginal('remaining_balance') : 0;
+            $oldBalanceSl    = $prevYearSl ? (float) $prevYearSl->getRawOriginal('remaining_balance') : 0;
+            $oldBalanceFound = true;
+        } else {
+            $oldBalanceVl    = 0;
+            $oldBalanceSl    = 0;
+            $oldBalanceFound = false;
+        }
 
         $oldBalanceHasPdf = $oldBalanceRecord && !empty($oldBalanceRecord->pdf_file);
 
@@ -290,26 +297,31 @@ if ($oldBalanceHasPdf) {
             ->values();
 
         /* ── Saved leave card header ── */
-        $card = LeaveCard::where('employee_id', $employeeId)
+        $card = LeaveCard::where('user_id', $userId) // FIXED: Query by user_id
                          ->where('year', $year)
                          ->first();
 
         /* ── Shared old_balance payload ── */
+        // FIX: Use the already-resolved $oldBalanceFound bool instead of
+        // re-evaluating $oldBalanceRecord (which can be null when no PDF row
+        // exists but a prev-year credit-balance record was used).
         $oldBalancePayload = [
-    'vl'             => $oldBalanceVl,
-    'sl'             => $oldBalanceSl,
-    'reference_year' => $year,
-    'found'          => (bool) $oldBalanceRecord
-                        || $oldBalanceVl > 0
-                        || $oldBalanceSl > 0,
-    'has_pdf'        => $oldBalanceHasPdf,
-];
+            'vl'             => $oldBalanceVl,
+            'sl'             => $oldBalanceSl,
+            'reference_year' => $year,
+            'found'          => $oldBalanceFound || $oldBalanceVl > 0 || $oldBalanceSl > 0,
+            'has_pdf'        => $oldBalanceHasPdf,
+        ];
 
         /* ── No saved card yet — return blank scaffold ── */
         if (!$card) {
             return response()->json([
+                // FIX: Return success:false so JS knows to call populateEditorBlank(),
+                // but include ALL fields so the blank editor renders completely.
                 'success'      => false,
                 'employee'     => $this->employeePayload($employee),
+                'card'         => null,        // explicit null — frontend checks data.card
+                'entries'      => [],           // empty array, never undefined
                 'current_vl'   => $currentVl,
                 'current_sl'   => $currentSl,
                 'vl_accrued'   => $vlAccrued,
@@ -417,15 +429,20 @@ if ($oldBalanceHasPdf) {
             'entries'     => 'nullable|array',
         ]);
 
+        // FIX: Look up by employee_id, not PK (user_id)
+        $employee = Employee::where('employee_id', $request->employee_id)->firstOrFail();
+        $userId = $employee->user_id;
+
         DB::beginTransaction();
         try {
             /* ── Upsert the card header ── */
             $card = LeaveCard::updateOrCreate(
                 [
-                    'employee_id' => $request->employee_id,
+                    'user_id' => $userId, // FIXED: Query by user_id
                     'year'        => $request->year,
                 ],
                 [
+                    'employee_id' => $request->employee_id, // Kept for legacy compatibility 
                     'opening_vl' => $request->opening_vl ?? 0,
                     'opening_sl' => $request->opening_sl ?? 0,
                     'created_by' => Auth::id(),
@@ -624,9 +641,12 @@ DB::commit();
      * ═══════════════════════════════════════════════ */
     public function print(int $employeeId, int $year)
     {
-        $employee = Employee::with(['position', 'department'])->findOrFail($employeeId);
+        // FIX: Look up by employee_id, not PK (user_id)
+        $employee = Employee::with(['position', 'department'])
+                            ->where('employee_id', $employeeId)
+                            ->firstOrFail();
 
-        $card = LeaveCard::where('employee_id', $employeeId)
+        $card = LeaveCard::where('user_id', $employee->user_id) // FIXED: Query by user_id
                          ->where('year', $year)
                          ->first();
 
@@ -669,7 +689,7 @@ DB::commit();
                              ->get();
 
         $allData = $employees->map(function ($employee) use ($year) {
-            $card = LeaveCard::where('employee_id', $employee->employee_id)
+            $card = LeaveCard::where('user_id', $employee->user_id) // FIXED: Query by user_id
                              ->where('year', $year)
                              ->first();
 
@@ -702,21 +722,21 @@ DB::commit();
     }
 
     public function oldBalancePdf(int $employeeId, int $year)
-{
-    $record = DB::table('old_balance')
-        ->where('employee_id', $employeeId)
-        ->where('reference_year', $year)
-        ->first();
+    {
+        $record = DB::table('old_balance')
+            ->where('employee_id', $employeeId)
+            ->where('reference_year', $year)
+            ->first();
 
-    if (!$record || !$record->pdf_file) {
-        abort(404, 'No PDF found for this employee and year.');
+        if (!$record || !$record->pdf_file) {
+            abort(404, 'No PDF found for this employee and year.');
+        }
+
+        return response($record->pdf_file, 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="old_balance_' . ($year - 1) . '_emp' . $employeeId . '.pdf"',
+        ]);
     }
-
-    return response($record->pdf_file, 200, [
-        'Content-Type'        => 'application/pdf',
-        'Content-Disposition' => 'inline; filename="old_balance_' . ($year - 1) . '_emp' . $employeeId . '.pdf"',
-    ]);
-}
 
     /* ═══════════════════════════════════════════════
      * PRIVATE HELPER — employee payload shape
@@ -725,6 +745,7 @@ DB::commit();
     {
         return [
             'employee_id'           => $emp->employee_id,
+            'user_id'               => $emp->user_id, // Added user_id
             'last_name'             => $emp->last_name,
             'first_name'            => $emp->first_name,
             'middle_name'           => $emp->middle_name,
