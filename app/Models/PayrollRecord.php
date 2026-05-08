@@ -11,7 +11,9 @@ class PayrollRecord extends Model
     protected $primaryKey = 'payroll_id';
 
     protected $fillable = [
-        'period_id', 'employee_id', 'designation',
+        'period_id',
+        'user_id',          // sole FK — references employee.user_id
+        'designation',
         'gross_salary',
         'gsis_ee', 'gsis_govt', 'gsis_ec',
         'gsis_policy', 'gsis_emergency', 'gsis_real_estate',
@@ -20,14 +22,20 @@ class PayrollRecord extends Model
         'philhealth_ee', 'philhealth_govt',
         'withholding_tax',
         'loan_dbp', 'loan_lbp', 'loan_cngwmpc', 'loan_paracle',
-        'label_loan_lbp', 'label_loan_dbp', 'label_loan_cngwmpc', 'label_loan_paracle',
-        'overpayment',
+        'overpayment', 'overpayment_label',
         'other_deduction', 'other_deduction_label',
         'allowance_pera', 'allowance_rata', 'allowance_ta', 'allowance_other',
-        'label_pera', 'label_rata', 'label_ta', 'label_allowance_other',
         'total_deductions', 'total_allowances', 'net_pay',
         'dynamic_deductions',
         'remarks',
+
+        // Label fields
+        'label_pera', 'label_rata', 'label_ta', 'label_allowance_other',
+        'label_withholding_tax', 'label_gsis_ee', 'label_gsis_ec', 'label_gsis_policy',
+        'label_gsis_emergency', 'label_gsis_real_estate', 'label_gsis_mpl', 'label_gsis_mpl_lite',
+        'label_gsis_gfal', 'label_gsis_computer', 'label_gsis_conso', 'label_pagibig_govt',
+        'label_pagibig_mpl', 'label_pagibig_calamity', 'label_philhealth_ee',
+        'label_loan_lbp', 'label_loan_dbp', 'label_loan_cngwmpc', 'label_loan_paracle',
     ];
 
     protected $casts = [
@@ -63,17 +71,45 @@ class PayrollRecord extends Model
         'total_deductions'   => 'float',
         'total_allowances'   => 'float',
         'net_pay'            => 'float',
+        // 'array' cast handles json_encode on save and json_decode on load.
+        // Do NOT manually json_encode() this field anywhere — it will double-encode
+        // and break every foreach() that reads it back.
         'dynamic_deductions' => 'array',
     ];
 
+    // -------------------------------------------------------------------------
+    // Safe accessor: guarantees dynamic_deductions is ALWAYS a plain PHP array.
+    // Prevents "foreach() argument must be of type array|object, string given"
+    // even if stale double-encoded JSON exists in the database.
+    // -------------------------------------------------------------------------
+    public function getDynamicDeductionsAttribute(mixed $value): array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (is_string($value) && $value !== '') {
+            $decoded = json_decode($value, true);
+            // Handle double-encoded strings (e.g. "\"[...]\"")
+            if (is_string($decoded)) {
+                $decoded = json_decode($decoded, true);
+            }
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return [];
+    }
+
+    // -------------------------------------------------------------------------
+    // Relationships
+    // -------------------------------------------------------------------------
+
     public function employee(): BelongsTo
     {
-        // ADDED withDefault() to prevent "Attempt to read property on null"
-        // if an employee ID was changed or deleted.
-        return $this->belongsTo(Employee::class, 'employee_id', 'employee_id')->withDefault([
-            'first_name' => 'Unknown',
-            'last_name' => 'Employee',
-            'extension_name' => null
+        return $this->belongsTo(Employee::class, 'user_id', 'user_id')->withDefault([
+            'first_name'     => 'Unknown',
+            'last_name'      => 'Employee',
+            'extension_name' => null,
         ]);
     }
 
@@ -82,15 +118,23 @@ class PayrollRecord extends Model
         return $this->belongsTo(PayrollPeriod::class, 'period_id', 'period_id');
     }
 
+    // -------------------------------------------------------------------------
+    // Static helper
+    // -------------------------------------------------------------------------
+
     public static function computeFromSalary(float $salary, array $overrides = []): array
     {
         return (new \App\Http\Controllers\PayrollController)->computeFromSalary($salary, $overrides);
     }
 
+    // -------------------------------------------------------------------------
+    // Recompute totals (including dynamic deductions)
+    // -------------------------------------------------------------------------
+
     public function recomputeTotals(?\Illuminate\Support\Collection $deductionConfig = null): void
     {
         $totalDeductions =
-              ($this->gsis_ee           ?? 0)
+            ($this->gsis_ee           ?? 0)
             + ($this->gsis_policy       ?? 0)
             + ($this->gsis_emergency    ?? 0)
             + ($this->gsis_real_estate  ?? 0)
@@ -112,12 +156,13 @@ class PayrollRecord extends Model
             + ($this->other_deduction   ?? 0);
 
         $totalAllowances =
-              ($this->allowance_pera  ?? 0)
+            ($this->allowance_pera  ?? 0)
             + ($this->allowance_rata  ?? 0)
             + ($this->allowance_ta    ?? 0)
             + ($this->allowance_other ?? 0);
 
-        $dynamic = $this->dynamic_deductions ?? [];
+        // Safe: accessor above guarantees this is always an array
+        $dynamic = $this->dynamic_deductions;
 
         if (!empty($dynamic)) {
             if ($deductionConfig === null) {
@@ -126,7 +171,7 @@ class PayrollRecord extends Model
 
             foreach ($dynamic as $dedId => $amount) {
                 $amount = (float) $amount;
-                $ded = $deductionConfig->get((int) $dedId);
+                $ded    = $deductionConfig->get((int) $dedId);
 
                 if ($ded === null) {
                     $totalDeductions += $amount;
@@ -147,6 +192,10 @@ class PayrollRecord extends Model
         $this->philhealth_govt  = round($this->philhealth_ee ?? 0, 2);
     }
 
+    // -------------------------------------------------------------------------
+    // Dynamic deduction helpers
+    // -------------------------------------------------------------------------
+
     public function getDynamicDeduction(int $deductionId): float
     {
         return (float) ($this->dynamic_deductions[$deductionId] ?? 0);
@@ -154,7 +203,7 @@ class PayrollRecord extends Model
 
     public function setDynamicDeduction(int $deductionId, float $amount): void
     {
-        $current = $this->dynamic_deductions ?? [];
+        $current               = $this->dynamic_deductions; // always an array via accessor
         $current[$deductionId] = round($amount, 2);
         $this->dynamic_deductions = $current;
     }

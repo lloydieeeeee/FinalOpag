@@ -10,8 +10,7 @@ class LeaveApplication extends Model
     protected $primaryKey = 'leave_id';
 
     protected $fillable = [
-        'user_id', // ── ADDED ──
-        'employee_id',
+        'user_id', // Changed from employee_id
         'leave_type_id',
         'credit_balance_id',
         'details_of_leave',
@@ -40,7 +39,7 @@ class LeaveApplication extends Model
 
     public function employee()
     {
-        // ── UPDATED to user_id ──
+        // Directly maps to Employee using user_id
         return $this->belongsTo(Employee::class, 'user_id', 'user_id');
     }
 
@@ -56,7 +55,7 @@ class LeaveApplication extends Model
 
     public function approvedBy()
     {
-        // Left as employee_id since the migration didn't alter the approved_by tracking
-        return $this->belongsTo(Employee::class, 'approved_by', 'employee_id');
+        // Approver is also mapped to Employee via user_id
+        return $this->belongsTo(Employee::class, 'approved_by', 'user_id');
     }
 }

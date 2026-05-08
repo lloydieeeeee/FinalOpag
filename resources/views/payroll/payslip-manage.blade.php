@@ -9,19 +9,12 @@
 *, *::before, *::after { box-sizing: border-box; }
 body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-.pm-page { display: flex; flex-direction: column; gap: 12px; min-height: calc(100vh - 80px); }
-
-.breadcrumb {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 12px; color: #9ca3af; margin-bottom: 14px; flex-wrap: wrap;
-}
-.breadcrumb a { color: #9ca3af; text-decoration: none; transition: color .15s; }
-.breadcrumb a:hover { color: #1a3a1a; }
-.breadcrumb .sep { color: #e5e7eb; }
-.breadcrumb .current { color: #1a3a1a; font-weight: 700; }
+.pm-page { display: flex; flex-direction: column; min-height: calc(100vh - 80px); }
 
 /* ── Top bar ── */
 .top-bar {
+    position: sticky; top: 0; z-index: 100;
+    margin-bottom: 12px;
     background: #fff; border-radius: 12px;
     border: 0.5px solid #e5e7eb;
     padding: 12px 16px;
@@ -119,6 +112,7 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
     padding: 8px 14px; cursor: pointer;
     border-bottom: 1px solid #f9fafb;
     transition: background .1s;
+    user-select: none;
 }
 .emp-item:hover { background: #f9fafb; }
 .emp-item.active { background: #f0fdf4; border-left: 2px solid #1a3a1a; padding-left: 12px; }
@@ -150,6 +144,7 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
     max-height: calc(100vh - 130px);
 }
 .form-panel-header {
+    position: sticky; top: 0; z-index: 10;
     padding: 12px 14px; border-bottom: 1px solid #f3f4f6;
     background: #fafffe; flex-shrink: 0;
 }
@@ -273,6 +268,7 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
     max-height: calc(100vh - 130px);
 }
 .preview-header {
+    position: sticky; top: 0; z-index: 10;
     padding: 11px 16px; border-bottom: 1px solid #f3f4f6;
     background: #fafffe;
     display: flex; align-items: center; justify-content: space-between;
@@ -298,48 +294,17 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 
 .pdf-page-wrap {
     width: 374px;
-    transform: scale(1.0);
     transform-origin: top center;
 }
 .pdf-doc {
     width: 374px;
     background: #fff;
-    border: 1px dashed #aaa;
     padding: 7px 9px;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 7pt;
     color: #000;
     line-height: 1.3;
 }
-
-.pdf-header { text-align: center; padding-bottom: 3px; margin-bottom: 3px; border-bottom: 0.5pt solid #555; }
-.pdf-header p      { font-size: 6.5pt; line-height: 1.3; }
-.pdf-header .bold  { font-weight: bold; font-size: 7pt; }
-.pdf-header .title { font-weight: bold; font-size: 8.5pt; letter-spacing: 0.5pt; margin-top: 2px; }
-
-.pdf-info { width: 100%; border-collapse: collapse; margin-bottom: 3px; }
-.pdf-info td { font-size: 6.5pt; padding: 1px 0; vertical-align: top; line-height: 1.3; }
-.pdf-info .i-lbl { width: 22mm; color: #444; white-space: nowrap; }
-.pdf-info .i-sep { width: 4px; }
-.pdf-info .i-val { font-weight: bold; }
-
-.pdf-table { width: 100%; border-collapse: collapse; }
-.pdf-table td { font-size: 6.5pt; padding: 1.2px 1pt; vertical-align: bottom; line-height: 1.25; }
-.pdf-c-lbl { width: 53%; }
-.pdf-c-ul  { width: 28%; border-bottom: 0.4pt solid #555; }
-.pdf-c-amt { width: 19%; text-align: right; font-weight: 600; white-space: nowrap; padding-right: 1pt; }
-
-.pdf-row-bold td  { font-weight: bold; font-size: 7pt; }
-.pdf-row-div  td  { border-top: 0.3pt solid #ccc; padding-top: 1px; font-size: 0; line-height: 0; }
-.pdf-row-sect td  { font-size: 6.5pt; padding-top: 1px; padding-bottom: 0; }
-.pdf-row-sub  td  { font-size: 6.5pt; }
-.pdf-row-total td { font-weight: bold; font-size: 7pt; border-top: 0.8pt solid #000; padding-top: 2px; }
-.pdf-row-net   td { font-weight: bold; font-size: 8.5pt; border-top: 1pt solid #000; padding-top: 2px; }
-.pdf-zero         { color: #bbb; }
-
-.pdf-sig { text-align: center; margin-top: 5px; padding-top: 3px; border-top: 0.4pt solid #aaa; }
-.pdf-sig-name  { font-weight: bold; font-size: 6.5pt; text-transform: uppercase; }
-.pdf-sig-title { font-size: 6pt; color: #555; margin-top: 1px; }
 
 .no-record {
     text-align: center; padding: 50px 20px; color: #9ca3af;
@@ -350,7 +315,7 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 .no-record h3 { font-size: 14px; font-weight: 700; color: #6b7280; margin: 0; }
 .no-record p  { font-size: 12px; color: #9ca3af; margin: 0; }
 
-/* Signatory modal */
+/* ── Modal shared styles ── */
 .sig-modal-overlay {
     position: fixed; inset: 0; z-index: 1100;
     background: rgba(0,0,0,.45); backdrop-filter: blur(3px);
@@ -361,7 +326,7 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 .sig-modal {
     background: #fff; border-radius: 16px;
     box-shadow: 0 24px 64px rgba(0,0,0,.18);
-    width: 100%; max-width: 420px;
+    width: 100%; max-width: 440px;
     transform: translateY(18px) scale(.97);
     transition: transform .25s cubic-bezier(.34,1.56,.64,1); overflow: hidden;
 }
@@ -375,9 +340,7 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 .sig-modal-body  { padding: 20px; }
 .sig-field-group { margin-bottom: 14px; }
 .sig-field-label { display: block; font-size: 10px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
-.sig-field-input { width: 100%; padding: 9px 11px; font-size: 13px; font-weight: 600; border: 1px solid #e5e7eb; border-radius: 9px; color: #111827; background: #fff; outline: none; }
-.sig-field-input:focus { border-color: #2d5a1b; }
-.sig-field-hint { font-size: 10px; color: #9ca3af; margin-top: 3px; }
+
 .sig-modal-footer { padding: 12px 20px; border-top: 1px solid #f0f2f0; display: flex; gap: 8px; justify-content: flex-end; background: #fafffe; }
 .btn-sig-save {
     display: inline-flex; align-items: center; gap: 5px;
@@ -388,7 +351,6 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 .btn-sig-save:disabled { opacity: .55; cursor: not-allowed; }
 .btn-sig-cancel { padding: 8px 14px; font-size: 12px; font-weight: 600; color: #6b7280; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: background .15s; }
 .btn-sig-cancel:hover { background: #f9fafb; }
-.sig-note { font-size: 11px; color: #6b7280; padding: 9px 11px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 14px; line-height: 1.5; }
 .modal-close { background: #f3f4f6; border: 1px solid #e5e7eb; width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6b7280; transition: all .15s; }
 .modal-close:hover { background: #fee2e2; border-color: #fca5a5; color: #ef4444; }
 
@@ -418,15 +380,26 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 }
 </style>
 
-<div class="breadcrumb">
-    <a href="{{ route('payroll.index') }}">Payroll</a>
-    <span class="sep">›</span>
-    <span class="current">Payslip Management</span>
-</div>
-
 @php
+    $signatoryOptions = $signatoryOptions ?? collect();
+    $defaultSignatory = $defaultSignatory ?? null;
+    $periods          = $periods          ?? collect();
+    $records          = $records          ?? collect();
+    $selectedPeriodId = $selectedPeriodId ?? null;
+
     $currentPeriod = $periods->firstWhere('period_id', $selectedPeriodId);
     $isFinalized   = optional($currentPeriod)->status === 'FINALIZED';
+
+    $payrollClerkOption = $signatoryOptions->firstWhere('label', 'Payroll Clerk')
+                       ?? $signatoryOptions->last();
+
+    $currentSigName = !empty(optional($currentPeriod)->sig_clerk_name)
+        ? strtoupper(trim($currentPeriod->sig_clerk_name))
+        : strtoupper(optional($payrollClerkOption)->full_name ?? 'MELINDA R. BARCELONA');
+
+    $currentSigTitle = !empty(optional($currentPeriod)->sig_clerk_title)
+        ? strtoupper(trim($currentPeriod->sig_clerk_title))
+        : strtoupper(optional($payrollClerkOption)->title ?? 'Administrative Officer V');
 @endphp
 
 <div class="pm-page">
@@ -448,7 +421,7 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
         <div class="top-bar-right">
             <div class="period-select-wrap">
                 <select class="period-select" id="periodSelect"
-                    onchange="window.location.href='{{ route('payroll.manage') }}?period_id='+this.value">
+                    onchange="window.location.href='{{ url('payroll/manage') }}?period_id='+this.value">
                     <option value="">— Select Period —</option>
                     @foreach($periods as $p)
                         <option value="{{ $p->period_id }}"
@@ -460,30 +433,29 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
             </div>
 
             @if($records->isNotEmpty())
-            <a href="{{ route('payroll.payslip.pdf', $selectedPeriodId) }}"
-                target="_blank" class="btn-primary">
+            <a href="{{ url('payroll/'.$selectedPeriodId.'/payslip-pdf') }}" target="_blank" class="btn-primary">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
                 Export All PDF
             </a>
-            <a href="{{ route('payroll.pdf', $selectedPeriodId) }}"
-                target="_blank" class="btn-secondary">
+
+            <a href="{{ url('payroll/'.$selectedPeriodId.'/pdf') }}" target="_blank" class="btn-secondary">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Payroll PDF
             </a>
-            <button type="button" class="btn-secondary" onclick="openSigModal()"
+
+            <button type="button" class="btn-secondary" onclick="openBulkEditModal()"
                 style="border-color:#bbf7d0;color:#1a3a1a;background:#f0fdf4;">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
-                Signatory
+                Bulk Edit
             </button>
+
             @if($currentPeriod)
             <span class="status-badge {{ strtolower($currentPeriod->status) }}">
                 {{ $currentPeriod->status }}
@@ -514,17 +486,18 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
             <div class="emp-list" id="empChips">
                 @foreach($records as $r)
                 @php
+                    $uid = (string)($r->user_id ?? '');
                     $ln  = strtoupper($r->employee->last_name ?? '—');
                     $fn  = $r->employee->first_name ?? '';
                     $ini = substr($ln,0,1).substr($fn,0,1);
                     $pos = $r->designation ?? optional($r->employee->position)->position_code ?? 'N/A';
                 @endphp
-                <div class="emp-item {{ $loop->first ? 'active' : '' }}"
-                    data-rid="{{ $r->payroll_id }}"
+                <div class="emp-item"
+                    data-rid="{{ (string)$r->payroll_id }}"
                     data-name="{{ strtolower($ln.','.$fn) }}"
-                    onclick="selectEmployee({{ $r->payroll_id }}, this)">
+                    onclick="selectEmployee('{{ $r->payroll_id }}', this)">
                     <div class="emp-avatar">{{ $ini }}</div>
-                    <div>
+                    <div style="min-width:0;">
                         <div class="emp-name">{{ $ln }}, {{ $fn }}</div>
                         <div class="emp-pos">{{ $pos }}</div>
                     </div>
@@ -587,6 +560,16 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                                 oninput="onFieldChange()" placeholder="0.00">
                         </div>
                     </div>
+
+                    {{-- Designation field added after Gross Salary --}}
+                    <div class="form-row single" style="margin-top:4px;">
+                        <div class="field-group" data-fieldname="designation position title">
+                            <label class="field-label">Designation (shown on payslip)</label>
+                            <input type="text" class="field-input label-input" id="f_designation"
+                                oninput="onLabelChange()" placeholder="e.g. SR AG">
+                        </div>
+                    </div>
+
                     <div class="form-row">
                         <div class="field-group" data-fieldname="pera label">
                             <label class="field-label">PERA Label</label>
@@ -643,10 +626,22 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         <span class="s-dot" style="background:#dc2626;"></span>Statutory Deductions
                     </div>
                     <div class="form-row">
+                        <div class="field-group" data-fieldname="withholding tax label">
+                            <label class="field-label">Withholding Tax Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_withholding_tax" data-label="label_withholding_tax"
+                                oninput="onLabelChange()" placeholder="Withholding Tax">
+                        </div>
                         <div class="field-group" data-fieldname="withholding tax">
                             <label class="field-label">Withholding Tax</label>
                             <input type="text" class="field-input" id="f_withholding_tax" data-field="withholding_tax"
                                 oninput="onFieldChange()" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="field-group" data-fieldname="gsis premium employee share label">
+                            <label class="field-label">GSIS Premium Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_gsis_ee" data-label="label_gsis_ee"
+                                oninput="onLabelChange()" placeholder="GSIS Premium">
                         </div>
                         <div class="field-group" data-fieldname="gsis premium employee share">
                             <label class="field-label">GSIS Premium (9%)</label>
@@ -655,10 +650,22 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         </div>
                     </div>
                     <div class="form-row">
+                        <div class="field-group" data-fieldname="pagibig pag-ibig label">
+                            <label class="field-label">PAG-IBIG Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_pagibig_govt" data-label="label_pagibig_govt"
+                                oninput="onLabelChange()" placeholder="PAG-IBIG">
+                        </div>
                         <div class="field-group" data-fieldname="pagibig pag-ibig">
                             <label class="field-label">PAG-IBIG</label>
                             <input type="text" class="field-input" id="f_pagibig_govt" data-field="pagibig_govt"
                                 oninput="onFieldChange()" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="field-group" data-fieldname="medicare philhealth label">
+                            <label class="field-label">Medicare (PhilHealth) Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_philhealth_ee" data-label="label_philhealth_ee"
+                                oninput="onLabelChange()" placeholder="Medicare">
                         </div>
                         <div class="field-group" data-fieldname="medicare philhealth">
                             <label class="field-label">Medicare (PhilHealth)</label>
@@ -666,7 +673,12 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                                 oninput="onFieldChange()" placeholder="0.00">
                         </div>
                     </div>
-                    <div class="form-row single">
+                    <div class="form-row">
+                        <div class="field-group" data-fieldname="gsis ec ecf emergency contingency label">
+                            <label class="field-label">GSIS ECF Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_gsis_ec" data-label="label_gsis_ec"
+                                oninput="onLabelChange()" placeholder="ECF">
+                        </div>
                         <div class="field-group" data-fieldname="gsis ec ecf emergency contingency">
                             <label class="field-label">GSIS ECF</label>
                             <input type="text" class="field-input" id="f_gsis_ec" data-field="gsis_ec"
@@ -736,10 +748,22 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         <span class="s-dot" style="background:#2563eb;"></span>GSIS Loans
                     </div>
                     <div class="form-row">
+                        <div class="field-group" data-fieldname="gsis salary loan conso label">
+                            <label class="field-label">GSIS Salary Loan Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_gsis_conso" data-label="label_gsis_conso"
+                                oninput="onLabelChange()" placeholder="GSIS salary Loan">
+                        </div>
                         <div class="field-group" data-fieldname="gsis salary loan conso">
                             <label class="field-label">GSIS Salary Loan</label>
                             <input type="text" class="field-input" id="f_gsis_conso" data-field="gsis_conso"
                                 oninput="onFieldChange()" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="field-group" data-fieldname="gsis policy loan label">
+                            <label class="field-label">GSIS Policy Loan Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_gsis_policy" data-label="label_gsis_policy"
+                                oninput="onLabelChange()" placeholder="GSIS Policy Loan">
                         </div>
                         <div class="field-group" data-fieldname="gsis policy loan">
                             <label class="field-label">GSIS Policy Loan</label>
@@ -748,10 +772,22 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         </div>
                     </div>
                     <div class="form-row">
+                        <div class="field-group" data-fieldname="gsis real estate loan label">
+                            <label class="field-label">GSIS Real Estate Loan Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_gsis_real_estate" data-label="label_gsis_real_estate"
+                                oninput="onLabelChange()" placeholder="GSIS Real State Loan">
+                        </div>
                         <div class="field-group" data-fieldname="gsis real estate loan">
                             <label class="field-label">GSIS Real Estate Loan</label>
                             <input type="text" class="field-input" id="f_gsis_real_estate" data-field="gsis_real_estate"
                                 oninput="onFieldChange()" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="field-group" data-fieldname="gsis emergency calamity loan label">
+                            <label class="field-label">GSIS Emergency Loan Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_gsis_emergency" data-label="label_gsis_emergency"
+                                oninput="onLabelChange()" placeholder="GSIS Em. Loan">
                         </div>
                         <div class="field-group" data-fieldname="gsis emergency calamity loan">
                             <label class="field-label">GSIS Emergency Loan</label>
@@ -760,10 +796,22 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         </div>
                     </div>
                     <div class="form-row">
+                        <div class="field-group" data-fieldname="gsis educ education computer loan label">
+                            <label class="field-label">GSIS Educ Loan Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_gsis_computer" data-label="label_gsis_computer"
+                                oninput="onLabelChange()" placeholder="GSIS Educ loan">
+                        </div>
                         <div class="field-group" data-fieldname="gsis educ education computer loan">
                             <label class="field-label">GSIS Educ Loan</label>
                             <input type="text" class="field-input" id="f_gsis_computer" data-field="gsis_computer"
                                 oninput="onFieldChange()" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="field-group" data-fieldname="gsis mpl multi purpose label">
+                            <label class="field-label">GSIS MPL Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_gsis_mpl" data-label="label_gsis_mpl"
+                                oninput="onLabelChange()" placeholder="MPL">
                         </div>
                         <div class="field-group" data-fieldname="gsis mpl multi purpose">
                             <label class="field-label">GSIS MPL</label>
@@ -772,10 +820,22 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         </div>
                     </div>
                     <div class="form-row">
+                        <div class="field-group" data-fieldname="gsis gfal label">
+                            <label class="field-label">GSIS GFAL Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_gsis_gfal" data-label="label_gsis_gfal"
+                                oninput="onLabelChange()" placeholder="GSIS GFAL">
+                        </div>
                         <div class="field-group" data-fieldname="gsis gfal">
                             <label class="field-label">GSIS GFAL</label>
                             <input type="text" class="field-input" id="f_gsis_gfal" data-field="gsis_gfal"
                                 oninput="onFieldChange()" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="field-group" data-fieldname="gsis mpl lite label">
+                            <label class="field-label">GSIS MPL Lite Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_gsis_mpl_lite" data-label="label_gsis_mpl_lite"
+                                oninput="onLabelChange()" placeholder="GSIS MPL Lite">
                         </div>
                         <div class="field-group" data-fieldname="gsis mpl lite">
                             <label class="field-label">GSIS MPL Lite</label>
@@ -784,10 +844,22 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         </div>
                     </div>
                     <div class="form-row">
+                        <div class="field-group" data-fieldname="pagibig mpl loyalty card label">
+                            <label class="field-label">PAG-IBIG Loyalty Card Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_pagibig_mpl" data-label="label_pagibig_mpl"
+                                oninput="onLabelChange()" placeholder="PAG IBIG Loyalty Card">
+                        </div>
                         <div class="field-group" data-fieldname="pagibig mpl loyalty card">
                             <label class="field-label">PAG-IBIG Loyalty Card</label>
                             <input type="text" class="field-input" id="f_pagibig_mpl" data-field="pagibig_mpl"
                                 oninput="onFieldChange()" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="field-group" data-fieldname="pagibig calamity loan label">
+                            <label class="field-label">PAG-IBIG Calamity Loan Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_pagibig_calamity" data-label="label_pagibig_calamity"
+                                oninput="onLabelChange()" placeholder="GSIS Calamity Loan">
                         </div>
                         <div class="field-group" data-fieldname="pagibig calamity loan">
                             <label class="field-label">PAG-IBIG Calamity Loan</label>
@@ -802,7 +874,12 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                     <div class="section-title">
                         <span class="s-dot" style="background:#7c3aed;"></span>Other
                     </div>
-                    <div class="form-row single">
+                    <div class="form-row">
+                        <div class="field-group" data-fieldname="overpayment label">
+                            <label class="field-label">Overpayment Label</label>
+                            <input type="text" class="field-input label-input" id="f_overpayment_label" data-label="overpayment_label"
+                                oninput="onLabelChange()" placeholder="Overpayment">
+                        </div>
                         <div class="field-group" data-fieldname="overpayment">
                             <label class="field-label">Overpayment</label>
                             <input type="text" class="field-input" id="f_overpayment" data-field="overpayment"
@@ -813,7 +890,7 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         <div class="field-group" data-fieldname="custom deduction label">
                             <label class="field-label">Custom Deduction Label</label>
                             <input type="text" class="field-input label-input" id="f_other_deduction_label"
-                                data-field="other_deduction_label"
+                                data-label="other_deduction_label"
                                 oninput="onLabelChange()" placeholder="Other Deduction">
                         </div>
                         <div class="field-group" data-fieldname="custom deduction amount">
@@ -878,14 +955,16 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                     </div>
                     <span class="preview-changes-badge" id="previewChangesBadge">● Unsaved</span>
                 </div>
-                <a id="btnPreviewPdf" href="#" target="_blank" class="btn-secondary"
-                    style="pointer-events:none;opacity:.4;font-size:11.5px;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    Open PDF
-                </a>
+                <div style="display:flex; gap:8px;">
+                    <a id="btnPreviewPdf" href="#" target="_blank" class="btn-primary"
+                        style="pointer-events:none;opacity:.4;font-size:11.5px;">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Open PDF
+                    </a>
+                </div>
             </div>
             <div class="preview-scroll" id="previewScroll">
                 <div id="pdfDocWrap">
@@ -920,46 +999,90 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 
 </div>
 
-{{-- SIGNATORY MODAL --}}
-<div class="sig-modal-overlay" id="sigModal">
-    <div class="sig-modal">
+{{-- ── BULK EDIT MODAL ── --}}
+<div class="sig-modal-overlay" id="bulkEditModal">
+    <div class="sig-modal" style="max-width: 600px;">
         <div class="sig-modal-header">
             <div>
-                <p class="sig-modal-title">Signatory Settings</p>
-                <p class="sig-modal-sub" id="sigModalPeriodLabel">Period: —</p>
+                <p class="sig-modal-title">Bulk Edit Payslips</p>
+                <p class="sig-modal-sub">Apply changes to multiple employees at once</p>
             </div>
-            <button class="modal-close" onclick="closeSigModal()">
+            <button class="modal-close" onclick="closeBulkEditModal()">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:13px;height:13px;">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
-        <div class="sig-modal-body">
-            <p class="sig-note">
-                These details appear on all payslip PDFs for the selected period as the Payroll Clerk / Signatory.
-            </p>
-            <div class="sig-field-group">
-                <label class="sig-field-label">Payroll Clerk Name</label>
-                <input type="text" class="sig-field-input" id="sig_clerk_name"
-                    placeholder="e.g. MELINDA R. BARCELONA"
-                    value="{{ optional($currentPeriod)->sig_clerk_name ?? '' }}">
-                <p class="sig-field-hint">Full name in UPPERCASE as it should appear on the PDF.</p>
+        <div class="sig-modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="display: flex; flex-direction: column;">
+                <label class="sig-field-label">Select Employees</label>
+                <div style="margin-bottom: 8px;">
+                    <label style="font-size: 11.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <input type="checkbox" id="bulkSelectAll" onchange="toggleBulkSelectAll(this)"> Select All
+                    </label>
+                </div>
+                <div class="emp-list" style="border: 1px solid #e5e7eb; border-radius: 8px; flex: 1; max-height: 280px;">
+                    @foreach($records as $r)
+                    <label class="emp-item" style="padding: 6px 10px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f9fafb; cursor: pointer; margin: 0;">
+                        <input type="checkbox" class="bulk-emp-cb" value="{{ $r->payroll_id }}">
+                        <span style="font-size: 11.5px; font-weight: 600;">{{ strtoupper($r->employee->last_name ?? '') }}, {{ $r->employee->first_name ?? '' }}</span>
+                    </label>
+                    @endforeach
+                </div>
             </div>
-            <div class="sig-field-group">
-                <label class="sig-field-label">Clerk Title / Role</label>
-                <input type="text" class="sig-field-input" id="sig_clerk_title"
-                    placeholder="e.g. AO V / Payroll Clerk"
-                    value="{{ optional($currentPeriod)->sig_clerk_title ?? 'AO V / Payroll Clerk' }}">
-                <p class="sig-field-hint">Position title shown below the name.</p>
+            <div>
+                <label class="sig-field-label">Field to Update</label>
+                <select id="bulkField" class="field-input" style="margin-bottom: 14px;" onchange="toggleBulkLabelInput()">
+                    <option value="">-- Select Field --</option>
+                    <optgroup label="Earnings">
+                        <option value="gross_salary">Gross Salary</option>
+                        <option value="designation">Designation</option>
+                        <option value="allowance_pera" data-label-field="label_pera">PERA</option>
+                        <option value="allowance_rata" data-label-field="label_rata">RATA</option>
+                        <option value="allowance_ta" data-label-field="label_ta">TA</option>
+                        <option value="allowance_other" data-label-field="label_allowance_other">Other Allowance</option>
+                    </optgroup>
+                    <optgroup label="Deductions">
+                        <option value="withholding_tax" data-label-field="label_withholding_tax">Withholding Tax</option>
+                        <option value="gsis_ee" data-label-field="label_gsis_ee">GSIS Premium</option>
+                        <option value="pagibig_govt" data-label-field="label_pagibig_govt">PAG-IBIG</option>
+                        <option value="philhealth_ee" data-label-field="label_philhealth_ee">Medicare</option>
+                        <option value="gsis_ec" data-label-field="label_gsis_ec">GSIS ECF</option>
+                        <option value="loan_lbp" data-label-field="label_loan_lbp">LBP</option>
+                        <option value="loan_dbp" data-label-field="label_loan_dbp">DBP</option>
+                        <option value="loan_cngwmpc" data-label-field="label_loan_cngwmpc">CNGWMPC</option>
+                        <option value="loan_paracle" data-label-field="label_loan_paracle">UOLI/PARACLE</option>
+                        <option value="gsis_conso" data-label-field="label_gsis_conso">GSIS Salary Loan</option>
+                        <option value="gsis_policy" data-label-field="label_gsis_policy">GSIS Policy Loan</option>
+                        <option value="gsis_real_estate" data-label-field="label_gsis_real_estate">GSIS Real Estate</option>
+                        <option value="gsis_emergency" data-label-field="label_gsis_emergency">GSIS Em. Loan</option>
+                        <option value="gsis_computer" data-label-field="label_gsis_computer">GSIS Educ Loan</option>
+                        <option value="gsis_mpl" data-label-field="label_gsis_mpl">GSIS MPL</option>
+                        <option value="gsis_gfal" data-label-field="label_gsis_gfal">GSIS GFAL</option>
+                        <option value="gsis_mpl_lite" data-label-field="label_gsis_mpl_lite">GSIS MPL Lite</option>
+                        <option value="pagibig_mpl" data-label-field="label_pagibig_mpl">PAG-IBIG Loyalty Card</option>
+                        <option value="pagibig_calamity" data-label-field="label_pagibig_calamity">PAG-IBIG Calamity</option>
+                        <option value="overpayment" data-label-field="overpayment_label">Overpayment</option>
+                        <option value="other_deduction" data-label-field="other_deduction_label">Other Deduction</option>
+                    </optgroup>
+                </select>
+
+                <div id="bulkLabelDiv" style="display: none; margin-bottom: 14px;">
+                    <label class="sig-field-label">Custom Label (Optional)</label>
+                    <input type="text" id="bulkLabelValue" class="field-input label-input" placeholder="Leave blank to keep current">
+                </div>
+
+                <label class="sig-field-label">New Amount / Value</label>
+                <input type="text" id="bulkValue" class="field-input" placeholder="0.00 or Value">
             </div>
         </div>
         <div class="sig-modal-footer">
-            <button class="btn-sig-cancel" onclick="closeSigModal()">Cancel</button>
-            <button class="btn-sig-save" id="sigSaveBtn" onclick="saveSignatory()">
+            <button class="btn-sig-cancel" onclick="closeBulkEditModal()">Cancel</button>
+            <button class="btn-sig-save" id="btnBulkSave" onclick="applyBulkEdit()">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
-                Save Signatory
+                Apply Changes
             </button>
         </div>
     </div>
@@ -970,12 +1093,15 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 <script>
 // ── Constants ──────────────────────────────────────────────────────────────
 const CSRF                = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-const SELECTED_PERIOD_ID  = {{ $selectedPeriodId ?? 'null' }};
-const RECORD_UPDATE_URL   = '{{ url('payroll/record') }}';
-const SIGNATORY_URL_BASE  = '{{ url('payroll/period') }}/';
-const PERIOD_IS_FINALIZED = {{ $isFinalized ? 'true' : 'false' }};
+const SELECTED_PERIOD_ID  = {{ $selectedPeriodId ? (int)$selectedPeriodId : 'null' }};
+const RECORD_UPDATE_URL   = "{{ url('payroll/record') }}";
+const PERIOD_IS_FINALIZED = {{ (optional($currentPeriod)->status === 'FINALIZED') ? 'true' : 'false' }};
 
-const RECORDS = {!! \Illuminate\Support\Js::from(
+const currentSigName  = {!! json_encode($currentSigName) !!};
+const currentSigTitle = {!! json_encode($currentSigTitle) !!};
+
+// ── Records data ───────────────────────────────────────────────────────────
+const RECORDS = {!! json_encode(
     $records->mapWithKeys(function($r) use ($currentPeriod) {
         $ln  = strtoupper($r->employee->last_name ?? '—');
         $fn  = strtoupper($r->employee->first_name ?? '');
@@ -983,19 +1109,25 @@ const RECORDS = {!! \Illuminate\Support\Js::from(
         $empName     = $ln . ', ' . $fn . $ext;
         $posCode     = $r->designation ?? optional($r->employee->position)->position_code ?? 'N/A';
         $periodLabel = optional($r->period)->period_label ?? optional($currentPeriod)->period_label ?? '—';
-        $sigName     = strtoupper(optional($currentPeriod)->sig_clerk_name ?? 'MELINDA R. BARCELONA');
-        $sigTitle    = optional($currentPeriod)->sig_clerk_title ?? 'AO V / Payroll Clerk';
+
+        $userId = (string)($r->user_id ?? '');
 
         return [(string)$r->payroll_id => [
-            'record_id'             => (int)$r->payroll_id,
-            'employee_id'           => (string)$r->employee_id,
+            'record_id'             => (string)$r->payroll_id,
+            'user_id'               => $userId,
             'period_id'             => (int)$r->period_id,
             'emp_name'              => $empName,
             'position'              => $posCode,
+            'designation'           => $r->designation ?? optional($r->employee->position)->position_code ?? 'N/A',
+            
+            'employee_id'           => (string)($r->employee_id ?? ''),
+            'tin'                   => $r->employee->tin ?? '',
+            'gsis_id'               => $r->employee->gsis_id ?? '',
+            'pagibig_id'            => $r->employee->pagibig_id ?? '',
+            'philhealth_id'         => $r->employee->philhealth_id ?? '',
+
             'period_label'          => $periodLabel,
-            'sig_name'              => $sigName,
-            'sig_title'             => strtoupper($sigTitle),
-            'gross_salary'          => (float)$r->gross_salary,
+            'gross_salary'          => (float)($r->gross_salary ?? 0),
             'gsis_ee'               => (float)($r->gsis_ee ?? 0),
             'gsis_ec'               => (float)($r->gsis_ec ?? 0),
             'gsis_policy'           => (float)($r->gsis_policy ?? 0),
@@ -1017,7 +1149,7 @@ const RECORDS = {!! \Illuminate\Support\Js::from(
             'loan_paracle'          => (float)($r->loan_paracle ?? 0),
             'overpayment'           => (float)($r->overpayment ?? 0),
             'other_deduction'       => (float)($r->other_deduction ?? 0),
-            'other_deduction_label' => $r->other_deduction_label ?? 'Other Deduction',
+            'other_deduction_label' => $r->other_deduction_label ?? '',
             'allowance_pera'        => (float)($r->allowance_pera ?? 0),
             'allowance_rata'        => (float)($r->allowance_rata ?? 0),
             'allowance_ta'          => (float)($r->allowance_ta ?? 0),
@@ -1025,15 +1157,29 @@ const RECORDS = {!! \Illuminate\Support\Js::from(
             'total_deductions'      => (float)($r->total_deductions ?? 0),
             'total_allowances'      => (float)($r->total_allowances ?? 0),
             'net_pay'               => (float)($r->net_pay ?? 0),
-            // Editable label fields (persisted per record)
-            'label_pera'            => $r->label_pera ?? 'PERA',
-            'label_rata'            => $r->label_rata ?? 'RATA',
-            'label_ta'              => $r->label_ta ?? 'TA',
-            'label_allowance_other' => $r->label_allowance_other ?? 'Other Allowance',
-            'label_loan_lbp'        => $r->label_loan_lbp ?? 'LBP',
-            'label_loan_dbp'        => $r->label_loan_dbp ?? 'DBP',
-            'label_loan_cngwmpc'    => $r->label_loan_cngwmpc ?? 'CNGWMPC',
-            'label_loan_paracle'    => $r->label_loan_paracle ?? 'UOLI',
+            'label_pera'              => $r->label_pera ?? 'PERA',
+            'label_rata'              => $r->label_rata ?? 'RATA',
+            'label_ta'                => $r->label_ta ?? 'TA',
+            'label_allowance_other'   => $r->label_allowance_other ?? 'Other Allowance',
+            'label_withholding_tax'   => $r->label_withholding_tax ?? 'Withholding Tax',
+            'label_gsis_ee'           => $r->label_gsis_ee ?? 'GSIS Premium',
+            'label_gsis_ec'           => $r->label_gsis_ec ?? 'ECF',
+            'label_gsis_policy'       => $r->label_gsis_policy ?? 'GSIS Policy Loan',
+            'label_gsis_emergency'    => $r->label_gsis_emergency ?? 'GSIS Em. Loan',
+            'label_gsis_real_estate'  => $r->label_gsis_real_estate ?? 'GSIS Real State Loan',
+            'label_gsis_mpl'          => $r->label_gsis_mpl ?? 'MPL',
+            'label_gsis_mpl_lite'     => $r->label_gsis_mpl_lite ?? 'GSIS MPL Lite',
+            'label_gsis_gfal'         => $r->label_gsis_gfal ?? 'GSIS GFAL',
+            'label_gsis_computer'     => $r->label_gsis_computer ?? 'GSIS Educ loan',
+            'label_gsis_conso'        => $r->label_gsis_conso ?? 'GSIS salary Loan',
+            'label_pagibig_govt'      => $r->label_pagibig_govt ?? 'PAG-IBIG',
+            'label_pagibig_mpl'       => $r->label_pagibig_mpl ?? 'PAG IBIG Loyalty Card',
+            'label_pagibig_calamity'  => $r->label_pagibig_calamity ?? 'GSIS Calamity Loan',
+            'label_philhealth_ee'     => $r->label_philhealth_ee ?? 'Medicare',
+            'label_loan_lbp'          => $r->label_loan_lbp ?? 'LBP',
+            'label_loan_dbp'          => $r->label_loan_dbp ?? 'Development Bank of The Philippines',
+            'label_loan_cngwmpc'      => $r->label_loan_cngwmpc ?? 'CNGWMPC',
+            'label_loan_paracle'      => $r->label_loan_paracle ?? 'UOLI',
         ]];
     })->toArray()
 ) !!};
@@ -1050,66 +1196,68 @@ const DEDUCTION_FIELDS = [
 const ALLOWANCE_FIELDS = ['allowance_pera','allowance_rata','allowance_ta','allowance_other'];
 const NUMERIC_FIELDS   = ['gross_salary', ...DEDUCTION_FIELDS, ...ALLOWANCE_FIELDS];
 
-// All data-label attribute values for label inputs
 const LABEL_FIELD_KEYS = [
-    'label_pera',
-    'label_rata',
-    'label_ta',
-    'label_allowance_other',
-    'label_loan_lbp',
-    'label_loan_dbp',
-    'label_loan_cngwmpc',
-    'label_loan_paracle',
+    'label_pera','label_rata','label_ta','label_allowance_other',
+    'label_withholding_tax','label_gsis_ee','label_gsis_ec','label_gsis_policy',
+    'label_gsis_emergency','label_gsis_real_estate','label_gsis_mpl','label_gsis_mpl_lite',
+    'label_gsis_gfal','label_gsis_computer','label_gsis_conso','label_pagibig_govt',
+    'label_pagibig_mpl','label_pagibig_calamity','label_philhealth_ee',
+    'label_loan_lbp','label_loan_dbp','label_loan_cngwmpc','label_loan_paracle',
+    'overpayment_label',
 ];
 
 let currentRecordId = null;
 let hasChanges      = false;
 
-// ── Formatters ─────────────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────
 function fmt(v) {
     return parseFloat(v || 0).toLocaleString('en-PH', {
         minimumFractionDigits: 2, maximumFractionDigits: 2,
     });
 }
 function parseNum(s) {
-    if (!s || s.trim() === '' || s.trim() === '—') return 0;
+    if (!s || String(s).trim() === '' || String(s).trim() === '—') return 0;
     return parseFloat(String(s).replace(/,/g, '')) || 0;
 }
-function fmtBlank(v) {
-    return v > 0 ? fmt(v) : '';
-}
+function fmtBlank(v) { return v > 0 ? fmt(v) : ''; }
 
-// ── Read all label inputs from the DOM ────────────────────────────────────
 function getLabels() {
     const labels = {};
     LABEL_FIELD_KEYS.forEach(key => {
         const el = document.querySelector(`[data-label="${key}"]`);
         labels[key] = el ? el.value.trim() : '';
     });
-    // other_deduction_label uses data-field, not data-label
-    const odlEl = document.getElementById('f_other_deduction_label');
+    const odlEl = document.querySelector('[data-label="other_deduction_label"]');
     labels.other_deduction_label = odlEl ? odlEl.value.trim() : '';
     return labels;
 }
 
-// ── Select employee ────────────────────────────────────────────────────────
+// ── Employee selection ─────────────────────────────────────────────────────
 function selectEmployee(recordId, itemEl) {
-    if (hasChanges) {
+    const rid = String(recordId);
+
+    if (!RECORDS[rid]) {
+        console.error('Record not found', rid);
+        showToast('Could not load employee data.', 'error');
+        return;
+    }
+
+    if (hasChanges && currentRecordId && currentRecordId !== rid) {
         if (!confirm('You have unsaved changes. Discard and switch employee?')) return;
     }
-    currentRecordId = String(recordId);
+
+    const r = RECORDS[rid];
+    currentRecordId = rid;
     hasChanges = false;
 
+    // Highlight active chip
     document.querySelectorAll('.emp-item').forEach(c => c.classList.remove('active'));
     if (itemEl) itemEl.classList.add('active');
 
-    const r = RECORDS[currentRecordId];
-    if (!r) return;
-
-    // Header
-    const parts = r.emp_name.split(',');
-    const li = (parts[0] || '').trim()[0] || '';
-    const fi = (parts[1] || '').trim()[0] || '';
+    // Form header
+    const nameParts = r.emp_name.split(',');
+    const li = (nameParts[0] || '').trim()[0] || '';
+    const fi = (nameParts[1] || '').trim()[0] || '';
     document.getElementById('formAvatar').textContent  = (li + fi).toUpperCase() || '?';
     document.getElementById('formEmpName').textContent = r.emp_name;
     document.getElementById('formEmpMeta').textContent = r.position + ' · ' + r.period_label;
@@ -1118,23 +1266,25 @@ function selectEmployee(recordId, itemEl) {
     // Populate numeric fields
     NUMERIC_FIELDS.forEach(f => {
         const el = document.getElementById('f_' + f);
-        if (el) el.value = (r[f] || 0) > 0 ? fmt(r[f]) : '';
+        if (el) el.value = (r[f] && r[f] > 0) ? fmt(r[f]) : '';
     });
 
-    // Populate label fields from record cache
+    // Populate label fields
     LABEL_FIELD_KEYS.forEach(key => {
         const el = document.querySelector(`[data-label="${key}"]`);
         if (el) el.value = r[key] ?? '';
     });
-
-    // Populate other_deduction_label
-    const odlEl = document.getElementById('f_other_deduction_label');
+    const odlEl = document.querySelector('[data-label="other_deduction_label"]');
     if (odlEl) odlEl.value = r.other_deduction_label || '';
 
-    // PDF open link
+    // Populate designation field
+    const desigEl = document.getElementById('f_designation');
+    if (desigEl) desigEl.value = r.designation ?? '';
+
+    // Open PDF button uses user_id
     const pdfLink = document.getElementById('btnPreviewPdf');
     if (pdfLink) {
-        pdfLink.href = `/payroll/${r.period_id}/payslip-pdf?emp_id=${r.employee_id}`;
+        pdfLink.href = `/payroll/${r.period_id}/payslip-pdf?user_id=${r.user_id}`;
         pdfLink.style.pointerEvents = '';
         pdfLink.style.opacity = '';
     }
@@ -1146,22 +1296,17 @@ function selectEmployee(recordId, itemEl) {
     setChangesState(false);
 }
 
-// ── Collect all form values (numeric + labels) ─────────────────────────────
+// ── Form helpers ───────────────────────────────────────────────────────────
 function getFormData() {
     const data = {};
-
     NUMERIC_FIELDS.forEach(f => {
         const el = document.getElementById('f_' + f);
         data[f] = el ? parseNum(el.value) : 0;
     });
-
     data.total_deductions = DEDUCTION_FIELDS.reduce((s, f) => s + (data[f] || 0), 0);
     data.total_allowances = ALLOWANCE_FIELDS.reduce((s, f) => s + (data[f] || 0), 0);
     data.net_pay          = data.gross_salary - data.total_deductions + data.total_allowances;
-
-    // Merge all label values in
     Object.assign(data, getLabels());
-
     return data;
 }
 
@@ -1175,7 +1320,7 @@ function onFieldChange() {
 function onLabelChange() {
     if (!currentRecordId) return;
     setChangesState(true);
-    renderPdf(); // re-render immediately so label change shows in preview
+    renderPdf();
 }
 
 function updateTotals() {
@@ -1195,112 +1340,172 @@ function setChangesState(v) {
     if (btnDiscard) btnDiscard.disabled = !v;
 }
 
-// ── Render live PDF preview — mirrors payslip-pdf.blade.php exactly ───────
+// ── Live PDF preview ───────────────────────────────────────────────────────
 function renderPdf() {
     if (!currentRecordId) return;
     const r = RECORDS[currentRecordId];
-    const d = getFormData(); // contains both numeric values and all label strings
+    if (!r) return;
+    const d = getFormData();
 
-    // Build combined allowance label (mirrors blade logic)
     const allowParts = [];
-    if (d.allowance_pera  > 0) allowParts.push(d.label_pera            || 'PERA');
-    if (d.allowance_rata  > 0) allowParts.push(d.label_rata            || 'RA');
-    if (d.allowance_ta    > 0) allowParts.push(d.label_ta              || 'TA');
-    if (d.allowance_other > 0) allowParts.push(d.label_allowance_other || 'Other');
-    const allowLabel      = allowParts.length ? allowParts.join('/') : 'PERA';
-    const totalAllowances = d.allowance_pera + d.allowance_rata + d.allowance_ta + d.allowance_other;
+    let allowSum = 0;
+    if (d.allowance_pera > 0) { allowParts.push(d.label_pera || 'PERA'); allowSum += d.allowance_pera; }
+    if (d.allowance_rata > 0) { allowParts.push(d.label_rata || 'RATA'); allowSum += d.allowance_rata; }
+    if (d.allowance_ta > 0)   { allowParts.push(d.label_ta || 'TA'); allowSum += d.allowance_ta; }
+    
+    let allowLabel = '';
+    if (allowParts.length > 0) {
+        allowLabel = allowParts.join('/');
+    } else {
+        allowLabel = [d.label_pera || 'PERA', d.label_rata || 'RATA', d.label_ta || 'TA'].filter(Boolean).join('/') || 'PERA/RATA/TA';
+    }
+    
+    const otherAllowLabel = d.label_allowance_other || 'Other Allowance';
 
-    // Helper: one deduction row (label | underline col | amount)
     const row = (label, amount) => {
         const val    = fmtBlank(amount);
         const amtCls = val ? '' : 'pdf-zero';
         return `<tr class="pdf-row-sub">
-            <td class="pdf-c-lbl">${label}</td>
-            <td class="pdf-c-ul"></td>
-            <td class="pdf-c-amt ${amtCls}">${val}</td>
+            <td class="pdf-c-lbl">${escHtml(label)}</td>
+            <td class="pdf-c-ul" style="border-bottom: 0.5pt solid #000;"></td>
+            <td class="pdf-c-amt ${amtCls}">${fmt(amount)}</td>
         </tr>`;
     };
 
-    const html = `
-    <div class="pdf-page-wrap"><div class="pdf-doc">
+    const displayEmpId = r.employee_id || 'N/A';
+    const displayPosition = document.getElementById('f_designation')?.value?.trim() || r.designation || r.position || 'N/A';
+    
+    const baseFontSize = 7;
+    const sSmall = 6.5;
+    const sMini  = 6;
+    const lineHeight = 1.3;
+    const fontFamily = 'Arial, Helvetica, sans-serif';
+    
+    const dynamicStyles = `
+        <style>
+            #pdfDocWrap .pdf-doc { font-family: ${fontFamily}; font-size: ${baseFontSize}pt; line-height: ${lineHeight}; }
+            #pdfDocWrap .pdf-header p { font-size: ${sSmall}pt; line-height: ${lineHeight}; margin: 0; }
+            #pdfDocWrap .pdf-header .bold { font-size: ${baseFontSize}pt; font-weight: bold; }
+            #pdfDocWrap .pdf-header .title { font-size: ${baseFontSize + 1.5}pt; font-weight: bold; letter-spacing: 0.5pt; margin-top: 2px; }
+            #pdfDocWrap .pdf-info td { font-size: ${sSmall}pt; line-height: ${lineHeight}; }
+            #pdfDocWrap .pdf-table td { font-size: ${sSmall}pt; line-height: 1.25; }
+            #pdfDocWrap .pdf-row-bold td { font-size: ${baseFontSize}pt; font-weight: bold; }
+            #pdfDocWrap .pdf-row-sect td { font-size: ${sSmall}pt; font-weight: bold; }
+            #pdfDocWrap .pdf-row-sub td { font-size: ${sSmall}pt; }
+            #pdfDocWrap .pdf-row-total td { font-size: ${baseFontSize}pt; font-weight: bold; }
+            #pdfDocWrap .pdf-row-net td { font-size: ${baseFontSize + 1.5}pt; font-weight: bold; }
+            #pdfDocWrap .pdf-sig-name { font-size: ${sSmall}pt; font-weight: bold; text-transform: uppercase; }
+            #pdfDocWrap .pdf-sig-title { font-size: ${sMini}pt; color: #555; margin-top: 1px; }
+        </style>
+    `;
+    
+    const trEmpId = `<td class="i-lbl">Employee ID</td><td class="i-sep">:</td><td class="i-val">${escHtml(displayEmpId)}</td>`;
+    const trTin = `<td class="i-lbl" style="width:14mm; padding-left:4mm;">TIN</td><td class="i-sep">:</td><td class="i-val">${escHtml(r.tin || 'N/A')}</td>`;
+    const trGsis = `<td class="i-lbl" style="padding-left:4mm;">GSIS No.</td><td class="i-sep">:</td><td class="i-val">${escHtml(r.gsis_id || 'N/A')}</td>`;
+    const trPagibig = `<td class="i-lbl" style="padding-left:4mm;">PAG-IBIG</td><td class="i-sep">:</td><td class="i-val">${escHtml(r.pagibig_id || 'N/A')}</td>`;
+    const trPhilhealth = `<td class="i-lbl" style="padding-left:4mm;">PhilHealth</td><td class="i-sep">:</td><td class="i-val">${escHtml(r.philhealth_id || 'N/A')}</td>`;
 
-        <div class="pdf-header">
+    const html = `
+    ${dynamicStyles}
+    <div class="pdf-page-wrap"><div class="pdf-doc payslip-doc" style="width: 98.95mm; padding: 1.8mm 2.5mm; border: 0.5pt dashed #888; background: #fff; overflow: hidden;">
+
+        <div class="pdf-header" style="text-align: center; padding-bottom: 3px; margin-bottom: 3px; border-bottom: 0.5pt solid #555;">
             <p>Republic of the Philippines</p>
             <p class="bold">PROVINCE OF CAMARINES NORTE</p>
-            <p class="bold">D A E T</p>
             <p>OFFICE OF THE PROVINCIAL AGRICULTURIST</p>
             <p class="title">PAY SLIP</p>
         </div>
 
-        <table class="pdf-info">
-            <tr><td class="i-lbl">Name</td><td class="i-sep">:</td><td class="i-val">${r.emp_name}</td></tr>
-            <tr><td class="i-lbl">Position</td><td class="i-sep">:</td><td class="i-val">${r.position}</td></tr>
-            <tr><td class="i-lbl">For the Period</td><td class="i-sep">:</td><td class="i-val">${r.period_label}</td></tr>
+        <table class="pdf-info" style="width: 100%; border-collapse: collapse; margin-bottom: 3px;">
+            <tr>
+                <td class="i-lbl" style="width: 17mm;">Name</td><td class="i-sep" style="width: 3mm;">:</td><td class="i-val" style="font-weight: bold;">${escHtml(r.emp_name)}</td>
+                ${trTin}
+            </tr>
+            <tr>
+                <td class="i-lbl">Position</td><td class="i-sep">:</td><td class="i-val">${escHtml(displayPosition)}</td>
+                ${trGsis}
+            </tr>
+            <tr>
+                ${trEmpId}
+                ${trPagibig}
+            </tr>
+            <tr>
+                <td class="i-lbl">Period</td><td class="i-sep">:</td><td class="i-val">${escHtml(r.period_label)}</td>
+                ${trPhilhealth}
+            </tr>
         </table>
 
-        <table class="pdf-table">
+        <table class="pdf-table" style="width: 100%; border-collapse: collapse;">
 
             <tr class="pdf-row-bold">
-                <td class="pdf-c-lbl">Gross Salary</td>
-                <td class="pdf-c-ul"></td>
-                <td class="pdf-c-amt">${fmt(d.gross_salary)}</td>
+                <td class="pdf-c-lbl" style="width: 45%;">Gross Salary</td>
+                <td class="pdf-c-ul" style="width: 35%; border-bottom: 0.5pt solid #000;"></td>
+                <td class="pdf-c-amt" style="width: 20%; text-align: right; font-weight: bold;">${fmt(d.gross_salary)}</td>
             </tr>
 
-            ${totalAllowances > 0 ? `
             <tr class="pdf-row-bold">
-                <td class="pdf-c-lbl">${allowLabel}</td>
-                <td class="pdf-c-ul"></td>
-                <td class="pdf-c-amt">${fmt(totalAllowances)}</td>
+                <td class="pdf-c-lbl">${escHtml(allowLabel)}</td>
+                <td class="pdf-c-ul" style="border-bottom: 0.5pt solid #000;"></td>
+                <td class="pdf-c-amt" style="font-weight: bold;">${fmt(allowSum)}</td>
+            </tr>
+            
+            ${d.allowance_other > 0 ? `
+            <tr class="pdf-row-bold">
+                <td class="pdf-c-lbl">${escHtml(otherAllowLabel)}</td>
+                <td class="pdf-c-ul" style="border-bottom: 0.5pt solid #000;"></td>
+                <td class="pdf-c-amt" style="font-weight: bold;">${fmt(d.allowance_other)}</td>
             </tr>` : ''}
 
-            <tr class="pdf-row-div"><td colspan="3"></td></tr>
-            <tr class="pdf-row-sect"><td colspan="3">Less Deduction</td></tr>
+            <tr class="pdf-row-div"><td colspan="3" style="border-top: 0.3pt solid #ccc; padding-top: 1px;"></td></tr>
+            <tr class="pdf-row-sect"><td colspan="3" style="padding-top: 1px;">Less Deductions</td></tr>
 
             ${row('UCPB', 0)}
-            ${row('MPL', d.gsis_mpl)}
+            ${row(d.label_gsis_mpl        || 'MPL',              d.gsis_mpl)}
             ${row('CBCN', 0)}
             ${row('MSLAP', 0)}
-            ${row('Withholding Tax', d.withholding_tax)}
-            ${row('GSIS salary Loan', d.gsis_conso)}
-            ${row('GSIS Policy Loan', d.gsis_policy)}
-            ${row('Medicare', d.philhealth_ee)}
-            ${row('GSIS Premium', d.gsis_ee)}
-            ${row('PAG-IBIG', d.pagibig_govt)}
-            ${row(d.label_loan_lbp     || 'LBP',     d.loan_lbp)}
-            ${row(d.label_loan_dbp     || 'DBP',     d.loan_dbp)}
-            ${row(d.label_loan_cngwmpc || 'CNGWMPC', d.loan_cngwmpc)}
-            ${row(d.label_loan_paracle || 'UOLI',    d.loan_paracle)}
-            ${row('GSIS Real State Loan', d.gsis_real_estate)}
-            ${row('GSIS Calamity Loan', d.pagibig_calamity)}
+            ${row(d.label_withholding_tax  || 'Withholding Tax',  d.withholding_tax)}
+            ${row(d.label_gsis_conso       || 'GSIS salary Loan', d.gsis_conso)}
+            ${row(d.label_gsis_policy      || 'GSIS Policy Loan', d.gsis_policy)}
+            ${row(d.label_philhealth_ee    || 'Medicare',         d.philhealth_ee)}
+            ${row(d.label_gsis_ee          || 'GSIS Premium',     d.gsis_ee)}
+            ${row(d.label_pagibig_govt     || 'PAG-IBIG',         d.pagibig_govt)}
+            ${row(d.label_loan_lbp         || 'LBP',              d.loan_lbp)}
+            ${row(d.label_loan_dbp         || 'Development Bank of The Philippines', d.loan_dbp)}
+            ${row(d.label_loan_cngwmpc     || 'CNGWMPC',          d.loan_cngwmpc)}
+            ${row(d.label_loan_paracle     || 'UOLI',             d.loan_paracle)}
+            ${row(d.label_gsis_real_estate || 'GSIS Real State Loan', d.gsis_real_estate)}
+            ${row(d.label_pagibig_calamity || 'GSIS Calamity Loan',   d.pagibig_calamity)}
             ${row('Nursery', 0)}
-            ${row('GSIS Em. Loan', d.gsis_emergency)}
-            ${row('GSIS Educ loan', d.gsis_computer)}
-            ${row('PAG IBIG Loyalty Card', d.pagibig_mpl)}
-            ${d.gsis_gfal     > 0 ? row('GSIS GFAL',     d.gsis_gfal)     : ''}
-            ${d.gsis_mpl_lite > 0 ? row('GSIS MPL Lite', d.gsis_mpl_lite) : ''}
-            ${d.overpayment   > 0 ? row('Overpayment',   d.overpayment)   : ''}
+            ${row(d.label_gsis_emergency   || 'GSIS Em. Loan',    d.gsis_emergency)}
+            ${row(d.label_gsis_computer    || 'GSIS Educ loan',   d.gsis_computer)}
+            ${row(d.label_pagibig_mpl      || 'PAG IBIG Loyalty Card', d.pagibig_mpl)}
+            ${row(d.label_gsis_ec          || 'ECF',              d.gsis_ec)}
+
+            ${d.gsis_gfal     > 0 ? row(d.label_gsis_gfal     || 'GSIS GFAL',     d.gsis_gfal)     : ''}
+            ${d.gsis_mpl_lite > 0 ? row(d.label_gsis_mpl_lite || 'GSIS MPL Lite', d.gsis_mpl_lite) : ''}
+            ${d.overpayment   > 0 ? row(d.overpayment_label   || 'Overpayment',   d.overpayment)   : ''}
             ${d.other_deduction > 0 ? `<tr class="pdf-row-sub">
-                <td class="pdf-c-lbl" style="font-weight:700;">${d.other_deduction_label || 'Other Deduction'}</td>
-                <td class="pdf-c-ul"></td>
+                <td class="pdf-c-lbl" style="font-weight:700;">${escHtml(d.other_deduction_label || 'Other Deduction')}</td>
+                <td class="pdf-c-ul" style="border-bottom: 0.5pt solid #000;"></td>
                 <td class="pdf-c-amt" style="font-weight:700;">${fmt(d.other_deduction)}</td>
             </tr>` : ''}
 
             <tr class="pdf-row-total">
-                <td class="pdf-c-lbl">TOTAL DEDUCTION</td>
-                <td class="pdf-c-ul"></td>
-                <td class="pdf-c-amt">${fmt(d.total_deductions)}</td>
+                <td class="pdf-c-lbl" style="border-top: 0.8pt solid #000; padding-top: 2px;">TOTAL DEDUCTIONS</td>
+                <td class="pdf-c-ul" style="border-top: 0.8pt solid #000;"></td>
+                <td class="pdf-c-amt" style="border-top: 0.8pt solid #000; padding-top: 2px;">${fmt(d.total_deductions)}</td>
             </tr>
             <tr class="pdf-row-net">
-                <td class="pdf-c-lbl">NET PAY</td>
-                <td class="pdf-c-ul"></td>
-                <td class="pdf-c-amt">${fmt(d.net_pay)}</td>
+                <td class="pdf-c-lbl" style="border-top: 1pt solid #000; padding-top: 2px;">NET TAKE HOME PAY</td>
+                <td class="pdf-c-ul" style="border-top: 1pt solid #000;"></td>
+                <td class="pdf-c-amt" style="border-top: 1pt solid #000; padding-top: 2px;">${fmt(d.net_pay)}</td>
             </tr>
 
         </table>
 
-        <div class="pdf-sig">
-            <div class="pdf-sig-name">${r.sig_name}</div>
-            <div class="pdf-sig-title">${r.sig_title}</div>
+        <div class="pdf-sig" style="text-align: center; margin-top: 5px; padding-top: 3px; border-top: 0.4pt solid #aaa;">
+            <div class="pdf-sig-name">${escHtml(currentSigName)}</div>
+            <div class="pdf-sig-title">${escHtml(currentSigTitle)}</div>
         </div>
 
     </div></div>`;
@@ -1308,7 +1513,15 @@ function renderPdf() {
     document.getElementById('pdfDocWrap').innerHTML = html;
 }
 
-// ── Save ───────────────────────────────────────────────────────────────────
+function escHtml(s) {
+    return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+// ── Save / Discard ─────────────────────────────────────────────────────────
 async function saveChanges() {
     if (!currentRecordId || PERIOD_IS_FINALIZED) return;
     const btn = document.getElementById('btnSave');
@@ -1317,13 +1530,10 @@ async function saveChanges() {
 
     const d       = getFormData();
     const payload = {};
-
-    // Numeric fields
     NUMERIC_FIELDS.forEach(f => { payload[f] = d[f] || 0; });
-
-    // Label fields
     LABEL_FIELD_KEYS.forEach(key => { payload[key] = d[key] || ''; });
     payload.other_deduction_label = d.other_deduction_label || '';
+    payload.designation = document.getElementById('f_designation')?.value?.trim() ?? '';
 
     try {
         const res  = await fetch(`${RECORD_UPDATE_URL}/${currentRecordId}`, {
@@ -1337,9 +1547,29 @@ async function saveChanges() {
             if (res.status === 422 && data.errors) throw new Error(Object.values(data.errors).flat()[0]);
             throw new Error(data.message ?? data.error ?? 'Save failed.');
         }
-        // Sync the local cache with what the server returned
-        Object.assign(RECORDS[currentRecordId], data.record ?? data);
+
+        const saved = data.record ?? data;
+        if (saved && RECORDS[currentRecordId]) {
+            NUMERIC_FIELDS.forEach(f => {
+                if (saved[f] !== undefined) RECORDS[currentRecordId][f] = parseFloat(saved[f]) || 0;
+            });
+            LABEL_FIELD_KEYS.forEach(key => {
+                if (saved[key] !== undefined) RECORDS[currentRecordId][key] = saved[key];
+            });
+            if (saved.other_deduction_label !== undefined)
+                RECORDS[currentRecordId].other_deduction_label = saved.other_deduction_label;
+            if (saved.total_deductions !== undefined)
+                RECORDS[currentRecordId].total_deductions = parseFloat(saved.total_deductions) || 0;
+            if (saved.total_allowances !== undefined)
+                RECORDS[currentRecordId].total_allowances = parseFloat(saved.total_allowances) || 0;
+            if (saved.net_pay !== undefined)
+                RECORDS[currentRecordId].net_pay = parseFloat(saved.net_pay) || 0;
+            if (saved.designation !== undefined)
+                RECORDS[currentRecordId].designation = saved.designation;
+        }
+
         setChangesState(false);
+        renderPdf();
         showToast('Payslip saved successfully!', 'success');
     } catch (err) {
         showToast(err.message ?? 'An error occurred.', 'error');
@@ -1352,11 +1582,12 @@ async function saveChanges() {
 
 function discardChanges() {
     if (!currentRecordId) return;
+    hasChanges = false;
     const item = document.querySelector(`.emp-item[data-rid="${currentRecordId}"]`);
-    selectEmployee(parseInt(currentRecordId), item);
+    selectEmployee(currentRecordId, item);
 }
 
-// ── Employee list search ────────────────────────────────────────────────────
+// ── Search / filter ────────────────────────────────────────────────────────
 function filterChips(q) {
     const query = q.toLowerCase().trim();
     let vis = 0;
@@ -1366,10 +1597,9 @@ function filterChips(q) {
         if (show) vis++;
     });
     const el = document.getElementById('statCount');
-    if (el) el.textContent = vis || document.querySelectorAll('.emp-item').length;
+    if (el) el.textContent = query ? vis : document.querySelectorAll('.emp-item').length;
 }
 
-// ── Form field search ──────────────────────────────────────────────────────
 function filterFormFields(q) {
     const query = q.toLowerCase().trim();
     document.querySelectorAll('.form-section').forEach(sec => {
@@ -1384,62 +1614,128 @@ function filterFormFields(q) {
     });
 }
 
-// ── Auto-select first employee on load ────────────────────────────────────
-(function () {
-    const first = document.querySelector('.emp-item');
-    if (first) selectEmployee(parseInt(first.dataset.rid), first);
-})();
-
-// ── Signatory modal ────────────────────────────────────────────────────────
-function openSigModal() {
+// ── Bulk Edit Modal ────────────────────────────────────────────────────────
+function openBulkEditModal() {
     if (!SELECTED_PERIOD_ID) { showToast('Please select a period first.', 'error'); return; }
-    const sel = document.getElementById('periodSelect');
-    const lbl = sel ? sel.options[sel.selectedIndex]?.text : '—';
-    document.getElementById('sigModalPeriodLabel').textContent = 'Period: ' + lbl;
-    document.getElementById('sigModal').classList.add('open');
+    document.getElementById('bulkEditModal').classList.add('open');
     document.body.style.overflow = 'hidden';
 }
-function closeSigModal() {
-    document.getElementById('sigModal').classList.remove('open');
+
+function closeBulkEditModal() {
+    document.getElementById('bulkEditModal').classList.remove('open');
     document.body.style.overflow = '';
 }
-document.getElementById('sigModal').addEventListener('click', function(e) {
-    if (e.target === this) closeSigModal();
-});
 
-async function saveSignatory() {
-    const btn      = document.getElementById('sigSaveBtn');
-    const nameVal  = document.getElementById('sig_clerk_name').value.trim();
-    const titleVal = document.getElementById('sig_clerk_title').value.trim();
-    if (!SELECTED_PERIOD_ID) { showToast('No period selected.', 'error'); return; }
-    btn.disabled    = true;
-    btn.textContent = '…Saving';
-    try {
-        const res = await fetch(`${SIGNATORY_URL_BASE}${SELECTED_PERIOD_ID}/signatory`, {
-            method:  'PATCH',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
-            body:    JSON.stringify({ sig_clerk_name: nameVal, sig_clerk_title: titleVal }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message ?? data.error ?? 'Save failed');
-        Object.values(RECORDS).forEach(r => {
-            if (r.period_id === SELECTED_PERIOD_ID) {
-                r.sig_name  = nameVal.toUpperCase()  || r.sig_name;
-                r.sig_title = titleVal.toUpperCase() || 'AO V / PAYROLL CLERK';
+function toggleBulkSelectAll(cb) {
+    document.querySelectorAll('.bulk-emp-cb').forEach(el => el.checked = cb.checked);
+}
+
+function toggleBulkLabelInput() {
+    const sel = document.getElementById('bulkField');
+    const opt = sel.options[sel.selectedIndex];
+    const hasLabel = opt && opt.dataset.labelField;
+    document.getElementById('bulkLabelDiv').style.display = hasLabel ? 'block' : 'none';
+    if (!hasLabel) document.getElementById('bulkLabelValue').value = '';
+}
+
+async function applyBulkEdit() {
+    if (PERIOD_IS_FINALIZED) { showToast('Period is finalized. Cannot edit.', 'error'); return; }
+
+    const selectedIds = Array.from(document.querySelectorAll('.bulk-emp-cb:checked')).map(el => el.value);
+    const field = document.getElementById('bulkField').value;
+    let value = document.getElementById('bulkValue').value;
+    const labelValue = document.getElementById('bulkLabelValue').value;
+
+    if (selectedIds.length === 0) return showToast('Please select at least one employee.', 'error');
+    if (!field) return showToast('Please select a field to update.', 'error');
+
+    const sel = document.getElementById('bulkField');
+    const opt = sel.options[sel.selectedIndex];
+    const labelField = opt.dataset.labelField;
+
+    if (field !== 'designation') {
+        value = parseNum(value);
+    }
+
+    const btn = document.getElementById('btnBulkSave');
+    btn.disabled = true;
+    btn.innerHTML = 'Saving...';
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const rid of selectedIds) {
+        const payload = {};
+        payload[field] = value;
+        if (labelField && labelValue.trim() !== '') {
+            payload[labelField] = labelValue.trim();
+        }
+
+        try {
+            const res = await fetch(`${RECORD_UPDATE_URL}/${rid}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                successCount++;
+                const saved = data.record ?? data;
+                
+                if (RECORDS[rid]) {
+                    if (field === 'designation') {
+                        RECORDS[rid][field] = saved[field] ?? value;
+                    } else {
+                        RECORDS[rid][field] = parseFloat(saved[field]) || 0;
+                    }
+
+                    if (labelField && saved[labelField] !== undefined) {
+                        RECORDS[rid][labelField] = saved[labelField];
+                    }
+                    
+                    if (saved.total_deductions !== undefined) RECORDS[rid].total_deductions = parseFloat(saved.total_deductions) || 0;
+                    if (saved.total_allowances !== undefined) RECORDS[rid].total_allowances = parseFloat(saved.total_allowances) || 0;
+                    if (saved.net_pay !== undefined) RECORDS[rid].net_pay = parseFloat(saved.net_pay) || 0;
+                }
+            } else {
+                failCount++;
             }
-        });
-        if (currentRecordId) renderPdf();
-        closeSigModal();
-        showToast('Signatory updated!', 'success');
-    } catch (err) {
-        showToast(err.message ?? 'An error occurred.', 'error');
-    } finally {
-        btn.disabled  = false;
-        btn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;stroke:#fff;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Save Signatory`;
+        } catch (e) {
+            failCount++;
+        }
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Apply Changes`;
+
+    if (failCount === 0) {
+        showToast(`Successfully updated ${successCount} payslips.`, 'success');
+        closeBulkEditModal();
+        
+        if (currentRecordId && selectedIds.includes(currentRecordId)) {
+            const item = document.querySelector(`.emp-item[data-rid="${currentRecordId}"]`);
+            selectEmployee(currentRecordId, item);
+        }
+    } else {
+        showToast(`Updated ${successCount}, failed ${failCount}.`, 'error');
     }
 }
 
-// ── Toast notifications ────────────────────────────────────────────────────
+// ── Auto-select first employee on page load ────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    const keys = Object.keys(RECORDS);
+    if (!keys.length) return;
+
+    const firstKey  = keys[0];
+    const firstChip = document.querySelector(`.emp-item[data-rid="${firstKey}"]`);
+    if (firstChip) {
+        selectEmployee(firstKey, firstChip);
+    }
+});
+
+// ── Toast ──────────────────────────────────────────────────────────────────
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
     const icon = type === 'success'
@@ -1447,17 +1743,27 @@ function showToast(message, type = 'success') {
         : `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>`;
     const t = document.createElement('div');
     t.className = `toast ${type}`;
-    t.innerHTML = icon + message;
+    t.innerHTML = icon + escHtml(message);
     container.appendChild(t);
     requestAnimationFrame(() => t.classList.add('show'));
     setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3500);
 }
 
+// ── Event Listeners ────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && document.getElementById('sigModal').classList.contains('open')) {
-        closeSigModal();
+    if (e.key === 'Escape') {
+        const bulkModal = document.getElementById('bulkEditModal');
+        if (bulkModal && bulkModal.classList.contains('open')) {
+            closeBulkEditModal();
+        }
     }
 });
-</script>
 
+const bulkModalEl = document.getElementById('bulkEditModal');
+if (bulkModalEl) {
+    bulkModalEl.addEventListener('click', function(e) {
+        if (e.target === this) closeBulkEditModal();
+    });
+}
+</script>
 @endsection

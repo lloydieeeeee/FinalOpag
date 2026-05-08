@@ -11,11 +11,11 @@ use App\Models\PayrollDeduction;
  * Manages the `payroll_deductions` table.
  *
  * ACTUAL table columns (from DB dump):
- *   id, parent_id (nullable FK → self), name, type ('Fixed'|'Not Fixed'),
- *   rate (display label), rate_value (decimal), rate_type ('percent'|'flat'),
- *   limit_amount (nullable decimal), status (varchar), is_active (tinyint),
- *   is_deducted (tinyint), entry_kind ('deduction'|'addition'),
- *   sort_order (int), created_at, updated_at
+ * id, parent_id (nullable FK → self), name, type ('Fixed'|'Not Fixed'),
+ * rate (display label), rate_value (decimal), rate_type ('percent'|'flat'),
+ * limit_amount (nullable decimal), status (varchar), is_active (tinyint),
+ * is_deducted (tinyint), entry_kind ('deduction'|'addition'),
+ * sort_order (int), created_at, updated_at
  */
 class PayrollDeductionController extends Controller
 {
@@ -135,9 +135,14 @@ class PayrollDeductionController extends Controller
     public function destroy($id)
     {
         $deduction = PayrollDeduction::findOrFail($id);
-        $deduction->delete();
+        
+        // SOFT DELETE: We mark it as inactive instead of permanently deleting the row.
+        // This preserves the name and history so old PDF payslips don't break.
+        $deduction->update(['is_active' => 0]); 
 
-        return response()->json(['success' => true]);
+        PayrollDeduction::flushCache();
+
+        return response()->json(['success' => true, 'message' => 'Component safely archived.']);
     }
 
     // ─── REORDER ─────────────────────────────────────────────────────────────

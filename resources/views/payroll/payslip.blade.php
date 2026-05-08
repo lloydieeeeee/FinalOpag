@@ -823,7 +823,7 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                         $rid       = $r->payroll_id;
                     @endphp
                     <tr data-name="{{ strtolower($fullName) }}"
-                        data-id="{{ $r->employee_id }}"
+                        data-id="{{ $r->user_id }}"
                         data-rid="{{ $rid }}"
                         onclick="openPayslipPanel({{ $rid }})">
                         <td class="muted">{{ $i + 1 }}</td>
@@ -832,7 +832,7 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                                 <div class="emp-avatar">{{ $initials }}</div>
                                 <div>
                                     <div class="emp-name">{{ $fullName }}</div>
-                                    <div class="emp-id">ID: {{ $r->employee_id }}</div>
+                                    <div class="emp-id">ID: {{ $r->user_id }}</div>
                                 </div>
                             </div>
                         </td>
@@ -847,7 +847,7 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                         <td class="num">{{ ($r->allowance_pera ?? 0) > 0 ? number_format($r->allowance_pera, 2) : '—' }}</td>
                         <td onclick="event.stopPropagation()">
                             <div class="tbl-btns">
-                                <a href="{{ route('payroll.payslip.pdf', $r->period_id) }}?emp_id={{ $r->employee_id }}"
+                                <a href="{{ route('payroll.payslip.pdf', $r->period_id) }}?user_id={{ $r->user_id }}"
                                     target="_blank" class="btn-tbl btn-tbl-pdf">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1336,7 +1336,7 @@ const RECORDS = {!! \Illuminate\Support\Js::from(
 
         return [(string)$r->payroll_id => [
             'record_id'             => (int)$r->payroll_id,
-            'employee_id'           => (string)$r->employee_id,
+            'user_id'               => (string)$r->user_id,
             'period_id'             => (int)$r->period_id,
             'emp_name'              => $empName,
             'position'              => $posCode,
@@ -1496,7 +1496,7 @@ function buildSlipDoc(r) {
         </div>
         <div class="slip-emp-cell">
             <div class="slip-emp-label">Employee ID</div>
-            <div class="slip-emp-val">${r.employee_id}</div>
+            <div class="slip-emp-val">${r.user_id}</div>
         </div>
     </div>
 
@@ -1722,8 +1722,8 @@ function openPayslipPanel(recordId) {
 
     // Header
     el('ppNameTitle').textContent = r.emp_name;
-    el('ppMetaSub').textContent   = `Employee ID: ${r.employee_id}  ·  Period: ${r.period_label}`;
-    el('btnPreviewPdf').href      = `/payroll/${r.period_id}/payslip-pdf?emp_id=${r.employee_id}`;
+    el('ppMetaSub').textContent   = `Employee ID: ${r.user_id}  ·  Period: ${r.period_label}`;
+    el('btnPreviewPdf').href      = `/payroll/${r.period_id}/payslip-pdf?user_id=${r.user_id}`;
 
     // Build form & preview
     populateForm(r);

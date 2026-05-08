@@ -12,9 +12,9 @@ use App\Models\LeaveApplication;
 use App\Models\LeaveCreditBalance;
 use App\Models\LeaveType;
 use App\Models\Notification;
-use App\Models\LeaveDetailGroup;          
+use App\Models\LeaveDetailGroup;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;        
+use Illuminate\Support\Facades\DB;
 
 class AdminLeaveController extends Controller
 {
@@ -23,7 +23,12 @@ class AdminLeaveController extends Controller
     // ─────────────────────────────────────────
     public function index(Request $request)
     {
-        $query = LeaveApplication::with(['employee.position', 'employee.department', 'leaveType'])
+        $query = LeaveApplication::with([
+                'employee.position',
+                'employee.department',
+                'leaveType',
+                'approvedBy',
+            ])
             ->where('is_monetization', 0)
             ->orderByDesc('application_date');
 
@@ -44,10 +49,22 @@ class AdminLeaveController extends Controller
         $pendingCount    = LeaveApplication::where('status', 'PENDING')->where('is_monetization', 0)->count();
         $monetizePending = LeaveApplication::where('status', 'PENDING')->where('is_monetization', 1)->count();
 
-        $monetizationApps = LeaveApplication::with(['employee.position', 'employee.department', 'leaveType'])
+        $monetizationApps = LeaveApplication::with([
+                'employee.position',
+                'employee.department',
+                'leaveType',
+                'approvedBy',
+            ])
             ->where('is_monetization', 1)
             ->orderByDesc('application_date')
             ->get();
+
+        // Attach actioned_by_name to each record
+        foreach ($leaveApps->merge($monetizationApps) as $app) {
+            $app->actioned_by_name = $app->approvedBy
+                ? (($app->approvedBy->last_name ?? '') . ', ' . ($app->approvedBy->first_name ?? ''))
+                : null;
+        }
 
         return view('admin.leave.index', compact(
             'leaveApps', 'monetizationApps', 'leaveTypes',
@@ -57,8 +74,6 @@ class AdminLeaveController extends Controller
 
     // ─────────────────────────────────────────
     //  APPROVE
-    //  Balance was already deducted on INSERT by trigger.
-    //  No balance change needed here.
     // ─────────────────────────────────────────
     public function approve(Request $request, $id)
     {
@@ -71,26 +86,31 @@ class AdminLeaveController extends Controller
             ], 422);
         }
 
-        // Just update status — trigger handles balance
         $app->update([
             'status'      => 'APPROVED',
-            'approved_by' => session('employee_id'),
+            'approved_by' => auth()->id(), // Updated from session
             'approved_at' => now(),
         ]);
 
         try {
-            Notification::notifyLeaveStatusChange($app, 'APPROVED', session('employee_id'));
+            Notification::notifyLeaveStatusChange($app, 'APPROVED', auth()->id());
         } catch (\Exception $e) {}
 
+        $app->refresh()->load('approvedBy');
+
+        $actionedByName = $app->approvedBy
+            ? (($app->approvedBy->last_name ?? '') . ', ' . ($app->approvedBy->first_name ?? ''))
+            : null;
+
         return response()->json([
-            'success' => true,
-            'message' => "Leave approved for {$app->employee->first_name} {$app->employee->last_name}.",
+            'success'          => true,
+            'message'          => "Leave approved for {$app->employee->first_name} {$app->employee->last_name}.",
+            'actioned_by_name' => $actionedByName,
         ]);
     }
 
     // ─────────────────────────────────────────
     //  REJECT
-    //  DB trigger restores balance automatically on REJECTED.
     // ─────────────────────────────────────────
     public function reject(Request $request, $id)
     {
@@ -105,32 +125,37 @@ class AdminLeaveController extends Controller
             ], 422);
         }
 
-        // Trigger restores balance automatically
         $app->update([
             'status'        => 'REJECTED',
             'reject_reason' => $request->reason ?? 'Disapproved by administrator.',
-            'approved_by'   => session('employee_id'),
+            'approved_by'   => auth()->id(), // Updated from session
             'approved_at'   => now(),
         ]);
 
         try {
-            Notification::notifyLeaveStatusChange($app, 'REJECTED', session('employee_id'));
+            Notification::notifyLeaveStatusChange($app, 'REJECTED', auth()->id());
         } catch (\Exception $e) {}
 
+        $app->refresh()->load('approvedBy');
+
+        $actionedByName = $app->approvedBy
+            ? (($app->approvedBy->last_name ?? '') . ', ' . ($app->approvedBy->first_name ?? ''))
+            : null;
+
         return response()->json([
-            'success' => true,
-            'message' => 'Leave application rejected.',
+            'success'          => true,
+            'message'          => 'Leave application rejected.',
+            'actioned_by_name' => $actionedByName,
         ]);
     }
 
     // ─────────────────────────────────────────
     //  UPDATE STATUS (inline badge click)
-    //  Trigger handles all balance changes.
     // ─────────────────────────────────────────
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:PENDING,RECEIVED,ON-PROCESS,APPROVED,REJECTED',
+            'status' => 'required|in:PENDING,RECEIVED,APPROVED,REJECTED,RECALLED',
             'reason' => 'nullable|string|max:500',
         ]);
 
@@ -146,12 +171,24 @@ class AdminLeaveController extends Controller
         }
 
         if ($oldStatus === $newStatus) {
-            return response()->json(['success' => true, 'message' => 'Status unchanged.', 'status' => $newStatus]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Status unchanged.',
+                'status'  => $newStatus,
+            ]);
+        }
+
+        // Only APPROVED applications can be recalled
+        if ($newStatus === 'RECALLED' && $oldStatus !== 'APPROVED') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only approved applications can be recalled.',
+            ], 422);
         }
 
         $updateData = [
             'status'      => $newStatus,
-            'approved_by' => session('employee_id'),
+            'approved_by' => auth()->id(), // Updated from session
             'approved_at' => now(),
         ];
 
@@ -165,26 +202,31 @@ class AdminLeaveController extends Controller
             $updateData['reject_reason'] = null;
         }
 
-        // DB trigger handles balance restoration for REJECTED/CANCELLED
-        // DB trigger handles nothing for APPROVED (already deducted on INSERT)
         $app->update($updateData);
 
         try {
-            Notification::notifyLeaveStatusChange($app, $newStatus, session('employee_id'));
+            Notification::notifyLeaveStatusChange($app, $newStatus, auth()->id());
         } catch (\Exception $e) {}
 
+        $app->refresh()->load('approvedBy');
+
+        $actionedByName = $app->approvedBy
+            ? (($app->approvedBy->last_name ?? '') . ', ' . ($app->approvedBy->first_name ?? ''))
+            : null;
+
         $labels = [
-            'PENDING'    => 'Pending',
-            'RECEIVED'   => 'Received',
-            'ON-PROCESS' => 'On-Process',
-            'APPROVED'   => 'Approved',
-            'REJECTED'   => 'Rejected',
+            'PENDING'  => 'Pending',
+            'RECEIVED' => 'Received',
+            'APPROVED' => 'Approved',
+            'REJECTED' => 'Rejected',
+            'RECALLED' => 'Recalled',
         ];
 
         return response()->json([
-            'success' => true,
-            'message' => "Status updated to {$labels[$newStatus]}.",
-            'status'  => $newStatus,
+            'success'          => true,
+            'message'          => "Status updated to {$labels[$newStatus]}.",
+            'status'           => $newStatus,
+            'actioned_by_name' => $actionedByName,
         ]);
     }
 
@@ -193,25 +235,30 @@ class AdminLeaveController extends Controller
     // ─────────────────────────────────────────
     public function pdf($id)
     {
-        $app = LeaveApplication::with(['employee.position', 'employee.department', 'leaveType'])
+        $app = LeaveApplication::with([
+                'employee.position',
+                'employee.department',
+                'leaveType',
+            ])
             ->findOrFail($id);
 
         $year = $app->start_date ? $app->start_date->year : now()->year;
 
-        $vlBalance = LeaveCreditBalance::where('user_id', $app->user_id) // ── UPDATED ──
+        $vlBalance = LeaveCreditBalance::where('user_id', $app->user_id) // Updated to user_id
             ->whereHas('leaveType', fn($q) => $q->where('type_code', 'VL'))
             ->where('year', $year)->first();
 
-        $slBalance = LeaveCreditBalance::where('user_id', $app->user_id) // ── UPDATED ──
+        $slBalance = LeaveCreditBalance::where('user_id', $app->user_id) // Updated to user_id
             ->whereHas('leaveType', fn($q) => $q->where('type_code', 'SL'))
             ->where('year', $year)->first();
 
-        // ── Pull all dynamic content for the PDF ──────────────────
         $allLeaveTypes = LeaveType::where('is_active', 1)
             ->orderBy('leave_type_id')
             ->get();
 
-        $detailGroups = LeaveDetailGroup::with(['items' => fn($q) => $q->orderBy('sort_order')])
+        $detailGroups = LeaveDetailGroup::with([
+                'items' => fn($q) => $q->orderBy('sort_order'),
+            ])
             ->orderBy('sort_order')
             ->get();
 
@@ -222,7 +269,6 @@ class AdminLeaveController extends Controller
         $recommendationOptions = DB::table('recommendation_options')
             ->orderBy('sort_order')
             ->get();
-        // ─────────────────────────────────────────────────────────
 
         return view('application.leave-pdf', compact(
             'app',

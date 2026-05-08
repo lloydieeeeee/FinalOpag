@@ -72,24 +72,111 @@ class PayrollRemittanceController extends Controller
         return $records;
     }
 
+    private function getColumnsForType($type)
+    {
+        $map = [
+            'all' => [
+                'gsis_ee' => 'GSIS Premium',
+                'pagibig_govt' => 'PAG-IBIG',
+                'philhealth_ee' => 'PhilHealth',
+                'withholding_tax' => 'W/Tax',
+                'loan_dbp' => 'DBP',
+                'loan_lbp' => 'LBP',
+                'loan_cngwmpc' => 'CNGWMPC',
+                'allowance_pera' => 'PERA',
+            ],
+            'gsis' => [
+                'gsis_ee' => 'GSIS Premium',
+                'gsis_ec' => 'ECF',
+                'gsis_policy' => 'Policy Loan',
+                'gsis_emergency' => 'Emergency',
+                'gsis_real_estate' => 'Real Estate',
+                'gsis_mpl' => 'MPL',
+                'gsis_mpl_lite' => 'MPL Lite',
+                'gsis_gfal' => 'GFAL',
+                'gsis_computer' => 'Computer',
+                'gsis_conso' => 'Conso',
+            ],
+            'pagibig' => [
+                'pagibig_ee' => 'PAG-IBIG EE',
+                'pagibig_govt' => 'PAG-IBIG Govt',
+                'pagibig_mpl' => 'PAG-IBIG MPL',
+                'pagibig_calamity' => 'PAG-IBIG Calamity',
+            ],
+            'philhealth' => [
+                'philhealth_ee' => 'PhilHealth EE',
+                'philhealth_govt' => 'PhilHealth Govt',
+            ],
+            'withholding_tax' => [
+                'withholding_tax' => 'Withholding Tax',
+            ],
+            'cng' => [
+                'cng_capital_share' => 'Capital Share',
+                'cng_kiddie_savings' => 'Kiddie Savings',
+                'cng_savings' => 'Savings',
+                'cng_regular_loan' => 'Regular Loan',
+                'cng_crisis_loan' => 'Crisis Loan',
+                'cng_coop_canteen' => 'Coop Canteen',
+                'cng_coop_store' => 'Coop Store',
+                'cng_calamity_loan' => 'Calamity Loan',
+                'cng_abuloy' => 'Abuloy',
+                'cng_handog' => 'Handog',
+                'cng_b2b_loan' => 'B2B Loan',
+                'cng_petty_cash' => 'Petty Cash',
+                'cng_commodity_loan' => 'Commodity Loan',
+            ],
+            'dbp' => [
+                'loan_dbp' => 'DBP Loan',
+            ],
+            'lbp' => [
+                'loan_lbp' => 'LBP Loan',
+            ],
+            'allowances' => [
+                'allowance_pera' => 'PERA',
+                'allowance_rata' => 'RATA',
+                'allowance_ta' => 'TA',
+                'allowance_other' => 'Other Allowance',
+            ],
+            'overpayment' => [
+                'overpayment' => 'Overpayment',
+            ]
+        ];
+
+        return $map[$type] ?? $map['all'];
+    }
+
     public function index(Request $request)
     {
         $periods = PayrollPeriod::orderByDesc('year')->orderByDesc('month')->get();
 
         $selectedPeriodId = $request->query('period_id', optional($periods->first())->period_id);
         $selectedPeriod = $periods->find($selectedPeriodId);
+        $type = $request->query('type', 'all');
 
         $records = collect();
+        $columns = [];
+        $totals = [];
 
         if ($selectedPeriod) {
+            // Unrestricted get() to pull ALL records for the selected period
             $records = PayrollRecord::with(['employee.position', 'employee.department', 'period'])
                 ->where('period_id', $selectedPeriod->period_id)
-                ->orderBy(DB::raw("(SELECT last_name FROM employee WHERE employee.employee_id = payroll_record.employee_id)"))
+                ->orderBy(DB::raw("(SELECT last_name FROM employee WHERE employee.user_id = payroll_record.user_id)"))
                 ->get();
                 
-            $records = $this->mapOldCngData($records); // <--- Auto-map old data
+            $records = $this->mapOldCngData($records); 
+
+            $columns = $this->getColumnsForType($type);
+            
+            // Calculate column totals
+            foreach ($columns as $field => $label) {
+                $totals[$field] = $records->sum(function($r) use ($field) {
+                    return (float)($r->{$field} ?? 0);
+                });
+            }
         }
 
+        // Kept for backward compatibility if any old logic references them
         $gsis = [
             'ee'          => $records->sum('gsis_ee'),
             'govt'        => $records->sum('gsis_govt'),
@@ -126,8 +213,9 @@ class PayrollRemittanceController extends Controller
         $wtax = $records->sum('withholding_tax');
 
         return view('payroll.remittances', compact(
-            'periods', 'selectedPeriod', 'records',
-            'gsis', 'pagibig', 'philhealth', 'loans', 'wtax'
+            'periods', 'selectedPeriod', 'selectedPeriodId', 'records',
+            'gsis', 'pagibig', 'philhealth', 'loans', 'wtax',
+            'type', 'columns', 'totals'
         ));
     }
 
@@ -207,7 +295,7 @@ class PayrollRemittanceController extends Controller
             ->where('period_id', $periodId)
             ->get();
             
-        $records = $this->mapOldCngData($records); // <--- Auto-map old data for PDF
+        $records = $this->mapOldCngData($records); 
 
         $preparedBy = DB::table('signatory_options')->where('label', 'Remittance Signatory')->first();
         $certifiedBy = DB::table('signatory_options')->where('label', 'Provincial Agriculturist')->first();

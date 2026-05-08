@@ -428,8 +428,8 @@
     </div>
 
     @php
-        $pendingCount  = $halfDays->where('status','PENDING')->filter(fn($h) => !is_null($h->employee_id))->count();
-        $orphanCount   = $halfDays->whereNull('employee_id')->count();
+        $pendingCount  = $halfDays->where('status','PENDING')->filter(fn($h) => !is_null($h->user_id))->count();
+        $orphanCount   = $halfDays->whereNull('user_id')->count();
         $approvedCount = $halfDays->where('status','APPROVED')->count();
     @endphp
 
@@ -509,13 +509,14 @@
                         @forelse($halfDays->whereNotIn('status', ['APPROVED', 'REJECTED', 'CANCELLED']) as $hd)
                         @php
                             $hdId      = $hd->half_day_id;
-                            $isOrphan  = is_null($hd->employee_id) || is_null($hd->employee);
+                            $activeEmp = $hd->user->employee ?? $hd->employee;
+                            $isOrphan  = is_null($hd->user_id) || is_null($activeEmp);
                             $isLocked  = $isOrphan || in_array($hd->status, ['APPROVED','REJECTED','CANCELLED']);
                             $period    = strtoupper($hd->time_period ?? '');
                             $empSearch = strtolower(
-                                ($hd->employee->last_name ?? '') . ' ' .
-                                ($hd->employee->first_name ?? '') . ' ' .
-                                ($hd->employee->formatted_employee_id ?? '')
+                                ($activeEmp->last_name ?? '') . ' ' .
+                                ($activeEmp->first_name ?? '') . ' ' .
+                                ($activeEmp->formatted_employee_id ?? '')
                             );
                         @endphp
                         <tr class="hd-row{{ $isOrphan ? ' orphan-row' : '' }}"
@@ -533,14 +534,14 @@
                                 @if($isOrphan)
                                     <span style="color:#9ca3af;font-style:italic;">No employee linked</span>
                                 @else
-                                    {{ $hd->employee->last_name ?? '—' }},
-                                    {{ $hd->employee->first_name ?? '' }}
-                                    {{ $hd->employee->middle_name ? strtoupper($hd->employee->middle_name[0]).'.' : '' }}
+                                    {{ $activeEmp->last_name ?? '—' }},
+                                    {{ $activeEmp->first_name ?? '' }}
+                                    {{ $activeEmp->middle_name ? strtoupper($activeEmp->middle_name[0]).'.' : '' }}
                                 @endif
                             </td>
                             <td data-label="Dept." class="mob-hide" style="font-size:12px;color:#6b7280;">
-                                {{ $hd->employee?->department?->getAttribute('department_name')
-                                ?? $hd->employee?->department?->getAttribute('name')
+                                {{ $activeEmp?->department?->getAttribute('department_name')
+                                ?? $activeEmp?->department?->getAttribute('name')
                                 ?? '—' }}
                             </td>
                             <td data-label="Leave Type" style="font-size:12px;color:#6b7280;">
@@ -704,19 +705,21 @@
                         @forelse($historyHDs as $hd)
                         @php
                             $hdId      = $hd->half_day_id;
-                            $isOrphan  = is_null($hd->employee_id) || is_null($hd->employee);
+                            $activeEmp = $hd->user->employee ?? $hd->employee;
+                            $isOrphan  = is_null($hd->user_id) || is_null($activeEmp);
                             $period    = strtoupper($hd->time_period ?? '');
                             $empSearch = strtolower(
-                                ($hd->employee->last_name ?? '') . ' ' .
-                                ($hd->employee->first_name ?? '') . ' ' .
-                                ($hd->employee->formatted_employee_id ?? '')
+                                ($activeEmp->last_name ?? '') . ' ' .
+                                ($activeEmp->first_name ?? '') . ' ' .
+                                ($activeEmp->formatted_employee_id ?? '')
                             );
                             $historyMonth = ($hd->approved_date ?? $hd->application_date)
                                 ? \Carbon\Carbon::parse($hd->approved_date ?? $hd->application_date)->format('m')
                                 : '';
+                            $approverEmp = $hd->approvedBy->employee ?? $hd->approvedBy;
                             $approvedByName = $hd->approvedBy
-    ? (($hd->approvedBy->last_name ?? '') . ', ' . ($hd->approvedBy->first_name ?? ''))
-    : '—';
+                                ? (($approverEmp->last_name ?? '') . ', ' . ($approverEmp->first_name ?? ''))
+                                : '—';
                         @endphp
                         <tr class="hist-row"
                             data-id="{{ $hdId }}"
@@ -733,14 +736,14 @@
                                 @if($isOrphan)
                                     <span style="color:#9ca3af;font-style:italic;">No employee linked</span>
                                 @else
-                                    {{ $hd->employee->last_name ?? '—' }},
-                                    {{ $hd->employee->first_name ?? '' }}
-                                    {{ $hd->employee->middle_name ? strtoupper($hd->employee->middle_name[0]).'.' : '' }}
+                                    {{ $activeEmp->last_name ?? '—' }},
+                                    {{ $activeEmp->first_name ?? '' }}
+                                    {{ $activeEmp->middle_name ? strtoupper($activeEmp->middle_name[0]).'.' : '' }}
                                 @endif
                             </td>
                             <td data-label="Dept." class="mob-hide" style="font-size:12px;color:#6b7280;">
-                                {{ $hd->employee?->department?->getAttribute('department_name')
-                                ?? $hd->employee?->department?->getAttribute('name')
+                                {{ $activeEmp?->department?->getAttribute('department_name')
+                                ?? $activeEmp?->department?->getAttribute('name')
                                 ?? '—' }}
                             </td>
                             <td data-label="Leave Type" style="font-size:12px;color:#6b7280;">
@@ -897,18 +900,21 @@
    DATA — keyed by half_day_id
 ══════════════════════════════════════════════════════ */
 const HD_DATA = {!! json_encode(
-    $halfDays->keyBy('half_day_id')->map(fn($h) => [
+    $halfDays->keyBy('half_day_id')->map(function($h) {
+        $activeEmp = $h->user->employee ?? $h->employee;
+        $approverEmp = $h->approvedBy->employee ?? $h->approvedBy;
+        return [
         'id'               => $h->half_day_id,
-        'orphan'           => is_null($h->employee_id) || is_null($h->employee),
-        'employee_id_fmt'  => $h->employee->formatted_employee_id ?? '—',
-        'first_name'       => $h->employee->first_name  ?? '',
-        'last_name'        => $h->employee->last_name   ?? '',
-        'middle_name'      => $h->employee->middle_name ?? '',
-        'position'   => optional($h->employee?->position)->getAttribute('position_name')
-                     ?? optional($h->employee?->position)->getAttribute('name')
+        'orphan'           => is_null($h->user_id) || is_null($activeEmp),
+        'employee_id_fmt'  => $activeEmp->formatted_employee_id ?? '—',
+        'first_name'       => $activeEmp->first_name  ?? '',
+        'last_name'        => $activeEmp->last_name   ?? '',
+        'middle_name'      => $activeEmp->middle_name ?? '',
+        'position'   => optional($activeEmp?->position)->getAttribute('position_name')
+                     ?? optional($activeEmp?->position)->getAttribute('name')
                      ?? '—',
-        'department' => optional($h->employee?->department)->getAttribute('department_name')
-                     ?? optional($h->employee?->department)->getAttribute('name')
+        'department' => optional($activeEmp?->department)->getAttribute('department_name')
+                     ?? optional($activeEmp?->department)->getAttribute('name')
                      ?? '—',
         'leave_type'       => optional($h->leaveType)->type_name ?? '—',
         'application_date' => $h->application_date
@@ -921,10 +927,10 @@ const HD_DATA = {!! json_encode(
         'approved_date'    => $h->approved_date
                                 ? \Carbon\Carbon::parse($h->approved_date)->format('M d, Y') : '—',
         'approved_by'      => $h->approvedBy
-                                ? (($h->approvedBy->last_name ?? '') . ', ' . ($h->approvedBy->first_name ?? ''))
+                                ? (($approverEmp->last_name ?? '') . ', ' . ($approverEmp->first_name ?? ''))
                                 : (isset($h->approved_by) ? $h->approved_by : '—'),
         'updated_at'       => $h->updated_at ? \Carbon\Carbon::parse($h->updated_at)->timestamp : 0,
-    ])
+    ];})
 ) !!};
 const CSRF       = "{{ csrf_token() }}";
 const STATUS_URL = "{{ url('admin/halfday') }}";

@@ -400,6 +400,7 @@ tfoot .col-frozen-net { z-index: 20; }
 .grp-pagibig  { background: #ece8fb !important; color: #4530a0 !important; }
 .grp-ph       { background: #d4f2fa !important; color: #0b6a88 !important; }
 .grp-loans    { background: #fdefd8 !important; color: #8c4d08 !important; }
+.grp-dynded   { background: #475569 !important; color: #ffffff !important; }
 .grp-allow    { background: #d4f7ea !important; color: #0c5a3c !important; }
 .grp-net      { background: #fde4e4 !important; color: #991a1a !important; }
 .grp-action   { background: #eef0f2 !important; color: #374151 !important; }
@@ -412,6 +413,7 @@ tfoot .col-frozen-net { z-index: 20; }
 .sub-pagibig  { background: #f4f2ff !important; color: #4a30a8 !important; }
 .sub-ph       { background: #eafbff !important; color: #0a6c8a !important; }
 .sub-loans    { background: #fdf8ee !important; color: #854a08 !important; }
+.sub-dynded   { background: #f8fafc !important; color: #475569 !important; }
 .sub-allow    { background: #ecfdf6 !important; color: #0b5e40 !important; }
 .sub-net      { background: #fff2f2 !important; color: #b01c1c !important; font-weight: 800 !important; }
 .sub-action   { background: #f9fafb !important; color: #374151 !important; }
@@ -641,6 +643,15 @@ tfoot .net-footer {
 }
 #toast.show { opacity: 1; transform: translateY(0); }
 
+/* Quick Add Column Modal Styles */
+.cmodal-bg { position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,.45); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .22s; padding: 16px; }
+.cmodal-bg.show { opacity: 1; pointer-events: all; }
+.cmodal-card { background: #fff; border-radius: 20px; padding: 28px; width: min(98vw, 440px); box-shadow: 0 28px 70px rgba(0,0,0,.22); transform: scale(.92) translateY(14px); transition: transform .28s cubic-bezier(.34,1.56,.64,1); }
+.cmodal-bg.show .cmodal-card { transform: scale(1) translateY(0); }
+.modal-input { width: 100%; padding: 10px 14px; font-size: 13px; border: 1.5px solid #e9ecef; border-radius: 10px; background: #fafafa; color: #111827; outline: none; margin-bottom: 14px; transition: border-color .15s, background .15s; font-family: 'Plus Jakarta Sans', sans-serif; }
+.modal-input:focus { border-color: var(--forest); background: #fff; }
+.modal-label { display: block; font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+
 /* ══════════════════════════════
   RESPONSIVE
 ══════════════════════════════ */
@@ -676,7 +687,23 @@ tfoot .net-footer {
 </style>
 
 @php
-$dbDeductions = \App\Models\PayrollDeduction::where('is_active', 1)->get()->keyBy('name');
+/* ─── Fetch All Active Deductions ─── */
+$allDeductions = \App\Models\PayrollDeduction::where('is_active', 1)->orderBy('sort_order')->get();
+$dbDeductions = $allDeductions->keyBy('name');
+
+/* ─── Filter Dynamic Deductions & Allowances ─── */
+$dynamicDeductions = $allDeductions->filter(function($ded) {
+    if ($ded->parent_id == 9 || strtoupper($ded->name) === 'CNGWPC') return false;
+    if (method_exists($ded, 'isAllowance') && $ded->isAllowance()) return false;
+    if (method_exists($ded, 'resolveColumn') && $ded->resolveColumn() !== null) return false;
+    return true;
+});
+
+$dynamicAllowances = $allDeductions->filter(function($ded) {
+    if (method_exists($ded, 'isAllowance') && !$ded->isAllowance()) return false;
+    if (method_exists($ded, 'resolveColumn') && $ded->resolveColumn() !== null) return false;
+    return true;
+});
 
 $jsConfig = [
     'gsisEeType'      => $dbDeductions->get('GSIS Employee Share')?->rate_type    ?? 'percent',
@@ -704,7 +731,19 @@ $jsConfig = [
     'peraType'        => $dbDeductions->get('PERA')?->rate_type   ?? 'flat',
     'peraValue'       => (float)($dbDeductions->get('PERA')?->rate_value ?? 2000),
     'peraLimit'       => null,
+    'raType'          => $dbDeductions->get('RA')?->rate_type     ?? 'flat',
+    'raValue'         => (float)($dbDeductions->get('RA')?->rate_value   ?? 9500),
+    'taType'          => $dbDeductions->get('TA')?->rate_type     ?? 'flat',
+    'taValue'         => (float)($dbDeductions->get('TA')?->rate_value   ?? 9500),
 ];
+
+$computeFromConfig = function(string $type, float $value, ?float $limit, float $gross): float {
+    if ($type === 'percent') {
+        $amt = round($gross * $value, 2);
+        return $limit !== null ? min($amt, $limit) : $amt;
+    }
+    return round($value, 2);
+};
 @endphp
 
 <div class="pay-page">
@@ -802,8 +841,13 @@ $jsConfig = [
         </form>
 
         <div class="btn-divider"></div>
+        
+        {{-- QUICK ADD COLUMN --}}
+        <button class="btn-outline" style="color:#dcfce7;border-color:#5aaa5a;" onclick="openQuickAddModal()">
+            <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            New Column
+        </button>
 
-        {{-- ★ FINALIZE: now opens the polished modal instead of a plain confirm() ★ --}}
         @if($selectedPeriod && $selectedPeriod->status === 'DRAFT')
           <button type="button" class="btn-danger" onclick="openFinalizeModal()">
             <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -869,7 +913,10 @@ $jsConfig = [
             <th class="grp-pagibig" colspan="4"  style="text-align:center;">PAG-IBIG</th>
             <th class="grp-ph"      colspan="2"  style="text-align:center;">PHILHEALTH</th>
             <th class="grp-loans"   colspan="7"  style="text-align:center;">LOANS &amp; DEDUCTIONS</th>
-            <th class="grp-allow"   colspan="3"  style="text-align:center;">ALLOWANCES</th>
+            @if($dynamicDeductions->count() > 0)
+            <th class="grp-dynded"  colspan="{{ $dynamicDeductions->count() }}" style="text-align:center;">OTHER DEDUCTIONS</th>
+            @endif
+            <th class="grp-allow"   colspan="{{ 3 + $dynamicAllowances->count() }}"  style="text-align:center;">ALLOWANCES</th>
             <th class="grp-net"     colspan="1"  style="text-align:center;">TOTAL DED.</th>
             <th class="grp-action" rowspan="2" style="text-align:center;min-width:40px;">St.</th>
           </tr>
@@ -899,9 +946,19 @@ $jsConfig = [
             <th class="sub-loans"   style="min-width:74px;">PARACLE</th>
             <th class="sub-loans"   style="min-width:82px;">Overpayment</th>
             <th class="sub-loans"   style="min-width:160px;background:#78350f;color:#fef3c7;">Other Deduction</th>
+            
+            @foreach($dynamicDeductions as $d)
+            <th class="sub-dynded" style="min-width:82px;" title="{{ $d->name }}">{{ \Illuminate\Support\Str::limit($d->name, 10) }}</th>
+            @endforeach
+
             <th class="sub-allow"   style="min-width:68px;">PERA</th>
             <th class="sub-allow"   style="min-width:68px;">RA</th>
             <th class="sub-allow"   style="min-width:72px;">TA/Other</th>
+
+            @foreach($dynamicAllowances as $a)
+            <th class="sub-allow" style="min-width:82px;" title="{{ $a->name }}">{{ \Illuminate\Support\Str::limit($a->name, 10) }}</th>
+            @endforeach
+
             <th class="sub-net"     style="min-width:96px;">Total Ded.</th>
           </tr>
         </thead>
@@ -913,16 +970,50 @@ $jsConfig = [
             $locked = optional($selectedPeriod)->status === 'FINALIZED';
             $ro     = $locked ? 'readonly' : '';
             $onch   = $locked ? '' : "markDirty({$pid}, this)";
-            $dept   = strtolower($r->employee->department->department_name ?? '');
-            $name   = strtolower(($r->employee->last_name ?? '') . ' ' . ($r->employee->first_name ?? ''));
-            $empid  = strtolower($r->employee->formatted_employee_id ?? $r->employee_id ?? '');
+            
+            // Assign employee instance
+            $emp = $r->employee;
+
+            $dept   = strtolower($emp->department->department_name ?? '');
+            $name   = strtolower(($emp->last_name ?? '') . ' ' . ($emp->first_name ?? ''));
+            $userid = strtolower($emp->user_id ?? $r->user_id ?? '');
+
+            // Decode Dynamic JSON
+            $dynData = is_string($r->dynamic_deductions) ? json_decode($r->dynamic_deductions, true) : ($r->dynamic_deductions ?? []);
+            
+            $gross = (float)$r->gross_salary;
+            $positionCode = strtoupper(trim(optional($emp->position)->position_code ?? ''));
+            $isAgri = ($positionCode === 'PA');
+
+            /* ── Compute dynamic deduction & allowance defaults ── */
+            $dynValues = [];
+            foreach($dynamicDeductions as $d) {
+                $val = 0;
+                if (method_exists($d, 'isFixed') && $d->isFixed()) {
+                    $val = $d->rate_type === 'percent' ? ($gross * $d->rate_value) : $d->rate_value;
+                    if ($d->limit_amount) $val = min($val, $d->limit_amount);
+                }
+                $dynValues[$d->id] = round($val, 2);
+            }
+
+            $dynAddValues = [];
+            foreach($dynamicAllowances as $a) {
+                $val = 0;
+                if (method_exists($a, 'isFixed') && $a->isFixed()) {
+                    $val = $a->rate_type === 'percent' ? ($gross * $a->rate_value) : $a->rate_value;
+                    if ($a->limit_amount) $val = min($val, $a->limit_amount);
+                }
+                $dynAddValues[$a->id] = round($val, 2);
+            }
           ?>
           <tr id="row_{{ $pid }}"
               data-id="{{ $pid }}"
               data-orig="{{ $r->toJson() }}"
-              data-search="{{ $name }} {{ $empid }}"
+              data-search="{{ $name }} {{ $userid }}"
               data-dept="{{ $dept }}"
-              data-gross="{{ $r->gross_salary }}">
+              data-gross="{{ $gross }}"
+              data-user-id="{{ $r->user_id }}"
+              data-is-agri="{{ $isAgri ? '1' : '0' }}">
 
             <td class="col-frozen-0 col-num">
               <div class="cell-static" style="text-align:center;color:#9ca3af;font-size:10px;padding:5px 4px;">{{ $i+1 }}</div>
@@ -931,17 +1022,17 @@ $jsConfig = [
             <td class="col-frozen-1 col-name" style="border-right:1px solid #f0f2f0;">
               <div style="padding:5px 12px;">
                 <div style="font-weight:700;color:#111827;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;line-height:1.3;">
-                  {{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}
+                  {{ $emp->last_name ?? '—' }}, {{ $emp->first_name ?? '' }}
                 </div>
                 <div style="font-size:10px;color:#9ca3af;font-family:'JetBrains Mono',monospace;margin-top:1px;">
-                  {{ $r->employee->department->department_name ?? '' }}
+                  {{ $emp->department->department_name ?? '' }}
                 </div>
               </div>
             </td>
 
             <td class="col-frozen-2 col-desig">
               <div class="cell-static" style="font-size:11px;color:#374151;font-weight:600;">
-                {{ $r->designation ?? optional($r->employee->position)->position_code }}
+                {{ $r->designation ?? optional($emp->position)->position_code }}
               </div>
             </td>
 
@@ -952,7 +1043,7 @@ $jsConfig = [
             </td>
 
             <td>
-              <div class="cell-num" style="font-weight:700;color:#111827;min-width:110px;">{{ number_format($r->gross_salary, 2) }}</div>
+              <div class="cell-num" style="font-weight:700;color:#111827;min-width:110px;">{{ number_format($gross, 2) }}</div>
             </td>
 
             {{-- GSIS (11 cols) --}}
@@ -1198,6 +1289,21 @@ $jsConfig = [
               </div>
             </td>
 
+            {{-- DYNAMIC DEDUCTIONS --}}
+            @foreach($dynamicDeductions as $d)
+            <?php $val = $dynData[$d->id] ?? 0; ?>
+            <td>
+              <div class="cell-input-wrap" onclick="this.querySelector('input')?.focus()">
+                <input class="cell-input dyn-ded-input" type="number" step="0.01" min="0" {{ $ro }}
+                  value="{{ number_format($val, 2, '.', '') }}"
+                  data-dyn-id="{{ $d->id }}" oninput="{{ $onch }}"
+                  data-default="{{ number_format($dynValues[$d->id] ?? 0, 2, '.', '') }}"
+                  onfocus="this.parentElement.classList.add('focused')"
+                  onblur="this.parentElement.classList.remove('focused')">
+              </div>
+            </td>
+            @endforeach
+
             {{-- ALLOWANCES (3 cols) --}}
             <td>
               <div class="cell-input-wrap" onclick="this.querySelector('input')?.focus()">
@@ -1228,6 +1334,21 @@ $jsConfig = [
               </div>
             </td>
 
+            {{-- DYNAMIC ALLOWANCES --}}
+            @foreach($dynamicAllowances as $a)
+            <?php $val = $dynData[$a->id] ?? 0; ?>
+            <td>
+              <div class="cell-input-wrap" onclick="this.querySelector('input')?.focus()">
+                <input class="cell-input dyn-add-input" type="number" step="0.01" min="0" {{ $ro }}
+                  value="{{ number_format($val, 2, '.', '') }}"
+                  data-dyn-id="{{ $a->id }}" oninput="{{ $onch }}"
+                  data-default="{{ number_format($dynAddValues[$a->id] ?? 0, 2, '.', '') }}"
+                  onfocus="this.parentElement.classList.add('focused')"
+                  onblur="this.parentElement.classList.remove('focused')">
+              </div>
+            </td>
+            @endforeach
+
             {{-- TOTAL DEDUCTIONS --}}
             <td>
               <span class="cell-computed" id="ded_{{ $pid }}"
@@ -1243,7 +1364,7 @@ $jsConfig = [
           </tr>
           @empty
           <tr>
-            <td colspan="35" style="padding:64px;text-align:center;color:#9ca3af;font-family:'Plus Jakarta Sans',sans-serif;">
+            <td colspan="50" style="padding:64px;text-align:center;color:#9ca3af;font-family:'Plus Jakarta Sans',sans-serif;">
               <svg style="width:40px;height:40px;color:#d1d5db;margin:0 auto 12px;display:block;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
               No payroll records found.
               <a href="{{ route('payroll.create') }}" style="color:var(--forest);font-weight:600;text-decoration:none;border-bottom:1px solid var(--leaf);">Create a payroll period →</a>
@@ -1284,9 +1405,19 @@ $jsConfig = [
             <td style="text-align:right;padding:7px 8px;opacity:.4;">—</td>
             <td style="text-align:right;padding:7px 8px;opacity:.4;">—</td>
             <td style="text-align:right;padding:7px 8px;opacity:.4;font-size:10px;color:#92400e;">—</td>
+            
+            @foreach($dynamicDeductions as $d)
+            <td style="text-align:right;padding:7px 8px;opacity:.4;">—</td>
+            @endforeach
+
             <td style="text-align:right;padding:7px 8px;">{{ number_format($summary->pera_total ?? 0, 2) }}</td>
             <td style="text-align:right;padding:7px 8px;opacity:.4;">—</td>
             <td style="text-align:right;padding:7px 8px;opacity:.4;">—</td>
+
+            @foreach($dynamicAllowances as $a)
+            <td style="text-align:right;padding:7px 8px;opacity:.4;">—</td>
+            @endforeach
+
             <td style="text-align:right;padding:7px 8px;color:#991a1a;font-weight:800;">{{ number_format($summary->deductions, 2) }}</td>
             <td></td>
           </tr>
@@ -1311,6 +1442,28 @@ $jsConfig = [
 
   </div>{{-- end .app-card --}}
 </div>{{-- end .pay-page --}}
+
+{{-- Quick Add Column Modal --}}
+<div id="quickAddModal" class="cmodal-bg" onclick="if(event.target===this)closeQuickAddModal()">
+  <div class="cmodal-card">
+      <h3 style="font-size:16px;font-weight:800;color:#111827;margin:0 0 4px;">➕ New Column</h3>
+      <p style="font-size:12px;color:#6b7280;margin:0 0 20px;">Create a new deduction or allowance. <strong style="color:#b91c1c;">Note: Saving will refresh the page to rebuild the table.</strong></p>
+      
+      <label class="modal-label">Category Name</label>
+      <input type="text" id="qaName" class="modal-input" placeholder="e.g. Palarong Panlalawigan">
+      
+      <label class="modal-label">Column Type</label>
+      <select id="qaType" class="modal-input" style="padding-right:30px;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 fill=%22none%22 stroke=%22%239ca3af%22 viewBox=%220 0 24 24%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 12px center;">
+          <option value="deduction">Deduction (Minus from Net)</option>
+          <option value="addition">Allowance (Add to Net)</option>
+      </select>
+      
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
+          <button onclick="closeQuickAddModal()" style="padding:9px 18px;font-size:12px;font-weight:600;border:1.5px solid #e9ecef;border-radius:10px;color:#374151;background:#fff;cursor:pointer;">Cancel</button>
+          <button onclick="submitQuickAdd()" id="qaBtn" style="padding:9px 18px;font-size:12px;font-weight:700;border:none;border-radius:10px;color:#fff;background:linear-gradient(135deg, #1a3a1a, #2d5a1b);cursor:pointer;box-shadow:0 3px 10px rgba(26,58,26,.25);">Save & Refresh</button>
+      </div>
+  </div>
+</div>
 
 {{-- Toast --}}
 <div id="toast">
@@ -1377,7 +1530,7 @@ $jsConfig = [
     {{-- Actions --}}
     <div style="display:flex;gap:10px;padding:16px 20px 20px;">
       <button onclick="closeFinalizeModal()" style="flex:1;padding:11px;font-size:13px;font-weight:700;color:#6b7280;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;" onmouseover="this.style.borderColor='#9ca3af'" onmouseout="this.style.borderColor='#e5e7eb'">Cancel</button>
-      <form method="POST" action="{{ route('payroll.finalize', $selectedPeriod->period_id) }}" id="fzForm" style="flex:2;display:contents;">
+      <form method="POST" action="{{ route('payroll.finalize', $selectedPeriod->period_id ?? 0) }}" id="fzForm" style="flex:2;display:contents;">
         @csrf
         <button type="submit" id="fzBtn" disabled style="flex:2;padding:11px 20px;font-size:13px;font-weight:800;color:#fff;background:#b91c1c;border:none;border-radius:10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;opacity:.4;pointer-events:none;transition:all .2s;">
           <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -1436,10 +1589,18 @@ function recomputeRow(pid) {
   const row = document.getElementById('row_' + pid);
   if (!row) return;
   const gross = parseFloat(row.dataset.gross) || 0;
-  const ded   = EDITABLE_DEDUCTION_FIELDS.reduce((s, f) => s + getRowVal(row, f), 0);
-  const alw   = ALLOWANCE_FIELDS.reduce((s, f) => s + getRowVal(row, f), 0);
-  const net   = gross - ded + alw;
-  const fmt   = n => n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  
+  let ded = EDITABLE_DEDUCTION_FIELDS.reduce((s, f) => s + getRowVal(row, f), 0);
+  let alw = ALLOWANCE_FIELDS.reduce((s, f) => s + getRowVal(row, f), 0);
+
+  // Dynamic Deductions Sum
+  row.querySelectorAll('.dyn-ded-input').forEach(inp => ded += parseFloat(inp.value) || 0);
+
+  // Dynamic Allowances Sum
+  row.querySelectorAll('.dyn-add-input').forEach(inp => alw += parseFloat(inp.value) || 0);
+
+  const net = gross - ded + alw;
+  const fmt = n => n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const dedEl = document.getElementById('ded_' + pid);
   const netEl = document.getElementById('net_' + pid);
@@ -1472,6 +1633,12 @@ function collectRow(pid) {
   const row = document.getElementById('row_' + pid);
   if (!row) return null;
   const get = f => parseFloat(row.querySelector('[data-field="' + f + '"]')?.value) || 0;
+
+  const dynamic = {};
+  row.querySelectorAll('[data-dyn-id]').forEach(inp => {
+     dynamic[inp.dataset.dynId] = parseFloat(inp.value) || 0;
+  });
+
   return {
     gsis_ee: get('gsis_ee'), gsis_ec: get('gsis_ec'),
     gsis_policy: get('gsis_policy'), gsis_emergency: get('gsis_emergency'),
@@ -1487,7 +1654,58 @@ function collectRow(pid) {
     other_deduction_label: (row.querySelector('[data-field="other_deduction_label"]')?.value ?? ''),
     allowance_pera: get('allowance_pera'), allowance_rata: get('allowance_rata'),
     allowance_other: get('allowance_other'),
+    dynamic: dynamic
   };
+}
+
+/* ── Quick Add Column ── */
+function openQuickAddModal() {
+    document.getElementById('qaName').value = '';
+    document.getElementById('qaType').value = 'deduction';
+    document.getElementById('quickAddModal').classList.add('show');
+}
+function closeQuickAddModal() {
+    document.getElementById('quickAddModal').classList.remove('show');
+}
+function submitQuickAdd() {
+    const name = document.getElementById('qaName').value.trim();
+    const kind = document.getElementById('qaType').value;
+    if (!name) return showToast('Required', 'Please enter a name.', 'error');
+
+    const btn = document.getElementById('qaBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const payload = {
+        name: name,
+        type: 'Not Fixed',
+        rate_type: 'flat',
+        rate_value: 0,
+        is_deducted: kind === 'deduction',
+        entry_kind: kind
+    };
+
+    fetch('/payroll/deductions', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => {
+        if(res.success) {
+            showToast('Success', 'Column created. Refreshing table...', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast('Error', 'Failed to create column.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Save & Refresh';
+        }
+    })
+    .catch(() => {
+        showToast('Error', 'Network error.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Save & Refresh';
+    });
 }
 
 /* ── Save all dirty rows ── */
@@ -1559,6 +1777,19 @@ function discardAll() {
       const inp = row.querySelector('[data-field="' + field + '"]');
       if (inp) { inp.value = parseFloat(orig[field] || 0).toFixed(2); inp.classList.remove('changed'); }
     });
+
+    // Reset Dynamic Fields
+    let origDyn = orig.dynamic_deductions || {};
+    if (typeof origDyn === 'string') {
+        try { origDyn = JSON.parse(origDyn); } catch(e) { origDyn = {}; }
+    }
+
+    row.querySelectorAll('[data-dyn-id]').forEach(inp => {
+       const did = inp.dataset.dynId;
+       inp.value = parseFloat(origDyn[did] || 0).toFixed(2);
+       inp.classList.remove('changed');
+    });
+
     row.classList.remove('row-dirty');
     recomputeRow(pid);
     const statusEl = document.getElementById('status_' + pid);
@@ -1605,6 +1836,7 @@ document.addEventListener('keydown', e => {
     e.preventDefault();
     if (dirtyRows.size > 0) saveAll();
   }
+  if (e.key === 'Escape') { closeFinalizeModal(); closeQuickAddModal(); }
 });
 
 /* ── Finalize Modal ── */

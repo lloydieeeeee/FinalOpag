@@ -29,19 +29,22 @@
 /* ── Table ── */
 .data-table { width:100%; font-size:13px; border-collapse:collapse; }
 .data-table thead tr { border-bottom:1px solid #f3f4f6; background:#fafafa; }
-.data-table th { padding:10px 14px; text-align:left; font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.04em; white-space:nowrap; }
-.data-table td { padding:12px 14px; border-bottom:1px solid #f9fafb; color:#374151; }
+.data-table th { padding:10px 14px; text-align:center; font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.04em; white-space:nowrap; }
+.data-table td { padding:12px 14px; border-bottom:1px solid #f9fafb; color:#374151; text-align:center; }
 .data-table tbody tr:hover { background:#fafafa; }
 
 .data-table tbody .leave-row { cursor:pointer; }
 .data-table tbody .leave-row:hover td:nth-child(2) { color:#1a3a1a; }
+.th-center {
+    text-align: center;
+}
 
 /* ── Status Badges ── */
 .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap; }
 .badge::before { content:'●'; font-size:8px; }
 .badge-PENDING     { background:#fef9c3; color:#854d0e; }
 .badge-RECEIVED    { background:#dbeafe; color:#1e40af; }
-.badge-ON-PROCESS  { background:#ede9fe; color:#5b21b6; }
+.badge-RECALLED    { background:#ede9fe; color:#5b21b6; }
 .badge-APPROVED    { background:#dcfce7; color:#14532d; }
 .badge-REJECTED    { background:#fee2e2; color:#991b1b; }
 .badge-CANCELLED   { background:#f3f4f6; color:#6b7280; }
@@ -61,7 +64,7 @@
 
 .pill-PENDING    { background:#fef9c3; color:#854d0e; }
 .pill-RECEIVED   { background:#dbeafe; color:#1e40af; }
-.pill-ON-PROCESS { background:#ede9fe; color:#5b21b6; }
+.pill-RECALLED   { background:#ede9fe; color:#5b21b6; }
 .pill-APPROVED   { background:#dcfce7; color:#14532d; }
 .pill-REJECTED   { background:#fee2e2; color:#991b1b; }
 .pill-CANCELLED  { background:#f3f4f6; color:#6b7280; }
@@ -84,7 +87,7 @@
 .status-option .opt-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 .dot-PENDING    { background:#eab308; }
 .dot-RECEIVED   { background:#3b82f6; }
-.dot-ON-PROCESS { background:#8b5cf6; }
+.dot-RECALLED   { background:#8b5cf6; }
 .dot-APPROVED   { background:#22c55e; }
 .dot-REJECTED   { background:#ef4444; }
 .dot-CANCELLED  { background:#9ca3af; }
@@ -213,11 +216,11 @@
 .btn-approve:hover { background:#166534; }
 .btn-reject  { padding:8px 22px; font-size:12px; font-weight:700; border:none; border-radius:8px; color:#fff; background:#dc2626; cursor:pointer; transition:background 0.15s; }
 .btn-reject:hover { background:#b91c1c; }
+.btn-recall  { padding:8px 22px; font-size:12px; font-weight:700; border:none; border-radius:8px; color:#fff; background:#7c3aed; cursor:pointer; transition:background 0.15s; }
+.btn-recall:hover { background:#6d28d9; }
 .btn-pdf { padding:8px 16px; font-size:12px; font-weight:600; border:1.5px solid #e5e7eb; border-radius:8px; color:#374151; background:#fff; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; }
 .btn-pdf:hover { border-color:#2d5a1b; color:#1a3a1a; background:#f0fdf4; }
 
-#monetizeToolbar { display:none; }
-#monetizeToolbar.show { display:flex; }
 
 /* ════ CS FORM MODAL ════ */
 .form-modal {
@@ -285,7 +288,7 @@
 .fm-loading-text { font-size:12px; color:#6b7280; font-weight:500; }
 
 .leave-row[data-status="PENDING"] td:first-child     { border-left:3px solid #eab308; }
-.monetize-row[data-status="PENDING"] td:nth-child(2) { border-left:3px solid #eab308; }
+
 
 /* ════ PAGE LAYOUT ════ */
 .app-page {
@@ -394,13 +397,6 @@
 .toolbar-head-text p:first-child { font-weight:700; color:#1f2937; font-size:14px; margin:0 0 2px; }
 .toolbar-head-text p:last-child  { font-size:11px; color:#9ca3af; margin:0; }
 
-/* ── Action by chip ── */
-.action-by-chip {
-    display:inline-flex; align-items:center; gap:4px;
-    font-size:10px; color:#6b7280; background:#f3f4f6;
-    border-radius:20px; padding:2px 8px; white-space:nowrap;
-}
-.action-by-chip svg { flex-shrink:0; }
 
 /* ════════════════════════════════════════════════
    MOBILE  ≤ 767px
@@ -585,7 +581,7 @@
     #dpActionBtns .btn-reject, #dpActionBtns .btn-approve { flex:1; text-align:center; }
 
     .panel-toolbar .flex { flex-direction:column; align-items:stretch !important; gap:10px !important; }
-    .panel-toolbar .flex > div.flex { flex-direction:row; flex-wrap:wrap; }
+    .panel-toolbar .flex.sm\:flex-row { flex-wrap:wrap; gap:10px; }
     .panel-toolbar input[type="text"], .panel-toolbar select { width:100% !important; }
     .panel-toolbar .relative { width:100%; }
     .tab-btn { font-size:12px; padding:10px 2px; }
@@ -600,9 +596,8 @@
     #formFrame { width:820px !important; height:1200px !important; transform-origin:top left; transform:scale(var(--fm-scale, 0.44)); margin-bottom:calc(1200px * (var(--fm-scale, 0.44) - 1)); margin-right:calc(820px * (var(--fm-scale, 0.44) - 1)); }
     #toast { left:16px; right:16px; bottom:16px; min-width:0; width:auto; }
     #monetizeToolbar.show { flex-wrap:wrap; gap:10px; }
-    .data-table td.mob-check { position:absolute; top:14px; left:14px; display:flex !important; }
     .data-table td.mob-check::before { display:none; }
-    .monetize-row { padding-left:44px !important; }
+    .monetize-row[data-status="PENDING"] td:first-child { border-left:3px solid #eab308; }
 }
 
 /* ════ TABLET ════ */
@@ -644,7 +639,7 @@
             <svg style="width:18px;height:18px;color:#854d0e;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </div>
         <div>
-            <div class="stat-val" id="leaveStat-PENDING">{{ $leaveApps->whereNotIn('status',['APPROVED','REJECTED','CANCELLED'])->where('status','PENDING')->count() }}</div>
+            <div class="stat-val" id="leaveStat-PENDING">{{ $leaveApps->whereNotIn('status',['APPROVED','REJECTED','CANCELLED','RECALLED'])->where('status','PENDING')->count() }}</div>
             <div class="stat-lbl">Pending</div>
         </div>
     </div>
@@ -731,7 +726,6 @@
                         <option value="">All Status</option>
                         <option value="PENDING">Pending</option>
                         <option value="RECEIVED">Received</option>
-                        <option value="ON-PROCESS">On-Process</option>
                     </select>
                     <svg class="chevron" style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </div>
@@ -753,7 +747,7 @@
             <table class="data-table" id="leaveTable">
                 <thead>
                     <tr>
-                        <th>Employee ID</th>
+                        <th style="text-align:center;">Leave ID</th>
                         <th>Name</th>
                         <th>Application Date</th>
                         <th>Duration</th>
@@ -765,19 +759,21 @@
                     </tr>
                 </thead>
                 <tbody id="leaveTbody">
-                    @php $activeApps = $leaveApps->whereNotIn('status', ['APPROVED','REJECTED','CANCELLED']); @endphp
+                    @php $activeApps = $leaveApps->whereNotIn('status', ['APPROVED','REJECTED','CANCELLED','RECALLED']); @endphp
                     @forelse($activeApps as $app)
+                    @php $activeEmp = $app->employee; @endphp
                     <tr class="leave-row"
                         data-status="{{ $app->status }}"
                         data-month="{{ $app->application_date ? $app->application_date->format('m') : '' }}"
                         data-appdate="{{ $app->application_date ? $app->application_date->toDateString() : '' }}"
-                        data-search="{{ strtolower($app->employee->last_name ?? '') }} {{ strtolower($app->employee->first_name ?? '') }} {{ $app->employee_id }}"
+                        data-updated-at="{{ $app->updated_at ? $app->updated_at->toIso8601String() : '' }}"
+                        data-search="{{ strtolower($activeEmp->last_name ?? '') }} {{ strtolower($activeEmp->first_name ?? '') }} {{ $activeEmp->formatted_employee_id ?? $app->user_id }} {{ $app->leave_id }}"
                         data-leave-id="{{ $app->leave_id }}"
                         onclick="openDetailPanel({{ $app->leave_id }}, event)">
 
-                        <td data-label="Emp. ID" class="font-bold font-mono text-sm">{{ $app->employee->formatted_employee_id ?? $app->employee_id }}</td>
+                        <td data-label="Leave ID" style="font-family:monospace;font-size:12px;font-weight:600;color:#2d5a1b; text-align:center">{{ $app->leave_id }}</td>
                         <td data-label="Name" class="font-semibold mob-title">
-                            {{ $app->employee->last_name ?? '—' }}, {{ $app->employee->first_name ?? '' }}
+                            {{ $activeEmp->last_name ?? '—' }}, {{ $activeEmp->first_name ?? '' }}
                         </td>
                         <td data-label="App. Date" class="text-gray-500">{{ $app->application_date ? $app->application_date->format('M d, Y') : '—' }}</td>
                         <td data-label="Duration" class="text-gray-500">{{ $app->no_of_days }} day(s)</td>
@@ -801,7 +797,7 @@
                                     </svg>
                                 </div>
                                 <div class="status-dropdown" id="scd_{{ $app->leave_id }}">
-                                    @foreach(['PENDING','RECEIVED','ON-PROCESS','APPROVED','REJECTED'] as $s)
+                                    @foreach(['PENDING','RECEIVED','APPROVED','REJECTED'] as $s)
                                     <button class="status-option {{ $app->status === $s ? 'current' : '' }}"
                                             onclick="changeStatus({{ $app->leave_id }}, '{{ $s }}', event)">
                                         <span class="opt-dot dot-{{ $s }}"></span>
@@ -811,6 +807,13 @@
                                         @endif
                                     </button>
                                     @endforeach
+                                    @if($app->status === 'APPROVED')
+                                    <button class="status-option"
+                                            onclick="changeStatus({{ $app->leave_id }}, 'RECALLED', event)">
+                                        <span class="opt-dot dot-RECALLED"></span>
+                                        Recalled
+                                    </button>
+                                    @endif
                                 </div>
                             </div>
                         </td>
@@ -822,10 +825,6 @@
                                     <button class="action-item" onclick="openDetailPanel({{ $app->leave_id }}, event)">
                                         <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         View Details
-                                    </button>
-                                    <button class="action-item" onclick="viewPdf({{ $app->leave_id }})">
-                                        <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                        View / PDF
                                     </button>
                                 </div>
                             </div>
@@ -843,82 +842,67 @@
     {{-- ═══ MONETIZATION PANEL ═══ --}}
     <div id="panelMonetize" class="app-panel hidden">
 
-        <div class="panel-toolbar">
-            <div id="monetizeToolbar" class="items-center gap-3 flex-wrap" style="padding:10px 16px; border-bottom:1px solid #fef9c3; background:#fffbeb;">
-                <span style="font-size:12px;font-weight:600;color:#92400e;" id="checkedCountLabel">0 selected</span>
-                <button onclick="generateLetter()"
-                        style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:12px;font-weight:700;color:#fff;background:#1a3a1a;border:none;border-radius:8px;cursor:pointer;transition:background 0.15s;"
-                        onmouseover="this.style.background='#2d5a1b'" onmouseout="this.style.background='#1a3a1a'">
-                    <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Generate Letter / PDF
-                </button>
-            </div>
-
-            <div style="padding:14px 16px; border-bottom:1px solid #f9fafb;">
-                <div class="toolbar-head" style="margin-bottom:12px;">
-                    <div class="toolbar-head-text">
-                        <p>Monetization Request List</p>
-                        <p>Check rows to generate a consolidated letter · Click a row or ··· to view details</p>
-                    </div>
-                </div>
-                <div class="filter-row">
-                    <div class="rel rel-search">
-                        <svg class="search-icon" style="width:15px;height:15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg>
-                        <input type="text" placeholder="Search…" id="searchMonetize" oninput="filterTable('monetize')">
-                    </div>
-                    <div class="rel">
-                        <select id="filterMonetizeStatus" onchange="filterTable('monetize')">
-                            <option value="">All Status</option>
-                            <option value="PENDING">Pending</option>
-                            <option value="RECEIVED">Received</option>
-                            <option value="ON-PROCESS">On-Process</option>
-                        </select>
-                        <svg class="chevron" style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </div>
-                </div>
+    <div class="panel-toolbar" style="padding:14px 16px; border-bottom:1px solid #f9fafb;">
+        <div class="toolbar-head" style="margin-bottom:12px;">
+            <div class="toolbar-head-text">
+                <p>Monetization Request List</p>
+                <p>Click a row or ··· to view details · Click a status pill to change it</p>
             </div>
         </div>
+        <div class="filter-row">
+            <div class="rel rel-search">
+                <svg class="search-icon" style="width:15px;height:15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg>
+                <input type="text" placeholder="Search…" id="searchMonetize" oninput="filterTable('monetize')">
+            </div>
+            <div class="rel">
+                <select id="filterMonetizeStatus" onchange="filterTable('monetize')">
+                    <option value="">All Status</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="RECEIVED">Received</option>
+                </select>
+                <svg class="chevron" style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+        </div>
+    </div>  {{-- closes .panel-toolbar --}}
+
 
         <div class="tsa">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th style="width:36px;"><input type="checkbox" id="chkAllMonetize" onchange="toggleAllMonetize(this)" style="border-radius:4px;"></th>
-                        <th>Employee ID</th>
+                        <th style="text-align:center;">Leave ID</th>
                         <th>Name</th>
                         <th>Application Date</th>
                         <th>Leave Type</th>
                         <th>Days</th>
                         <th>Est. Amount</th>
                         <th>Status</th>
-                        <th style="text-align:right;padding-right:18px;">Action</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="monetizeTbody">
-                    @php $activeMonetize = $monetizationApps->whereNotIn('status', ['APPROVED','REJECTED','CANCELLED']); @endphp
+                    @php $activeMonetize = $monetizationApps->whereNotIn('status', ['APPROVED','REJECTED','CANCELLED','RECALLED']); @endphp
                     @forelse($activeMonetize as $app)
                     @php
-                        $mAmount = ($app->employee->salary ?? 0) * $app->no_of_days * 0.0481927;
+                        $activeEmp = $app->employee;
+                        $mAmount = ($activeEmp->salary ?? 0) * $app->no_of_days * 0.0481927;
                     @endphp
                     <tr class="monetize-row"
                         data-status="{{ $app->status }}"
-                        data-search="{{ strtolower($app->employee->last_name ?? '') }} {{ strtolower($app->employee->first_name ?? '') }} {{ strtolower($app->employee->formatted_employee_id ?? $app->employee_id) }} {{ strtolower($app->leaveType->type_name ?? '') }} {{ $app->application_date ? strtolower($app->application_date->format('M d Y')) : '' }} {{ $app->no_of_days }}"
+                        data-updated-at="{{ $app->updated_at ? $app->updated_at->toIso8601String() : '' }}"
+                        data-search="{{ strtolower($activeEmp->last_name ?? '') }} {{ strtolower($activeEmp->first_name ?? '') }} {{ strtolower($activeEmp->formatted_employee_id ?? $app->user_id) }} {{ strtolower($app->leaveType->type_name ?? '') }} {{ $app->application_date ? strtolower($app->application_date->format('M d Y')) : '' }} {{ $app->no_of_days }} {{ $app->leave_id }}"
                         data-leave-id="{{ $app->leave_id }}"
-                        data-name="{{ $app->employee->last_name ?? '' }}, {{ $app->employee->first_name ?? '' }}"
-                        data-emp-id="{{ $app->employee->formatted_employee_id ?? $app->employee_id }}"
+                        data-name="{{ $activeEmp->last_name ?? '' }}, {{ $activeEmp->first_name ?? '' }}"
+                        data-emp-id="{{ $activeEmp->formatted_employee_id ?? $app->user_id }}"
                         data-days="{{ $app->no_of_days }}"
                         data-amount="{{ number_format($mAmount,2) }}"
                         data-leave-type="{{ $app->leaveType->type_name ?? '' }}"
                         data-appdate="{{ $app->application_date ? $app->application_date->toDateString() : '' }}"
                         onclick="openDetailPanel({{ $app->leave_id }}, event)"
                         style="cursor:pointer;">
-
-                        <td class="mob-check" onclick="event.stopPropagation()">
-                            <input type="checkbox" class="monetize-chk" value="{{ $app->leave_id }}" onchange="onMonetizeCheck()" style="border-radius:4px;">
-                        </td>
-                        <td data-label="Emp. ID" class="font-bold font-mono text-sm">{{ $app->employee->formatted_employee_id ?? $app->employee_id }}</td>
+                        <td data-label="Leave ID" style="font-family:monospace;font-size:12px;font-weight:600;color:#2d5a1b; text-align:center">{{ $app->leave_id }}</td>
                         <td data-label="Name" class="font-semibold mob-title">
-                            {{ $app->employee->last_name ?? '—' }}, {{ $app->employee->first_name ?? '' }}
+                            {{ $activeEmp->last_name ?? '—' }}, {{ $activeEmp->first_name ?? '' }}
                         </td>
                         <td data-label="App. Date" class="text-gray-500">{{ $app->application_date ? $app->application_date->format('M d, Y') : '—' }}</td>
                         <td data-label="Leave Type" class="text-xs text-gray-500">{{ $app->leaveType->type_name ?? '—' }}</td>
@@ -935,7 +919,7 @@
                                 </button>
                                 <div class="status-saving" id="scspin_m_{{ $app->leave_id }}"></div>
                                 <div class="status-dropdown" id="scd_m_{{ $app->leave_id }}">
-                                    @foreach(['PENDING','RECEIVED','ON-PROCESS','APPROVED','REJECTED'] as $s)
+                                    @foreach(['PENDING','RECEIVED','APPROVED','REJECTED'] as $s)
                                     <button class="status-option {{ $app->status === $s ? 'current' : '' }}"
                                             onclick="changeStatus({{ $app->leave_id }}, '{{ $s }}', event, 'm_{{ $app->leave_id }}')">
                                         <span class="opt-dot dot-{{ $s }}"></span>
@@ -945,6 +929,13 @@
                                         @endif
                                     </button>
                                     @endforeach
+                                    @if($app->status === 'APPROVED')
+                                    <button class="status-option"
+                                            onclick="changeStatus({{ $app->leave_id }}, 'RECALLED', event, 'm_{{ $app->leave_id }}')">
+                                        <span class="opt-dot dot-RECALLED"></span>
+                                        Recalled
+                                    </button>
+                                    @endif
                                 </div>
                             </div>
                         </td>
@@ -956,16 +947,13 @@
                                         <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         View Details
                                     </button>
-                                    <button class="action-item" onclick="viewPdf({{ $app->leave_id }})">
-                                        <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                        View / PDF
-                                    </button>
-                                </div>
+                                    
+</div>
                             </div>
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="9" style="padding:48px 24px;text-align:center;color:#9ca3af;font-size:13px;">No active monetization requests.</td></tr>
+                    <tr><td colspan="8" style="padding:48px 24px;text-align:center;color:#9ca3af;font-size:13px;">No active monetization requests.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -980,7 +968,7 @@
             <div class="toolbar-head" style="margin-bottom:10px;">
                 <div class="toolbar-head-text">
                     <p>Application History</p>
-                    <p>All processed applications (approved, rejected &amp; cancelled)</p>
+                    <p>All processed applications (approved, rejected, recalled &amp; cancelled)</p>
                 </div>
             </div>
             <div class="filter-row">
@@ -993,6 +981,7 @@
                         <option value="">All Status</option>
                         <option value="APPROVED">Approved</option>
                         <option value="REJECTED">Rejected</option>
+                        <option value="RECALLED">Recalled</option>
                         <option value="CANCELLED">Cancelled</option>
                     </select>
                     <svg class="chevron" style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -1012,7 +1001,7 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Employee ID</th>
+                        <th style="text-align:center;">Leave ID</th>
                         <th>Name</th>
                         <th>Type</th>
                         <th>Leave Type</th>
@@ -1022,20 +1011,23 @@
                         <th>Days</th>
                         <th>Status</th>
                         <th>Action By</th>
-                        <th style="text-align:right;padding-right:18px;">Action</th>
+                        <th>Updated At</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="historyTbody">
-                    @php $processed = $leaveApps->whereIn('status', ['APPROVED','REJECTED','CANCELLED'])->values(); @endphp
+                    @php $processed = $leaveApps->whereIn('status', ['APPROVED','REJECTED','CANCELLED','RECALLED'])->values(); @endphp
                     @forelse($processed as $app)
+                    @php $activeEmp = $app->employee; @endphp
                     <tr class="history-row"
                         data-status="{{ $app->status }}"
                         data-record-type="leave"
+                        data-updated-at="{{ $app->updated_at ? $app->updated_at->toIso8601String() : '' }}"
                         data-search="{{ strtolower(implode(' ', array_filter([
-                            $app->employee->last_name ?? '',
-                            $app->employee->first_name ?? '',
-                            $app->employee->middle_name ?? '',
-                            $app->employee->formatted_employee_id ?? (string)($app->employee_id ?? ''),
+                            $activeEmp->last_name ?? '',
+                            $activeEmp->first_name ?? '',
+                            $activeEmp->middle_name ?? '',
+                            $activeEmp->formatted_employee_id ?? (string)($app->user_id ?? ''),
                             $app->leaveType->type_name ?? '',
                             strtolower($app->status ?? ''),
                             $app->application_date ? $app->application_date->format('M d Y') : '',
@@ -1043,12 +1035,13 @@
                             $app->end_date ? $app->end_date->format('M d Y') : '',
                             (string)($app->no_of_days ?? ''),
                             $app->actioned_by_name ?? '',
+                            (string)($app->leave_id ?? ''),
                             'leave',
                         ]))) }}"
                         style="cursor:pointer;"
                         onclick="openDetailPanel({{ $app->leave_id }}, event)">
-                        <td data-label="Emp. ID" class="font-bold font-mono text-sm">{{ $app->employee->formatted_employee_id ?? $app->employee_id }}</td>
-                        <td data-label="Name" class="font-semibold mob-title">{{ $app->employee->last_name ?? '—' }}, {{ $app->employee->first_name ?? '' }}</td>
+                        <td data-label="Leave ID" style="font-family:monospace;font-size:12px;font-weight:600;color:#2d5a1b; text-align:center">{{ $app->leave_id }}</td>
+                        <td data-label="Name" class="font-semibold mob-title">{{ $activeEmp->last_name ?? '—' }}, {{ $activeEmp->first_name ?? '' }}</td>
                         <td data-label="Type">
                             <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#f0fdf4;color:#166534;">
                                 Leave
@@ -1060,27 +1053,19 @@
                         <td data-label="End" class="text-gray-500">{{ $app->end_date ? $app->end_date->format('M d, Y') : '—' }}</td>
                         <td data-label="Days" class="text-gray-500">{{ $app->no_of_days }}</td>
                         <td data-label="Status"><span class="badge badge-{{ $app->status }}">{{ ucfirst(strtolower($app->status)) }}</span></td>
-                        <td data-label="Action By" onclick="event.stopPropagation()">
-                            @if($app->actioned_by_name)
-                            <span class="action-by-chip">
-                                <svg style="width:10px;height:10px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                {{ $app->actioned_by_name }}
-                            </span>
-                            @else
-                            <span style="color:#d1d5db;font-size:11px;">—</span>
-                            @endif
+                       <td data-label="Action By" onclick="event.stopPropagation()" style="white-space:nowrap;">
+                            {{ $app->actioned_by_name ?? '—' }}
                         </td>
-                        <td class="mob-action" onclick="event.stopPropagation()" style="text-align:right;padding-right:14px;">
+                        <td data-label="Updated At" style="color:#374151;font-size:12px;white-space:nowrap;">
+                            {{ $app->updated_at ? $app->updated_at->format('M d, Y h:i A') : '—' }}
+                        </td>
+                        <td class="mob-action" onclick="event.stopPropagation()">
                             <div class="action-menu">
                                 <button class="action-menu-btn" onclick="toggleMenu(this)">···</button>
                                 <div class="action-dropdown">
                                     <button class="action-item" onclick="openDetailPanel({{ $app->leave_id }}, event)">
                                         <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         View Details
-                                    </button>
-                                    <button class="action-item" onclick="viewPdf({{ $app->leave_id }})">
-                                        <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                        View / PDF
                                     </button>
                                 </div>
                             </div>
@@ -1089,17 +1074,21 @@
                     @empty
                     @endforelse
 
-                    @php $processedMonetize = $monetizationApps->whereIn('status', ['APPROVED','REJECTED','CANCELLED'])->values(); @endphp
+                    @php $processedMonetize = $monetizationApps->whereIn('status', ['APPROVED','REJECTED','CANCELLED','RECALLED'])->values(); @endphp
                     @forelse($processedMonetize as $app)
-                    @php $mAmount = ($app->employee->salary ?? 0) * $app->no_of_days * 0.0481927; @endphp
+                    @php 
+                        $activeEmp = $app->employee;
+                        $mAmount = ($activeEmp->salary ?? 0) * $app->no_of_days * 0.0481927; 
+                    @endphp
                     <tr class="history-row"
                         data-status="{{ $app->status }}"
                         data-record-type="monetization"
+                        data-updated-at="{{ $app->updated_at ? $app->updated_at->toIso8601String() : '' }}"
                         data-search="{{ strtolower(implode(' ', array_filter([
-                            $app->employee->last_name ?? '',
-                            $app->employee->first_name ?? '',
-                            $app->employee->middle_name ?? '',
-                            $app->employee->formatted_employee_id ?? (string)($app->employee_id ?? ''),
+                            $activeEmp->last_name ?? '',
+                            $activeEmp->first_name ?? '',
+                            $activeEmp->middle_name ?? '',
+                            $activeEmp->formatted_employee_id ?? (string)($app->user_id ?? ''),
                             $app->leaveType->type_name ?? '',
                             strtolower($app->status ?? ''),
                             $app->application_date ? $app->application_date->format('M d Y') : '',
@@ -1108,12 +1097,13 @@
                             (string)($app->no_of_days ?? ''),
                             number_format($mAmount, 2),
                             $app->actioned_by_name ?? '',
+                            (string)($app->leave_id ?? ''),
                             'monetization',
                         ]))) }}"
                         style="cursor:pointer;"
                         onclick="openDetailPanel({{ $app->leave_id }}, event)">
-                        <td data-label="Emp. ID" class="font-bold font-mono text-sm">{{ $app->employee->formatted_employee_id ?? $app->employee_id }}</td>
-                        <td data-label="Name" class="font-semibold mob-title">{{ $app->employee->last_name ?? '—' }}, {{ $app->employee->first_name ?? '' }}</td>
+                        <td data-label="Leave ID" style="font-family:monospace;font-size:12px;font-weight:600;color:#2d5a1b; text-align:center">{{ $app->leave_id }}</td>
+                        <td data-label="Name" class="font-semibold mob-title">{{ $activeEmp->last_name ?? '—' }}, {{ $activeEmp->first_name ?? '' }}</td>
                         <td data-label="Type">
                             <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#ede9fe;color:#5b21b6;">
                                 Monetization
@@ -1128,24 +1118,23 @@
                         <td data-label="Action By" onclick="event.stopPropagation()">
                             @if($app->actioned_by_name)
                             <span class="action-by-chip">
-                                <svg style="width:10px;height:10px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                
                                 {{ $app->actioned_by_name }}
                             </span>
                             @else
                             <span style="color:#d1d5db;font-size:11px;">—</span>
                             @endif
                         </td>
-                        <td class="mob-action" onclick="event.stopPropagation()" style="text-align:right;padding-right:14px;">
+                        <td data-label="Updated At" style="color:#374151;font-size:12px;white-space:nowrap;">
+    {{ $app->updated_at ? $app->updated_at->format('M d, Y h:i A') : '—' }}
+</td>
+                        <td class="mob-action" onclick="event.stopPropagation()">
                             <div class="action-menu">
                                 <button class="action-menu-btn" onclick="toggleMenu(this)">···</button>
                                 <div class="action-dropdown">
                                     <button class="action-item" onclick="openDetailPanel({{ $app->leave_id }}, event)">
                                         <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         View Details
-                                    </button>
-                                    <button class="action-item" onclick="viewPdf({{ $app->leave_id }})">
-                                        <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                        View / PDF
                                     </button>
                                 </div>
                             </div>
@@ -1155,7 +1144,7 @@
                     @endforelse
 
                     @if($processed->isEmpty() && $processedMonetize->isEmpty())
-                    <tr><td colspan="11" style="padding:48px 24px;text-align:center;color:#9ca3af;font-size:13px;">No processed applications yet.</td></tr>
+                    <tr><td colspan="12" style="padding:48px 24px;text-align:center;color:#9ca3af;font-size:13px;">No processed applications yet.</td></tr>
                     @endif
                 </tbody>
             </table>
@@ -1184,12 +1173,8 @@
             </button>
         </div>
         <div class="detail-body" id="dpBody"></div>
-        <div class="detail-footer" id="dpFooter">
-            <button class="btn-pdf" onclick="viewPdfFromPanel()">
-                <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                View PDF
-            </button>
-            <div style="display:flex;gap:8px;" id="dpActionBtns"></div>
+        <div class="detail-footer" id="dpFooter" style="justify-content:flex-end;">
+            <div style="display:flex;gap:8px;" id="dpActionBtns" style="width:100%;justify-content:flex-end;"></div>
         </div>
     </div>
 </div>
@@ -1271,10 +1256,10 @@
 <script>
 const LEAVE_DATA = {!! json_encode(
     $leaveApps->merge($monetizationApps)->keyBy('leave_id')->map(function($a) {
-        $emp = $a->employee; // may be null
+        $emp = $a->employee;
         return [
             'leave_id'         => $a->leave_id,
-            'employee_id'      => $emp ? ($emp->formatted_employee_id ?? $a->employee_id) : $a->employee_id,
+            'user_id'          => $a->user_id,
             'first_name'       => $emp->first_name ?? '',
             'last_name'        => $emp->last_name ?? '',
             'middle_name'      => $emp->middle_name ?? '',
@@ -1294,11 +1279,14 @@ const LEAVE_DATA = {!! json_encode(
             'commutation'      => $a->commutation ?? '—',
             'reason'           => $a->reason ?? '',
             'status'           => $a->status,
-            'actioned_by_name' => $a->actioned_by_name ?? null,
+            'is_monetization'  => (bool) $a->is_monetization,
+            'actioned_by_name' => $a->approvedBy? (($a->approvedBy->last_name ?? '') . ', ' . ($a->approvedBy->first_name ?? '')): null,
             'vacation_balance' => $emp->vacation_leave_balance ?? 15,
             'sick_balance'     => $emp->sick_leave_balance ?? 15,
             'vacation_max'     => $emp->vacation_leave_max ?? 15,
             'sick_max'         => $emp->sick_leave_max ?? 15,
+            'updated_at'       => $a->updated_at ? $a->updated_at->toIso8601String() : null,
+            'updated_at_fmt'   => $a->updated_at ? $a->updated_at->format('M d, Y h:i A') : '—',
         ];
     })
 ) !!};
@@ -1340,24 +1328,59 @@ function switchTab(tab) {
 }
 
 /* ══ SORT ══ */
-const STATUS_ORDER = { PENDING:0, RECEIVED:1, 'ON-PROCESS':2, APPROVED:3, REJECTED:4, CANCELLED:5 };
+const STATUS_ORDER = { PENDING:0, RECEIVED:1, APPROVED:2, RECALLED:3, REJECTED:4, CANCELLED:5 };
+
+/**
+ * Sorts a tbody by:
+ * 1. Status priority (PENDING first, CANCELLED last)
+ * 2. Within same status: updated_at DESC (most recently updated first)
+ * Falls back to data-appdate if updated_at is unavailable.
+ */
 function _sortTbody(tbodyId, rowClass) {
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
     const rows = [...tbody.querySelectorAll('tr.' + rowClass)];
     if (!rows.length) return;
     rows.sort((a, b) => {
+        // 1. Status priority
         const sa = STATUS_ORDER[a.dataset.status] ?? 99;
         const sb = STATUS_ORDER[b.dataset.status] ?? 99;
         if (sa !== sb) return sa - sb;
+
+        // 2. updated_at from LEAVE_DATA (most recent first)
+        const idA = a.dataset.leaveId;
+        const idB = b.dataset.leaveId;
+        const ua  = LEAVE_DATA[idA]?.updated_at ? new Date(LEAVE_DATA[idA].updated_at) : new Date(0);
+        const ub  = LEAVE_DATA[idB]?.updated_at ? new Date(LEAVE_DATA[idB].updated_at) : new Date(0);
+        if (ub - ua !== 0) return ub - ua;
+
+        // 3. Fallback: application_date DESC
         const da = a.dataset.appdate ? new Date(a.dataset.appdate) : new Date(0);
         const db = b.dataset.appdate ? new Date(b.dataset.appdate) : new Date(0);
         return db - da;
     });
     rows.forEach(r => tbody.appendChild(r));
 }
+
 function sortLeaveTable()    { _sortTbody('leaveTbody',    'leave-row');    }
 function sortMonetizeTable() { _sortTbody('monetizeTbody', 'monetize-row'); }
+
+/**
+ * Sorts the History tbody by updated_at DESC (most recently actioned first).
+ * Uses data-updated-at attribute on each row (ISO string from server).
+ */
+function sortHistoryTable() {
+    const tbody = document.getElementById('historyTbody');
+    if (!tbody) return;
+    const rows = [...tbody.querySelectorAll('tr.history-row')];
+    if (!rows.length) return;
+    rows.sort((a, b) => {
+        const ua = a.dataset.updatedAt ? new Date(a.dataset.updatedAt) : new Date(0);
+        const ub = b.dataset.updatedAt ? new Date(b.dataset.updatedAt) : new Date(0);
+        return ub - ua; // most recent first
+    });
+    rows.forEach(r => tbody.appendChild(r));
+}
 
 /* ══ LEAVE BALANCE CROSS-DEDUCTION LOGIC ══ */
 function computeBalanceAfterLeave(vacBal, sickBal, vacMax, sickMax, days, leaveType) {
@@ -1449,11 +1472,15 @@ function openDetailPanel(leaveId, e) {
     document.getElementById('dpTitle').textContent    = 'Leave Application Details';
     document.getElementById('dpSubtitle').textContent = `${d.last_name}, ${d.first_name} · ${d.application_date}`;
 
-    const isLocked = ['APPROVED','REJECTED','CANCELLED'].includes(d.status);
+    const isLocked = ['REJECTED','CANCELLED','RECALLED'].includes(d.status);
+
     const statusColors = {
-        PENDING:'#fef9c3|#854d0e', RECEIVED:'#dbeafe|#1e40af',
-        'ON-PROCESS':'#ede9fe|#5b21b6', APPROVED:'#dcfce7|#14532d',
-        REJECTED:'#fee2e2|#991b1b', CANCELLED:'#f3f4f6|#6b7280'
+        PENDING    : '#fef9c3|#854d0e',
+        RECEIVED   : '#dbeafe|#1e40af',
+        APPROVED   : '#dcfce7|#14532d',
+        RECALLED   : '#ede9fe|#5b21b6',
+        REJECTED   : '#fee2e2|#991b1b',
+        CANCELLED  : '#f3f4f6|#6b7280',
     };
     const [sBg, sC] = (statusColors[d.status] || '#f3f4f6|#6b7280').split('|');
     const fullName  = [d.last_name, d.first_name, d.middle_name ? d.middle_name[0]+'.' : '', d.extension_name].filter(Boolean).join(' ');
@@ -1486,17 +1513,24 @@ function openDetailPanel(leaveId, e) {
             ${crossNote ? `<div class="lbb-note show">⚠ Cross-deduction: ${crossNote}</div>` : ''}
         </div>`;
 
-    const actionByHtml = (isLocked && d.actioned_by_name)
-        ? `<div class="dp-field span2">
-                <label>Action Taken By</label>
-                <p style="display:inline-flex;align-items:center;gap:6px;">
-                    <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#f0fdf4;flex-shrink:0;">
-                        <svg style="width:12px;height:12px;color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    </span>
-                    ${d.actioned_by_name}
-                </p>
-           </div>`
+    const actionByHtml = d.actioned_by_name
+        ? `<div class="dp-field span2"><label>Action Taken By</label><p>${d.actioned_by_name}</p></div>`
         : '';
+
+    const estAmount = d.is_monetization
+        ? '&#8369;' + (parseFloat(d.salary || 0) * parseFloat(d.no_of_days) * 0.0481927).toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2})
+        : '';
+
+    const monetizeFields = d.is_monetization
+        ? `<div class="dp-field"><label>Days to Monetize</label><p>${d.no_of_days} day(s)</p></div>
+           <div class="dp-field"><label>Estimated Amount</label><p style="font-weight:700;color:#15803d;">${estAmount}</p></div>`
+        : `<div class="dp-field"><label>Start Date</label><p>${d.start_date}</p></div>
+           <div class="dp-field"><label>End Date</label><p>${d.end_date}</p></div>
+           <div class="dp-field"><label>No. of Days</label><p>${d.no_of_days} working day(s)</p></div>
+           <div class="dp-field"><label>Commutation</label><p>${d.commutation}</p></div>
+           <div class="dp-field span2"><label>Details of Leave</label><p>${d.details_of_leave}</p></div>`;
+
+    const sectionTitle = d.is_monetization ? 'Monetization Details' : 'Application Details';
 
     document.getElementById('dpBody').innerHTML = `
         <div class="dp-card">
@@ -1506,7 +1540,7 @@ function openDetailPanel(leaveId, e) {
             </div>
             <div class="dp-grid">
                 <div class="dp-field"><label>Full Name</label><p>${fullName}</p></div>
-                <div class="dp-field"><label>Employee ID</label><p style="font-family:monospace;">${d.employee_id}</p></div>
+                <div class="dp-field"><label>Leave ID</label><p style="font-family:monospace;">${d.leave_id}</p></div>
                 <div class="dp-field"><label>Position</label><p>${d.position}</p></div>
                 <div class="dp-field"><label>Department</label><p>${d.department}</p></div>
                 <div class="dp-field"><label>Salary</label><p>${salaryFmt}</p></div>
@@ -1518,29 +1552,19 @@ function openDetailPanel(leaveId, e) {
         <div class="dp-card">
             <div class="dp-section-heading">
                 <div class="dp-section-icon"><svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
-                <p class="dp-section-title">Application Details</p>
+                <p class="dp-section-title">${sectionTitle}</p>
             </div>
             <div class="dp-grid">
                 <div class="dp-field"><label>Leave Type</label><p>${d.leave_type}</p></div>
                 <div class="dp-field"><label>Application Date</label><p>${d.application_date}</p></div>
-                <div class="dp-field"><label>Start Date</label><p>${d.start_date}</p></div>
-                <div class="dp-field"><label>End Date</label><p>${d.end_date}</p></div>
-                <div class="dp-field"><label>No. of Days</label><p>${d.no_of_days} working day(s)</p></div>
-                <div class="dp-field"><label>Commutation</label><p>${d.commutation}</p></div>
-                <div class="dp-field span2"><label>Details of Leave</label><p>${d.details_of_leave}</p></div>
-                <div class="dp-field span2"><label>Current Status</label>
-                    <p><span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${sBg};color:${sC};">● ${d.status}</span></p>
+                ${monetizeFields}
+                <div class="dp-field"><label>Current Status</label>
+                    <p><span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${sBg};color:${sC};">&#9679; ${d.status}</span></p>
                 </div>
+                <div class="dp-field"><label>Last Updated</label><p>${d.updated_at_fmt || '&#8212;'}</p></div>
                 ${d.reason ? `<div class="dp-field span2"><label>Reason / Remarks</label><p>${d.reason}</p></div>` : ''}
                 ${actionByHtml}
             </div>
-        </div>
-        <div class="dp-card">
-            <div class="dp-section-heading">
-                <div class="dp-section-icon"><svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
-                <p class="dp-section-title">Leave Balance After Application</p>
-            </div>
-            ${balanceHtml}
         </div>
         <div style="height:8px;"></div>`;
 
@@ -1550,6 +1574,16 @@ function openDetailPanel(leaveId, e) {
             <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.1.9-2 2-2s2 .9 2 2v1H10v-1c0-1.1.9-2 2-2zm-4 9h8a2 2 0 002-2v-5H6v5a2 2 0 002 2z"/></svg>
             Status is final
         </span>`;
+    } else if (d.status === 'APPROVED') {
+        if (d.is_monetization) {
+            btns.innerHTML = `<span style="font-size:11px;color:#9ca3af;font-weight:500;display:inline-flex;align-items:center;gap:6px;">
+                <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.1.9-2 2-2s2 .9 2 2v1H10v-1c0-1.1.9-2 2-2zm-4 9h8a2 2 0 002-2v-5H6v5a2 2 0 002 2z"/></svg>
+                Status is final
+            </span>`;
+        } else {
+            btns.innerHTML = `
+                <button class="btn-recall" onclick="askConfirm(${leaveId},'RECALLED')">↩ Recall</button>`;
+        }
     } else {
         btns.innerHTML = `
             <button class="btn-reject"  onclick="askConfirm(${leaveId},'REJECTED')">✕ Reject</button>
@@ -1572,26 +1606,40 @@ function viewPdfFromPanel() { if (activePanelLeaveId) viewPdf(activePanelLeaveId
 /* ══ CONFIRM MODAL ══ */
 function askConfirm(leaveId, newStatus) {
     pendingConfirmAction = { leaveId, newStatus, key: String(leaveId) };
-    const isApprove = newStatus === 'APPROVED';
-    const iconBg    = isApprove ? '#dcfce7' : '#fee2e2';
-    const iconColor = isApprove ? '#16a34a' : '#dc2626';
-    const iconPath  = isApprove ? 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' : 'M6 18L18 6M6 6l12 12';
+
+    const isApprove  = newStatus === 'APPROVED';
+    const isRecalled = newStatus === 'RECALLED';
+
+    const iconBg    = isApprove ? '#dcfce7' : isRecalled ? '#ede9fe' : '#fee2e2';
+    const iconColor = isApprove ? '#16a34a' : isRecalled ? '#7c3aed' : '#dc2626';
+    const iconPath  = isApprove
+        ? 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
+        : isRecalled
+            ? 'M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6'
+            : 'M6 18L18 6M6 6l12 12';
 
     document.getElementById('confirmIconWrap').innerHTML =
         `<svg style="width:22px;height:22px;" fill="none" stroke="${iconColor}" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPath}"/></svg>`;
     document.getElementById('confirmIconWrap').style.background = iconBg;
-    document.getElementById('confirmTitle').textContent = isApprove ? 'Approve this Application?' : 'Reject this Application?';
-    document.getElementById('confirmDesc').textContent  = isApprove
+
+    document.getElementById('confirmTitle').textContent = isApprove
+        ? 'Approve this Application?'
+        : isRecalled ? 'Recall this Application?' : 'Reject this Application?';
+
+    document.getElementById('confirmDesc').textContent = isApprove
         ? 'This will mark the application as Approved and move it to History. This action cannot be reversed.'
-        : 'This will mark the application as Rejected and move it to History. This action cannot be reversed.';
+        : isRecalled
+            ? 'This will recall the approved application and move it to History. It will no longer appear in the active Leave Applications list.'
+            : 'This will mark the application as Rejected and move it to History. This action cannot be reversed.';
 
     const reasonWrap = document.getElementById('rejectReasonWrap');
-    reasonWrap.classList.toggle('hidden', isApprove);
-    if (!isApprove) document.getElementById('rejectReason').value = '';
+    reasonWrap.classList.toggle('hidden', isApprove || isRecalled);
+    if (!isApprove && !isRecalled) document.getElementById('rejectReason').value = '';
 
     const okBtn = document.getElementById('confirmOkBtn');
-    okBtn.textContent = isApprove ? '✓ Yes, Approve' : '✕ Yes, Reject';
-    okBtn.className   = isApprove ? 'btn-approve' : 'btn-reject';
+    okBtn.textContent = isApprove ? '✓ Yes, Approve' : isRecalled ? '↩ Yes, Recall' : '✕ Yes, Reject';
+    okBtn.className   = isApprove ? 'btn-approve'    : isRecalled ? 'btn-recall'    : 'btn-reject';
+
     document.getElementById('confirmModal').classList.add('show');
 }
 function closeConfirmModal() {
@@ -1641,7 +1689,7 @@ function changeStatus(leaveId, newStatus, e, scKey) {
     const key  = scKey || String(leaveId);
     const wrap = document.getElementById('sc_' + key);
     if (wrap) wrap.classList.remove('open');
-    if (newStatus === 'APPROVED' || newStatus === 'REJECTED') {
+    if (newStatus === 'APPROVED' || newStatus === 'REJECTED' || newStatus === 'RECALLED') {
         pendingConfirmAction = { leaveId, newStatus, key };
         askConfirm(leaveId, newStatus);
         return;
@@ -1662,27 +1710,18 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
     .then(data => {
         if (spin) spin.classList.remove('show');
         if (data.success) {
-            const isTerminal = ['APPROVED','REJECTED','CANCELLED'].includes(newStatus);
+            const isTerminal = ['APPROVED','REJECTED','CANCELLED','RECALLED'].includes(newStatus);
+            const now        = new Date().toISOString();
 
+            // Update local data store including updated_at timestamp
             if (LEAVE_DATA[leaveId]) {
-                LEAVE_DATA[leaveId].status = newStatus;
+                LEAVE_DATA[leaveId].status     = newStatus;
+                LEAVE_DATA[leaveId].updated_at = now;
                 if (data.actioned_by_name) LEAVE_DATA[leaveId].actioned_by_name = data.actioned_by_name;
             }
 
             if (isTerminal) {
                 const activeRow = document.querySelector(`tr[data-leave-id="${leaveId}"]`);
-                const rowData   = activeRow ? {
-                    leaveId   : leaveId,
-                    empId     : activeRow.querySelector('[data-label="Emp. ID"]')?.textContent?.trim() || '',
-                    name      : activeRow.querySelector('.mob-title')?.textContent?.trim() || '',
-                    leaveType : activeRow.querySelector('[data-label="Type"], [data-label="Leave Type"]')?.textContent?.trim() || '',
-                    appDate   : activeRow.querySelector('[data-label="App. Date"]')?.textContent?.trim() || '',
-                    startDate : activeRow.querySelector('[data-label="Start"]')?.textContent?.trim() || '',
-                    endDate   : activeRow.querySelector('[data-label="End"]')?.textContent?.trim() || '',
-                    days      : activeRow.querySelector('[data-label="Duration"], [data-label="Days"]')?.textContent?.trim() || '',
-                    status    : activeRow.dataset.status,
-                    recordType: activeRow.classList.contains('monetize-row') ? 'monetization' : 'leave',
-                } : null;
 
                 if (activeRow) {
                     activeRow.style.transition = 'opacity 0.35s, transform 0.35s';
@@ -1692,34 +1731,34 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
                 }
 
                 const d = LEAVE_DATA[leaveId];
-                if (d && rowData) {
+                if (d) {
                     const actionedBy = data.actioned_by_name || '';
                     const badgeCls   = `badge-${newStatus}`;
-                    const typeBadge  = rowData.recordType === 'monetization'
+                    const isMonetize = activeRow ? activeRow.classList.contains('monetize-row') : d.is_monetization;
+                    const typeBadge  = isMonetize
                         ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#ede9fe;color:#5b21b6;">Monetization</span>`
                         : `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#f0fdf4;color:#166534;">Leave</span>`;
-                    const actionByHtml = actionedBy
-                        ? `<span class="action-by-chip"><svg style="width:10px;height:10px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>${actionedBy}</span>`
-                        : `<span style="color:#d1d5db;font-size:11px;">—</span>`;
+                    const actionByHtml = actionedBy || '—';
 
                     const searchStr = [
                         d.last_name, d.first_name, d.middle_name || '',
-                        d.employee_id, d.leave_type,
+                        d.user_id, d.leave_type,
                         newStatus.toLowerCase(),
                         d.application_date, d.start_date, d.end_date,
                         String(d.no_of_days), actionedBy,
-                        rowData.recordType,
+                        isMonetize ? 'monetization' : 'leave',
                     ].join(' ').toLowerCase();
 
                     const tr = document.createElement('tr');
-                    tr.className          = 'history-row';
-                    tr.dataset.status     = newStatus;
-                    tr.dataset.recordType = rowData.recordType;
-                    tr.dataset.search     = searchStr;
-                    tr.style.cursor       = 'pointer';
-                    tr.style.opacity      = '0';
+                    tr.className              = 'history-row';
+                    tr.dataset.status         = newStatus;
+                    tr.dataset.recordType     = isMonetize ? 'monetization' : 'leave';
+                    tr.dataset.search         = searchStr;
+                    tr.dataset.updatedAt      = now; // set updated_at for future re-sorts
+                    tr.style.cursor           = 'pointer';
+                    tr.style.opacity          = '0';
                     tr.innerHTML = `
-                        <td data-label="Emp. ID" class="font-bold font-mono text-sm">${d.employee_id}</td>
+                        <td data-label="Leave ID" style="font-family:monospace;font-size:12px;font-weight:600;color:#2d5a1b;text-align:center;">${d.leave_id}</td>
                         <td data-label="Name" class="font-semibold mob-title">${d.last_name}, ${d.first_name}</td>
                         <td data-label="Type">${typeBadge}</td>
                         <td data-label="Leave Type" class="text-xs text-gray-500">${d.leave_type}</td>
@@ -1729,6 +1768,10 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
                         <td data-label="Days" class="text-gray-500">${d.no_of_days}</td>
                         <td data-label="Status"><span class="badge ${badgeCls}">${capitalize(newStatus)}</span></td>
                         <td data-label="Action By" onclick="event.stopPropagation()">${actionByHtml}</td>
+                        <td data-label="Updated At" style="color:#374151;font-size:12px;white-space:nowrap;">${
+                            new Date().toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'})
+                            + ' ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
+                        }</td>
                         <td class="mob-action" onclick="event.stopPropagation()" style="text-align:right;padding-right:14px;">
                             <div class="action-menu">
                                 <button class="action-menu-btn" onclick="toggleMenu(this)">···</button>
@@ -1737,10 +1780,10 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
                                         <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         View Details
                                     </button>
-                                    <button class="action-item" onclick="viewPdf(${leaveId})">
-                                        <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                        View / PDF
-                                    </button>
+                                    ${isMonetize ? `<button class="action-item" onclick="viewPdf(${leaveId})">
+                                        <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                        View Request
+                                    </button>` : ''}
                                 </div>
                             </div>
                         </td>`;
@@ -1750,6 +1793,7 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
                     const emptyRow = hTbody.querySelector('td[colspan="11"]');
                     if (emptyRow) emptyRow.closest('tr').remove();
 
+                    // Prepend so most recent action is always at top
                     hTbody.prepend(tr);
                     requestAnimationFrame(() => {
                         tr.style.transition = 'opacity 0.4s';
@@ -1760,6 +1804,10 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
                 closeDetailPanel();
 
             } else {
+                // Non-terminal: update the pill and row in place, also update data-updated-at
+                const row = document.querySelector(`tr[data-leave-id="${leaveId}"]`);
+                if (row) row.dataset.updatedAt = now;
+
                 const wrap = document.getElementById('sc_' + key);
                 if (wrap) {
                     const pill = wrap.querySelector('.status-pill');
@@ -1767,21 +1815,33 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
                     pill.classList.add('pill-' + newStatus);
                     const txt = [...pill.childNodes].filter(n => n.nodeType === Node.TEXT_NODE);
                     if (txt.length) txt[0].textContent = capitalize(newStatus.replace('-', ' ')) + ' ';
+
                     wrap.querySelectorAll('.status-option').forEach(opt => {
-                        const s = opt.querySelector('.opt-dot').className.replace('opt-dot dot-', '');
+                        const dotEl = opt.querySelector('.opt-dot');
+                        if (!dotEl) return;
+                        const s = [...dotEl.classList].find(c => c.startsWith('dot-'))?.replace('dot-', '');
                         opt.classList.toggle('current', s === newStatus);
                     });
-                    const row = wrap.closest('tr');
+
                     if (row) row.dataset.status = newStatus;
                 }
+
                 if (activePanelLeaveId === leaveId) {
-                    const statusColors = { PENDING:'#fef9c3|#854d0e', RECEIVED:'#dbeafe|#1e40af', 'ON-PROCESS':'#ede9fe|#5b21b6', APPROVED:'#dcfce7|#14532d', REJECTED:'#fee2e2|#991b1b', CANCELLED:'#f3f4f6|#6b7280' };
+                    const statusColors = {
+                        PENDING:'#fef9c3|#854d0e', RECEIVED:'#dbeafe|#1e40af',
+                        APPROVED:'#dcfce7|#14532d', RECALLED:'#ede9fe|#5b21b6',
+                        REJECTED:'#fee2e2|#991b1b', CANCELLED:'#f3f4f6|#6b7280'
+                    };
                     const [sBg, sC] = (statusColors[newStatus] || '#f3f4f6|#6b7280').split('|');
                     document.querySelectorAll('#dpBody .dp-field').forEach(f => {
                         if (f.querySelector('label')?.textContent === 'Current Status') {
                             f.querySelector('p').innerHTML = `<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${sBg};color:${sC};">● ${newStatus}</span>`;
                         }
                     });
+                    const btns = document.getElementById('dpActionBtns');
+                    btns.innerHTML = `
+                        <button class="btn-reject"  onclick="askConfirm(${leaveId},'REJECTED')">✕ Reject</button>
+                        <button class="btn-approve" onclick="askConfirm(${leaveId},'APPROVED')">✓ Approve</button>`;
                 }
             }
 
@@ -1806,8 +1866,9 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
             if (key.startsWith('m_')) { sortMonetizeTable(); filterTable('monetize'); }
             else { sortLeaveTable(); filterTable('leave'); }
 
-            const labelMap = { PENDING:'Pending', RECEIVED:'Received', 'ON-PROCESS':'On-Process', APPROVED:'Approved', REJECTED:'Rejected' };
-            showToast('Status Updated', `Changed to ${labelMap[newStatus] || newStatus}`, newStatus === 'APPROVED' ? 'success' : newStatus === 'REJECTED' ? 'error' : 'info');
+            const labelMap = { PENDING:'Pending', RECEIVED:'Received', APPROVED:'Approved', RECALLED:'Recalled', REJECTED:'Rejected' };
+            const toastType = newStatus === 'APPROVED' ? 'success' : newStatus === 'REJECTED' ? 'error' : newStatus === 'RECALLED' ? 'warning' : 'info';
+            showToast('Status Updated', `Changed to ${labelMap[newStatus] || newStatus}`, toastType);
         } else {
             showToast('Error', data.message || 'Could not update status.', 'error');
         }
@@ -1820,18 +1881,6 @@ function capitalize(str) {
 }
 
 /* ══ MONETIZE CHECKBOXES ══ */
-function onMonetizeCheck() {
-    const checked = document.querySelectorAll('.monetize-chk:checked');
-    const toolbar = document.getElementById('monetizeToolbar');
-    document.getElementById('checkedCountLabel').textContent = `${checked.length} selected`;
-    toolbar.classList.toggle('show', checked.length > 0);
-    document.getElementById('chkAllMonetize').indeterminate =
-        checked.length > 0 && checked.length < document.querySelectorAll('.monetize-chk').length;
-}
-function toggleAllMonetize(cb) {
-    document.querySelectorAll('.monetize-chk').forEach(c => c.checked = cb.checked);
-    onMonetizeCheck();
-}
 
 function generateLetter() {
     const checked = [...document.querySelectorAll('.monetize-chk:checked')];
@@ -1925,7 +1974,7 @@ function showToast(title, msg, type = 'success') {
     const map = {
         success : { bg:'#dcfce7', c:'#16a34a', p:'M5 13l4 4L19 7' },
         error   : { bg:'#fee2e2', c:'#dc2626', p:'M6 18L18 6M6 6l12 12' },
-        warning : { bg:'#fef9c3', c:'#ca8a04', p:'M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+        warning : { bg:'#ede9fe', c:'#7c3aed', p:'M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6' },
         info    : { bg:'#dbeafe', c:'#2563eb', p:'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
     };
     const s = map[type] || map.info;
@@ -1949,6 +1998,14 @@ document.addEventListener('DOMContentLoaded', () => {
     filterTable('leave');
     sortMonetizeTable();
     filterTable('monetize');
+    sortHistoryTable();
+    filterTable('history');
+
+    // Auto-switch tab from URL param (e.g. ?tab=monetize from notification click)
+    const urlTab = new URLSearchParams(window.location.search).get('tab');
+    if (urlTab === 'monetize' || urlTab === 'history') {
+        switchTab(urlTab);
+    }
 });
 </script>
 @endsection

@@ -93,8 +93,6 @@ Route::middleware('auth')->group(function () {
 
         // ── Admin payroll ─────────────────────────────────────────────────────
         Route::get('/payroll',                                    [PayrollController::class, 'index'])->name('payroll.index');
-        
-        // --- FIXED ROUTES TO MATCH CONTROLLER METHOD NAMES ---
         Route::get('/payroll/create',                             [PayrollController::class, 'create'])->name('payroll.create');
         Route::post('/payroll',                                   [PayrollController::class, 'store'])->name('payroll.store');
         Route::get('/payroll/manage',                             [PayrollController::class, 'manage'])->name('payroll.manage');
@@ -103,7 +101,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/payroll/{id}/pdf',                           [PayrollController::class, 'pdf'])->name('payroll.pdf');
         Route::get('/payroll/{id}/payslip-all-pdf',               [PayrollController::class, 'payslipAllPdf'])->name('payroll.payslip-all-pdf');
         
-        // Remittance routes merged back in so the Javascript doesn't crash
+        // Remittance routes
         Route::get('/payroll/remittances',                        [PayrollController::class, 'remittances'])->name('payroll.remittances');
         Route::patch('/payroll/remittance/record/{id}',           [PayrollRemittanceController::class, 'saveField'])->name('payroll.remittance.record.save');
         Route::patch('/payroll/remittance/record/{id}/hide',      [PayrollRemittanceController::class, 'hideRecord'])->name('payroll.remittance.record.hide');

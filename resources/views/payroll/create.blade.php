@@ -8,14 +8,10 @@
 *, *::before, *::after { box-sizing: border-box; }
 body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-.pay-create-page { display: flex; flex-direction: column; min-height: calc(100vh - 120px); }
-.breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #9ca3af; margin-bottom: 20px; flex-wrap: wrap; }
-.breadcrumb a { color: #9ca3af; text-decoration: none; transition: color .15s; }
-.breadcrumb a:hover { color: #1a3a1a; }
-.breadcrumb .sep { color: #e5e7eb; }
-.breadcrumb .current { color: #1a3a1a; font-weight: 700; }
-.main-card { background: #fff; border-radius: 20px; border: 1px solid #e9ecef; box-shadow: 0 2px 20px rgba(0,0,0,.07); overflow: hidden; flex: 1; }
-.card-topbar { padding: 18px 26px 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #f0f2f0; background: linear-gradient(135deg, #fafffe 0%, #f6faf6 100%); }
+.pay-create-page { display: flex; flex-direction: column; height: calc(100vh - 80px); }
+.main-card { background: #fff; border-radius: 16px; border: 1px solid #e9ecef; box-shadow: 0 4px 20px rgba(0,0,0,.05); overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+.card-topbar { padding: 18px 26px 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #f0f2f0; background: linear-gradient(135deg, #fafffe 0%, #f6faf6 100%); flex-shrink: 0; }
 .card-topbar-left { display: flex; align-items: center; gap: 12px; }
 .card-topbar-icon { width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0; background: linear-gradient(135deg, #1a3a1a 0%, #2d5a1b 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(26,58,26,.3); }
 .card-topbar-icon svg { width: 20px; height: 20px; color: #fff; }
@@ -30,18 +26,16 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 .pill-option { padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 500; color: #374151; cursor: pointer; border: none; background: none; text-align: left; transition: background .1s; }
 .pill-option:hover { background: #f3f4f6; }
 .pill-option.selected { background: #f0fdf4; color: #1a3a1a; font-weight: 700; }
-.pill-option.has-period { color: #b45309; }
-.pill-option.has-period::after { content: ' ✓'; font-size: 10px; opacity: .7; }
 
-#step1 { padding: 52px 26px; }
-.step1-inner { max-width: 510px; margin: 0 auto; }
+#step1 { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 52px 26px; overflow-y: auto; }
+.step1-inner { width: 100%; max-width: 510px; margin: 0 auto; }
 .step1-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; font-size: 11px; font-weight: 700; color: #15803d; margin-bottom: 18px; }
 .step1-header h2 { font-size: 22px; font-weight: 800; color: #111827; margin: 0 0 8px; letter-spacing: -.5px; }
 .step1-header p { font-size: 13px; color: #6b7280; margin: 0 0 32px; line-height: 1.6; }
 .step1-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 .field-group label { display: block; font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
 .step1-select, .step1-input { width: 100%; padding: 11px 14px; font-size: 13px; border: 1.5px solid #e9ecef; border-radius: 11px; color: #111827; background: #fafafa; outline: none; transition: border-color .15s, background .15s, box-shadow .15s; }
-.step1-select { padding-right: 36px; appearance: none; -webkit-appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%239ca3af' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-color: #fafafa; }
+.step1-select { padding-right: 36px; appearance: none; -webkit-appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%239ca3af' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
 .step1-select:focus, .step1-input:focus { border-color: #2d5a1b; background: #fff; box-shadow: 0 0 0 3px rgba(45,90,27,.09); }
 .step1-select.has-dup { border-color: #f59e0b !important; background-color: #fffbeb; }
 .warn-box { border-radius: 12px; padding: 13px 15px; font-size: 12px; margin-bottom: 16px; line-height: 1.65; display: flex; gap: 10px; align-items: flex-start; }
@@ -51,8 +45,8 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 .btn-proceed:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,58,26,.38); }
 .btn-proceed:disabled { opacity: .5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-#step2 { display: none; flex-direction: column; }
-.sub-toolbar { padding: 15px 26px; border-bottom: 1px solid #f0f2f0; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: linear-gradient(135deg, #fafffe, #f6faf6); }
+#step2 { display: none; flex-direction: column; flex: 1; min-height: 0; }
+.sub-toolbar { padding: 15px 26px; border-bottom: 1px solid #f0f2f0; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: linear-gradient(135deg, #fafffe, #f6faf6); flex-shrink: 0; }
 .sub-toolbar-left h3 { font-size: 14px; font-weight: 800; color: #1f2937; margin: 0 0 2px; }
 .sub-toolbar-left p { font-size: 11px; color: #9ca3af; margin: 0; }
 .sub-toolbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -65,33 +59,26 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 .btn-delete:disabled { opacity: .4; cursor: not-allowed; }
 .btn-icon { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: #374151; background: #fff; border: 1.5px solid #e9ecef; border-radius: 9px; cursor: pointer; transition: all .15s; }
 .btn-icon:hover { border-color: #9ca3af; background: #fafafa; }
+.btn-outline { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: #374151; background: #fff; border: 1.5px solid #e5e7eb; border-radius: 9px; cursor: pointer; transition: all .15s; }
+.btn-outline:hover { border-color: #d1d5db; background: #f9fafb; color: #111827; }
+.btn-icon-green { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; font-size: 12px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #16a34a, #15803d); border: none; border-radius: 9px; cursor: pointer; transition: all .15s; box-shadow: 0 2px 6px rgba(22,163,74,.3); }
+.btn-icon-green:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(22,163,74,.4); }
 
-#filterPanel { display: none; padding: 12px 26px; gap: 14px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid #f3f4f6; background: #fafffe; }
+#filterPanel { display: none; padding: 12px 26px; gap: 14px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid #f3f4f6; background: #fafffe; flex-shrink: 0; }
 #filterPanel.open { display: flex; }
 .fp-select { padding: 7px 28px 7px 10px; font-size: 12px; border: 1.5px solid #e9ecef; border-radius: 8px; color: #374151; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' fill='none' stroke='%239ca3af' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat right 8px center; appearance: none; -webkit-appearance: none; outline: none; }
 
-.tsa { overflow-x: auto; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #d1d5db transparent; max-height: calc(100vh - 380px); }
+.tsa { flex: 1; overflow-x: auto; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #d1d5db transparent; min-height: 0; }
 .tsa::-webkit-scrollbar { width: 5px; height: 5px; }
 .tsa::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .data-table thead { position: sticky; top: 0; z-index: 10; }
 
-/* Group header row */
-.thead-group tr:first-child th {
-    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
-    padding: 7px 10px; border-right: 1px solid rgba(255,255,255,.15);
-    text-align: center; color: #fff;
-}
-/* Sub-header row */
-.thead-group tr:nth-child(2) th {
-    padding: 7px 8px; font-size: 9px; font-weight: 700; color: #4b5563;
-    text-transform: uppercase; letter-spacing: .04em; white-space: nowrap;
-    cursor: pointer; user-select: none; border-right: 1px solid #e9ecef; text-align: center;
-}
+.thead-group tr:first-child th { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 7px 10px; border-right: 1px solid rgba(255,255,255,.15); text-align: center; color: #fff; transition: display 0s; }
+.thead-group tr:nth-child(2) th { padding: 7px 8px; font-size: 9px; font-weight: 700; color: #4b5563; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; cursor: pointer; user-select: none; border-right: 1px solid #e9ecef; text-align: center; transition: display 0s; }
 .thead-group tr:nth-child(2) th.no-sort { cursor: default; }
 .thead-group tr:nth-child(2) th .sarr { display: inline-block; margin-left: 3px; opacity: .3; font-size: 9px; }
 
-/* Group colors */
 .grp-employee  { background: #1a3a1a; }
 .grp-gsis      { background: #1e40af; }
 .grp-pagibig   { background: #7c3aed; }
@@ -99,11 +86,11 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 .grp-wtax      { background: #b45309; }
 .grp-loans     { background: #92400e; }
 .grp-cngwpc    { background: #6b21a8; }
+.grp-dynded    { background: #475569; }
 .grp-allowance { background: #065f46; }
 .grp-net       { background: #991b1b; }
 .grp-action    { background: #374151; }
 
-/* Sub-header tints */
 .sub-employee  { background: #f0fdf4 !important; color: #166534 !important; }
 .sub-gsis      { background: #dbeafe !important; color: #1e40af !important; }
 .sub-pagibig   { background: #ede9fe !important; color: #5b21b6 !important; }
@@ -111,11 +98,12 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
 .sub-wtax      { background: #fef3c7 !important; color: #92400e !important; }
 .sub-loans     { background: #ffedd5 !important; color: #92400e !important; }
 .sub-cngwpc    { background: #f3e8ff !important; color: #6b21a8 !important; }
+.sub-dynded    { background: #f8fafc !important; color: #475569 !important; }
 .sub-allowance { background: #d1fae5 !important; color: #065f46 !important; }
 .sub-net       { background: #fee2e2 !important; color: #991b1b !important; font-weight: 800 !important; }
 .sub-action    { background: #f3f4f6 !important; }
 
-.data-table td { padding: 0; border-bottom: 1px solid #f0f2f0; border-right: 1px solid #f5f5f5; color: #374151; vertical-align: middle; white-space: nowrap; }
+.data-table td { padding: 0; border-bottom: 1px solid #f0f2f0; border-right: 1px solid #f5f5f5; color: #374151; vertical-align: middle; white-space: nowrap; transition: display 0s; }
 .data-table tbody tr { cursor: pointer; transition: background .12s; }
 .data-table tbody tr:hover { background: #f0fdf4; }
 .data-table tbody tr.row-active { background: #f0fdf4; box-shadow: inset 3px 0 0 #2d5a1b; }
@@ -128,23 +116,14 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
 
 .editable-cell { position: relative; cursor: text; transition: background .15s; min-width: 70px; text-align: right; }
 .editable-cell:hover { background: #f0fdf4; }
-.editable-cell input {
-    width: 100%; background: transparent; border: none; outline: none;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500;
-    color: #374151; text-align: right; padding: 8px 10px; cursor: text; min-width: 65px;
-}
+.editable-cell input { width: 100%; background: transparent; border: none; outline: none; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; color: #374151; text-align: right; padding: 8px 10px; cursor: text; min-width: 65px; }
 .editable-cell.focused { background: #fff !important; box-shadow: inset 0 0 0 2px #2d5a1b; border-radius: 4px; }
 .editable-cell.focused input { color: #111827; }
-
-/* Agriculturist-only allowance cells — styled with a subtle tint so they're visually distinct */
 .editable-cell.agri-allowance { background: #f0fdf4; }
 .editable-cell.agri-allowance:hover { background: #dcfce7; }
-/* Non-agriculturist allowance cells are greyed-out/locked */
 .editable-cell.agri-locked { background: #f9fafb !important; cursor: not-allowed; }
 .editable-cell.agri-locked input { color: #d1d5db !important; cursor: not-allowed; pointer-events: none; }
-
 .net-cell { font-weight: 800; color: #dc2626; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 8px 10px !important; }
-
 .chk-cell { padding: 8px 10px !important; text-align: center; }
 .row-num  { color: #9ca3af; font-size: 11px; font-weight: 600; text-align: center; padding: 8px 6px !important; }
 
@@ -168,11 +147,9 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
 .btn-final:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(26,58,26,.38); }
 .btn-final:disabled { background: linear-gradient(135deg, #9ca3af, #9ca3af); box-shadow: none; cursor: not-allowed; transform: none; }
 
-/* Employer-paid column styling */
 .employer-col { color: #9ca3af !important; font-style: italic; }
 
-/* Modal */
-.cmodal-bg { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.45); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .22s; padding: 16px; }
+.cmodal-bg { position: fixed; inset: 0; z-index: 1500; background: rgba(0,0,0,.45); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .22s; padding: 16px; }
 .cmodal-bg.show { opacity: 1; pointer-events: all; }
 .cmodal-card { background: #fff; border-radius: 20px; padding: 28px; width: min(98vw, 440px); box-shadow: 0 28px 70px rgba(0,0,0,.22); transform: scale(.92) translateY(14px); transition: transform .28s cubic-bezier(.34,1.56,.64,1); }
 .cmodal-bg.show .cmodal-card { transform: scale(1) translateY(0); }
@@ -181,10 +158,25 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
 .cstat-row .lbl { color: #6b7280; }
 .cstat-row .val { font-weight: 700; color: #111827; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; }
 
-/* Slide panel */
-#empOverlay { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+.modal-input { width: 100%; padding: 10px 14px; font-size: 13px; border: 1.5px solid #e9ecef; border-radius: 10px; background: #fafafa; color: #111827; outline: none; margin-bottom: 14px; transition: border-color .15s, background .15s; font-family: 'Plus Jakarta Sans', sans-serif; }
+.modal-input:focus { border-color: #2d5a1b; background: #fff; }
+.modal-label { display: block; font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+
+/* Sub-column accordion styles */
+.col-category { margin-bottom: 8px; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
+.cat-header { padding: 12px 16px; background: #f9fafb; font-weight: 700; font-size: 13px; color: #111827; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background .15s; }
+.cat-header:hover { background: #f3f4f6; }
+.cat-content { display: none; background: #fff; border-top: 1px solid #e5e7eb; }
+.cat-content.open { display: block; }
+.manage-col-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid #f3f4f6; transition: background .1s; }
+.manage-col-item:hover { background: #fafafa; }
+.manage-col-item:last-child { border-bottom: none; }
+.chev { width: 14px; height: 14px; transition: transform .2s ease; color: #9ca3af; }
+.chev.rot { transform: rotate(180deg); }
+
+#empOverlay { position: fixed; inset: 0; z-index: 1090; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .3s ease; }
 #empOverlay.show { opacity: 1; pointer-events: all; }
-#empPanel { position: fixed; top: 0; right: 0; bottom: 0; z-index: 100; width: 55vw; min-width: 380px; max-width: 860px; display: flex; flex-direction: column; pointer-events: none; transform: translateX(100%); transition: transform .36s cubic-bezier(.32,.72,0,1); }
+#empPanel { position: fixed; top: 0; right: 0; bottom: 0; z-index: 1100; width: 55vw; min-width: 380px; max-width: 860px; display: flex; flex-direction: column; pointer-events: none; transform: translateX(100%); transition: transform .36s cubic-bezier(.32,.72,0,1); }
 #empPanel.open { pointer-events: all; transform: translateX(0); }
 .ep-box { background: #fff; width: 100%; height: 100%; display: flex; flex-direction: column; box-shadow: -12px 0 60px rgba(0,0,0,.22); overflow: hidden; }
 .ep-head { background: linear-gradient(135deg, #1a3a1a 0%, #2d5a1b 100%); padding: 20px 24px 18px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
@@ -217,7 +209,7 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
 .ep-btn-cancel { padding: 10px 20px; font-size: 13px; font-weight: 600; color: #374151; background: #fff; border: 1.5px solid #e9ecef; border-radius: 10px; cursor: pointer; }
 .ep-btn-save { padding: 10px 24px; font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #1a3a1a, #2d5a1b); border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 7px; box-shadow: 0 3px 10px rgba(26,58,26,.25); }
 
-#toast { position: fixed; bottom: 22px; right: 22px; z-index: 999; background: #fff; border-radius: 15px; padding: 13px 17px; box-shadow: 0 10px 36px rgba(0,0,0,.16); display: flex; align-items: center; gap: 11px; min-width: 230px; max-width: calc(100vw - 44px); opacity: 0; transform: translateY(14px); transition: all .32s cubic-bezier(.34,1.56,.64,1); pointer-events: none; }
+#toast { position: fixed; bottom: 22px; right: 22px; z-index: 2000; background: #fff; border-radius: 15px; padding: 13px 17px; box-shadow: 0 10px 36px rgba(0,0,0,.16); display: flex; align-items: center; gap: 11px; min-width: 230px; max-width: calc(100vw - 44px); opacity: 0; transform: translateY(14px); transition: all .32s cubic-bezier(.34,1.56,.64,1); pointer-events: none; }
 #toast.show { opacity: 1; transform: translateY(0); }
 
 @media (max-width: 767px) {
@@ -254,10 +246,52 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
         'cng_commodity_loan' => 'Commodity Loan'
     ];
 
+    /* Setup arrays for our grouped modal UI */
+    $modalGroups = [
+        'GSIS Loans' => [
+            'gsis_policy' => 'Policy Loan', 'gsis_emergency' => 'Emergency Loan', 'gsis_real_estate' => 'Real Estate',
+            'gsis_mpl' => 'MPL', 'gsis_mpl_lite' => 'MPL Lite', 'gsis_gfal' => 'GFAL',
+            'gsis_computer' => 'Computer Loan', 'gsis_conso' => 'Conso Loan'
+        ],
+        'Pag-IBIG Loans' => [
+            'pagibig_mpl' => 'MPL Loan', 'pagibig_calamity' => 'Calamity Loan'
+        ],
+        'Other Default Loans' => [
+            'loan_dbp' => 'DBP Loan', 'loan_lbp' => 'LBP Loan', 'loan_paracle' => 'PARACLE',
+            'overpayment' => 'Overpayment', 'other_deduction' => 'Other Deduction'
+        ],
+        'CNGWPC Cooperative' => $cngCols,
+        'Allowances' => [
+            'allowance_ra' => 'RA (PA Only)', 'allowance_ta' => 'TA (PA Only)'
+        ]
+    ];
+
     /* ─── Load all active deductions from DB ─── */
-    $allDeductions = \App\Models\PayrollDeduction::where('is_active', 1)
-        ->orderBy('sort_order')
-        ->get();
+    $everyDeduction = \App\Models\PayrollDeduction::orderBy('sort_order')->get();
+    
+    // Manageable Custom Columns for the modal (both deductions and allowances)
+    $manageableCols = $everyDeduction->filter(function($ded) {
+        if ($ded->parent_id == 9 || strtoupper($ded->name) === 'CNGWPC') return false;
+        if (method_exists($ded, 'resolveColumn') && $ded->resolveColumn() !== null) return false;
+        return true;
+    });
+
+    // Active config for the table layout
+    $allDeductions = $everyDeduction->where('is_active', 1);
+
+    /* ─── Filter purely dynamic deductions and allowances ─── */
+    $dynamicDeductions = $allDeductions->filter(function($ded) {
+        if ($ded->parent_id == 9 || strtoupper($ded->name) === 'CNGWPC') return false;
+        if (method_exists($ded, 'isAllowance') && $ded->isAllowance()) return false;
+        if (method_exists($ded, 'resolveColumn') && $ded->resolveColumn() !== null) return false;
+        return true;
+    });
+
+    $dynamicAllowances = $allDeductions->filter(function($ded) {
+        if (method_exists($ded, 'isAllowance') && !$ded->isAllowance()) return false;
+        if (method_exists($ded, 'resolveColumn') && $ded->resolveColumn() !== null) return false;
+        return true;
+    });
 
     $dbDeductions = $allDeductions->keyBy(fn($d) => strtolower($d->name));
 
@@ -313,6 +347,13 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
     $employees = \App\Models\Employee::with(['position','department'])
         ->where('is_active', 1)->orderBy('last_name')->get();
 
+    /* ── FETCH LATEST RECORD FOR EACH EMPLOYEE TO CARRY FORWARD BALANCES ── */
+    $latestRecords = \App\Models\PayrollRecord::whereIn('user_id', $employees->pluck('user_id'))
+        ->orderBy('period_id', 'desc')
+        ->get()
+        ->groupBy('user_id')
+        ->map(fn($records) => $records->first());
+
     $existingPeriods = \App\Models\PayrollPeriod::select('period_id','month','year','period_label','status')
         ->orderBy('year','desc')->orderBy('month','desc')->get();
     $existingPeriodMap = $existingPeriods->mapWithKeys(fn($p) => [
@@ -320,20 +361,15 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
     ])->toArray();
 @endphp
 
-<div class="breadcrumb">
-    <a href="{{ route('payroll.index') }}">Payroll</a>
-    <span class="sep">›</span>
-    <a href="#" id="bc2" onclick="goBack(); return false;">Create Payroll</a>
-    <span class="sep" id="bc3sep" style="display:none;">›</span>
-    <span class="current" id="bc3" style="display:none;">Review Employees</span>
-</div>
-
 <div class="pay-create-page">
 <div class="main-card">
 
     {{-- TOP BAR --}}
     <div class="card-topbar">
         <div class="card-topbar-left">
+            <a href="{{ route('payroll.index') }}" class="btn-icon" style="margin-right:8px; border:none; background:transparent; box-shadow:none; padding:4px;" title="Exit to Payroll Index">
+                <svg style="width:22px;height:22px;color:#6b7280;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            </a>
             <div class="card-topbar-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             </div>
@@ -377,7 +413,7 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
             </div>
             <div class="step1-header">
                 <h2>Configure Payroll Period</h2>
-                <p>Select the month and year, then review which active employees to include. All deduction values are loaded from Deduction Management.</p>
+                <p>Select the month and year. We will automatically carry forward your employees' loan balances and custom deductions from the previous month.</p>
             </div>
             <div class="step1-row">
                 <div class="field-group">
@@ -413,7 +449,7 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
             </div>
             <div class="warn-box yellow" style="margin-bottom:24px;">
                 <span>⚠️</span>
-                <div>Only <strong>active employees</strong> are shown. Fixed deductions (GSIS, Pag-IBIG, PhilHealth, PERA) are auto-calculated from DB rates. <strong>RA &amp; TA allowances apply only to the Provincial Agriculturist (PA)</strong> and are editable. Click any row to edit variable deductions.</div>
+                <div><strong>Loans Auto-Populated:</strong> Active employees' variable loans and custom dynamic deductions have been carried over from their last recorded payroll. Fixed deductions (GSIS, Pag-IBIG, PhilHealth, PERA) are freshly auto-calculated from DB rates.</div>
             </div>
             <button class="btn-proceed" id="btnProceed1" onclick="goToStep2()">
                 <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -434,6 +470,19 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg>
                     <input type="text" id="empSearch" placeholder="Search employee…" oninput="filterEmployees()">
                 </div>
+                
+                {{-- QUICK ADD COLUMN BUTTON --}}
+                <button class="btn-icon-green" onclick="openQuickAddModal()">
+                    <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    New Column
+                </button>
+
+                {{-- MANAGE COLUMNS BUTTON --}}
+                <button class="btn-outline" style="color:#374151;border-color:#e5e7eb;background:#fff;" onclick="openManageColumnsModal()">
+                    <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    Manage Columns
+                </button>
+
                 <button class="btn-delete" id="btnDelete" disabled onclick="removeSelected()">
                     <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16"/></svg>
                     Exclude
@@ -475,25 +524,30 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     <th class="grp-employee no-sort" colspan="4" style="text-align:left;padding-left:14px;">Employee</th>
 
                     {{-- GSIS: 3 fixed + 8 editable = 11 cols --}}
-                    <th class="grp-gsis no-sort" colspan="11" style="text-align:center;">G S I S</th>
+                    <th class="grp-gsis no-sort" data-group="gsis" colspan="11" style="text-align:center;">G S I S</th>
 
                     {{-- PAG-IBIG: 2 fixed + 2 editable = 4 cols --}}
-                    <th class="grp-pagibig no-sort" colspan="4" style="text-align:center;">PAG-IBIG</th>
+                    <th class="grp-pagibig no-sort" data-group="pagibig" colspan="4" style="text-align:center;">PAG-IBIG</th>
 
                     {{-- PHILHEALTH: 2 fixed --}}
-                    <th class="grp-phic no-sort" colspan="2" style="text-align:center;">PHILHEALTH</th>
+                    <th class="grp-phic no-sort" data-group="phic" colspan="2" style="text-align:center;">PHILHEALTH</th>
 
                     {{-- WITHHOLDING TAX: 1 editable --}}
-                    <th class="grp-wtax no-sort" colspan="1" style="text-align:center;">W/TAX</th>
+                    <th class="grp-wtax no-sort" data-group="wtax" colspan="1" style="text-align:center;">W/TAX</th>
 
                     {{-- OTHER LOANS = 5 columns --}}
-                    <th class="grp-loans no-sort" colspan="5" style="text-align:center;">OTHER LOANS &amp; DEDUCTIONS</th>
+                    <th class="grp-loans no-sort" data-group="other_loans" colspan="5" style="text-align:center;">OTHER LOANS &amp; DEDUCTIONS</th>
 
                     {{-- CNGWPC cooperative deductions --}}
-                    <th class="grp-cngwpc no-sort" colspan="{{ count($cngCols) }}" style="text-align:center;">CNGWPC COOPERATIVE</th>
+                    <th class="grp-cngwpc no-sort" data-group="cngwpc" colspan="{{ count($cngCols) }}" style="text-align:center;">CNGWPC COOPERATIVE</th>
 
-                    {{-- ALLOWANCES: PERA(fixed) + RA(agri-editable) + TA(agri-editable) = 3 --}}
-                    <th class="grp-allowance no-sort" colspan="3" style="text-align:center;">ALLOWANCES</th>
+                    {{-- DYNAMIC DEDUCTIONS --}}
+                    @if($dynamicDeductions->count() > 0)
+                    <th class="grp-dynded no-sort" data-group="dynded" colspan="{{ $dynamicDeductions->count() }}" style="text-align:center;">OTHER DEDUCTIONS</th>
+                    @endif
+
+                    {{-- ALLOWANCES: PERA(fixed) + RA(agri-editable) + TA(agri-editable) = 3 + Dynamic Allowances --}}
+                    <th class="grp-allowance no-sort" data-group="allowance" colspan="{{ 3 + $dynamicAllowances->count() }}" style="text-align:center;">ALLOWANCES</th>
 
                     {{-- NET PAY --}}
                     <th class="grp-net no-sort" colspan="1" style="text-align:center;">NET PAY</th>
@@ -515,48 +569,57 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     <th class="sub-employee" onclick="sortEmp(5)" style="text-align:right;">Gross Salary <span class="sarr">↕</span></th>
 
                     {{-- GSIS --}}
-                    <th class="sub-gsis">Personal Share (9%)</th>
-                    <th class="sub-gsis" style="color:#9ca3af !important;">Govt (12%)*</th>
-                    <th class="sub-gsis" style="color:#9ca3af !important;">ECF*</th>
-                    <th class="sub-gsis no-sort">Policy Loan</th>
-                    <th class="sub-gsis no-sort">Emergency</th>
-                    <th class="sub-gsis no-sort">Real Estate</th>
-                    <th class="sub-gsis no-sort">MPL</th>
-                    <th class="sub-gsis no-sort">MPL Lite</th>
-                    <th class="sub-gsis no-sort">GFAL</th>
-                    <th class="sub-gsis no-sort">Computer</th>
-                    <th class="sub-gsis no-sort">Conso</th>
+                    <th class="sub-gsis" data-group="gsis">Personal Share (9%)</th>
+                    <th class="sub-gsis" data-group="gsis" style="color:#9ca3af !important;">Govt (12%)*</th>
+                    <th class="sub-gsis" data-group="gsis" style="color:#9ca3af !important;">ECF*</th>
+                    <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_policy">Policy Loan</th>
+                    <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_emergency">Emergency</th>
+                    <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_real_estate">Real Estate</th>
+                    <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_mpl">MPL</th>
+                    <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_mpl_lite">MPL Lite</th>
+                    <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_gfal">GFAL</th>
+                    <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_computer">Computer</th>
+                    <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_conso">Conso</th>
 
                     {{-- PAG-IBIG --}}
-                    <th class="sub-pagibig">Personal Share (₱200)</th>
-                    <th class="sub-pagibig" style="color:#9ca3af !important;">Govt (₱200)*</th>
-                    <th class="sub-pagibig no-sort">MPL</th>
-                    <th class="sub-pagibig no-sort">Calamity</th>
+                    <th class="sub-pagibig" data-group="pagibig">Personal Share (₱200)</th>
+                    <th class="sub-pagibig" data-group="pagibig" style="color:#9ca3af !important;">Govt (₱200)*</th>
+                    <th class="sub-pagibig no-sort" data-group="pagibig" data-col="pagibig_mpl">MPL</th>
+                    <th class="sub-pagibig no-sort" data-group="pagibig" data-col="pagibig_calamity">Calamity</th>
 
                     {{-- PhilHealth --}}
-                    <th class="sub-phic">Personal Share (2.5%)</th>
-                    <th class="sub-phic" style="color:#9ca3af !important;">Govt (2.5%)*</th>
+                    <th class="sub-phic" data-group="phic">Personal Share (2.5%)</th>
+                    <th class="sub-phic" data-group="phic" style="color:#9ca3af !important;">Govt (2.5%)*</th>
 
                     {{-- W/Tax --}}
-                    <th class="sub-wtax no-sort">W/Tax</th>
+                    <th class="sub-wtax no-sort" data-group="wtax" data-col="withholding_tax">W/Tax</th>
 
                     {{-- Other Loans --}}
-                    <th class="sub-loans no-sort">DBP</th>
-                    <th class="sub-loans no-sort">LBP</th>
-                    <th class="sub-loans no-sort">PARACLE</th>
-                    <th class="sub-loans no-sort">Overpayment</th>
-                    <th class="sub-loans no-sort">Other Ded.</th>
+                    <th class="sub-loans no-sort" data-group="other_loans" data-col="loan_dbp">DBP</th>
+                    <th class="sub-loans no-sort" data-group="other_loans" data-col="loan_lbp">LBP</th>
+                    <th class="sub-loans no-sort" data-group="other_loans" data-col="loan_paracle">PARACLE</th>
+                    <th class="sub-loans no-sort" data-group="other_loans" data-col="overpayment">Overpayment</th>
+                    <th class="sub-loans no-sort" data-group="other_loans" data-col="other_deduction">Other Ded.</th>
 
                     {{-- CNGWPC cooperative columns --}}
                     @foreach($cngCols as $field => $label)
-                    <th class="sub-cngwpc no-sort">{{ $label }}</th>
+                    <th class="sub-cngwpc no-sort" data-group="cngwpc" data-col="{{ $field }}">{{ $label }}</th>
+                    @endforeach
+
+                    {{-- Dynamic Deductions sub-headers --}}
+                    @foreach($dynamicDeductions as $d)
+                    <th class="sub-dynded no-sort" data-group="dynded" data-col="dyn_{{ $d->id }}" title="{{ $d->name }}">{{ \Illuminate\Support\Str::limit($d->name, 10) }}</th>
                     @endforeach
 
                     {{-- Allowances --}}
-                    <th class="sub-allowance">PERA</th>
-                    {{-- RA & TA: editable for PA, locked for others --}}
-                    <th class="sub-allowance no-sort" title="Representation Allowance — Provincial Agriculturist only">RA <span style="font-size:8px;opacity:.6;">(PA)</span></th>
-                    <th class="sub-allowance no-sort" title="Transportation Allowance — Provincial Agriculturist only">TA <span style="font-size:8px;opacity:.6;">(PA)</span></th>
+                    <th class="sub-allowance" data-group="allowance">PERA</th>
+                    <th class="sub-allowance no-sort" data-group="allowance" data-col="allowance_ra" title="Representation Allowance — Provincial Agriculturist only">RA <span style="font-size:8px;opacity:.6;">(PA)</span></th>
+                    <th class="sub-allowance no-sort" data-group="allowance" data-col="allowance_ta" title="Transportation Allowance — Provincial Agriculturist only">TA <span style="font-size:8px;opacity:.6;">(PA)</span></th>
+                    
+                    {{-- Dynamic Allowances sub-headers --}}
+                    @foreach($dynamicAllowances as $a)
+                    <th class="sub-allowance no-sort" data-group="allowance" data-col="dyn_{{ $a->id }}" title="{{ $a->name }}">{{ \Illuminate\Support\Str::limit($a->name, 10) }}</th>
+                    @endforeach
 
                     {{-- Net Pay --}}
                     <th class="sub-net no-sort">Net Pay</th>
@@ -568,6 +631,16 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
             <tbody id="empTbody">
                 @forelse($employees as $i => $emp)
                 @php
+                    /* ── FETCH LATEST RECORD FOR THIS EMPLOYEE ── */
+                    $lastRecord = $latestRecords->get($emp->user_id);
+                    $lastDynData = [];
+                    if ($lastRecord) {
+                        $lastDynData = is_string($lastRecord->dynamic_deductions) 
+                            ? json_decode($lastRecord->dynamic_deductions, true) 
+                            : ($lastRecord->dynamic_deductions ?? []);
+                    }
+                    $getCarried = fn($field) => $lastRecord ? (float)($lastRecord->{$field} ?? 0) : 0;
+
                     $gross      = (float)$emp->salary;
                     $gsisEe     = $computeFromConfig($jsConfig['gsisEeType'],    $jsConfig['gsisEeValue'],    $jsConfig['gsisEeLimit'],    $gross);
                     $gsisGovt   = $computeFromConfig($jsConfig['gsisGovtType'],  $jsConfig['gsisGovtValue'],  $jsConfig['gsisGovtLimit'],  $gross);
@@ -585,10 +658,71 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     $raDefault  = $isAgri ? $computeFromConfig($jsConfig['raType'], $jsConfig['raValue'], null, $gross) : 0.0;
                     $taDefault  = $isAgri ? $computeFromConfig($jsConfig['taType'], $jsConfig['taValue'], null, $gross) : 0.0;
 
-                    // Net = Gross - GSIS_EE - Pagibig_EE - PhilHealth_EE + PERA + RA + TA
-                    $netBase    = $gross - $gsisEe - $pagibigEe - $phicEe + $pera + $raDefault + $taDefault;
+                    /* ── CARRIED FORWARD HARDCODED LOANS ── */
+                    $v_gsis_policy      = $getCarried('gsis_policy');
+                    $v_gsis_emergency   = $getCarried('gsis_emergency');
+                    $v_gsis_real_estate = $getCarried('gsis_real_estate');
+                    $v_gsis_mpl         = $getCarried('gsis_mpl');
+                    $v_gsis_mpl_lite    = $getCarried('gsis_mpl_lite');
+                    $v_gsis_gfal        = $getCarried('gsis_gfal');
+                    $v_gsis_computer    = $getCarried('gsis_computer');
+                    $v_gsis_conso       = $getCarried('gsis_conso');
+                    $v_pagibig_mpl      = $getCarried('pagibig_mpl');
+                    $v_pagibig_calamity = $getCarried('pagibig_calamity');
+                    $v_withholding_tax  = $getCarried('withholding_tax');
+                    $v_loan_dbp         = $getCarried('loan_dbp');
+                    $v_loan_lbp         = $getCarried('loan_lbp');
+                    $v_loan_paracle     = $getCarried('loan_paracle');
+                    $v_overpayment      = $getCarried('overpayment');
+                    $v_other_deduction  = $getCarried('other_deduction');
+
+                    $carriedLoansTotal = $v_gsis_policy + $v_gsis_emergency + $v_gsis_real_estate + $v_gsis_mpl + $v_gsis_mpl_lite + $v_gsis_gfal + $v_gsis_computer + $v_gsis_conso 
+                                       + $v_pagibig_mpl + $v_pagibig_calamity 
+                                       + $v_withholding_tax 
+                                       + $v_loan_dbp + $v_loan_lbp + $v_loan_paracle 
+                                       + $v_overpayment + $v_other_deduction;
+
+                    foreach($cngCols as $f => $l) {
+                        $carriedLoansTotal += $getCarried($f);
+                    }
+
+                    /* ── Compute dynamic deduction defaults (Carried Over or Config) ── */
+                    $dynValues = [];
+                    foreach($dynamicDeductions as $d) {
+                        if ($lastRecord && isset($lastDynData[$d->id])) {
+                            $val = (float)$lastDynData[$d->id];
+                        } else {
+                            $val = 0;
+                            if (method_exists($d, 'isFixed') && $d->isFixed()) {
+                                $val = $d->rate_type === 'percent' ? ($gross * $d->rate_value) : $d->rate_value;
+                                if ($d->limit_amount) $val = min($val, $d->limit_amount);
+                            }
+                        }
+                        $dynValues[$d->id] = round($val, 2);
+                    }
+
+                    /* ── Compute dynamic allowance defaults (Carried Over or Config) ── */
+                    $dynAddValues = [];
+                    foreach($dynamicAllowances as $a) {
+                        if ($lastRecord && isset($lastDynData[$a->id])) {
+                            $val = (float)$lastDynData[$a->id];
+                        } else {
+                            $val = 0;
+                            if (method_exists($a, 'isFixed') && $a->isFixed()) {
+                                $val = $a->rate_type === 'percent' ? ($gross * $a->rate_value) : $a->rate_value;
+                                if ($a->limit_amount) $val = min($val, $a->limit_amount);
+                            }
+                        }
+                        $dynAddValues[$a->id] = round($val, 2);
+                    }
+
+                    $sumDynDed = array_sum($dynValues);
+                    $sumDynAdd = array_sum($dynAddValues);
+
+                    // Net = Gross - EE Deductions - Carried Loans + Allowances
+                    $netBase = $gross - $gsisEe - $pagibigEe - $phicEe - $sumDynDed - $carriedLoansTotal + $pera + $raDefault + $taDefault + $sumDynAdd;
                 @endphp
-                <tr data-emp-id="{{ $emp->employee_id }}"
+                <tr data-user-id="{{ $emp->user_id }}"
                     data-dept="{{ $emp->department_id }}"
                     data-name="{{ strtolower($emp->last_name . ' ' . $emp->first_name) }}"
                     data-salary="{{ $gross }}"
@@ -601,14 +735,14 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
 
                     {{-- Checkbox --}}
                     <td class="chk-cell" onclick="event.stopPropagation()">
-                        <input type="checkbox" class="emp-chk" value="{{ $emp->employee_id }}" checked onchange="onChkChange()">
+                        <input type="checkbox" class="emp-chk" value="{{ $emp->user_id }}" checked onchange="onChkChange()">
                     </td>
                     <td class="row-num">{{ $i+1 }}</td>
 
                     {{-- Employee Info --}}
                     <td>
                         <div class="emp-name">{{ $emp->last_name }}, {{ $emp->first_name }}@if($emp->extension_name) {{ $emp->extension_name }}@endif</div>
-                        <div class="emp-dept mono">{{ $emp->employee_id }}</div>
+                        <div class="emp-dept mono">{{ $emp->user_id }}</div>
                     </td>
                     <td style="padding:8px;font-size:11.5px;font-weight:600;color:#374151;">{{ optional($emp->position)->position_code ?? '—' }}</td>
                     <td style="padding:8px;font-size:11px;color:#6b7280;max-width:120px;white-space:normal;line-height:1.3;">{{ optional($emp->department)->department_name ?? '—' }}</td>
@@ -620,39 +754,47 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     <td class="num-cell employer-col">{{ number_format($gsisEc,2) }}</td>
 
                     {{-- ── GSIS Editable Loans ── --}}
-                    <td class="editable-cell" data-field="gsis_policy"      onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-field="gsis_emergency"   onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-field="gsis_real_estate" onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-field="gsis_mpl"         onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-field="gsis_mpl_lite"    onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-field="gsis_gfal"        onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-field="gsis_computer"    onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-field="gsis_conso"       onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_policy"      data-field="gsis_policy"      onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_policy, 2, '.', '') }}"      data-default="{{ number_format($v_gsis_policy, 2, '.', '') }}"      class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_emergency"   data-field="gsis_emergency"   onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_emergency, 2, '.', '') }}"   data-default="{{ number_format($v_gsis_emergency, 2, '.', '') }}"   class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_real_estate" data-field="gsis_real_estate" onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_real_estate, 2, '.', '') }}" data-default="{{ number_format($v_gsis_real_estate, 2, '.', '') }}" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_mpl"         data-field="gsis_mpl"         onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_mpl, 2, '.', '') }}"         data-default="{{ number_format($v_gsis_mpl, 2, '.', '') }}"         class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_mpl_lite"    data-field="gsis_mpl_lite"    onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_mpl_lite, 2, '.', '') }}"    data-default="{{ number_format($v_gsis_mpl_lite, 2, '.', '') }}"    class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_gfal"        data-field="gsis_gfal"        onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_gfal, 2, '.', '') }}"        data-default="{{ number_format($v_gsis_gfal, 2, '.', '') }}"        class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_computer"    data-field="gsis_computer"    onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_computer, 2, '.', '') }}"    data-default="{{ number_format($v_gsis_computer, 2, '.', '') }}"    class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_conso"       data-field="gsis_conso"       onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_conso, 2, '.', '') }}"       data-default="{{ number_format($v_gsis_conso, 2, '.', '') }}"       class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
 
                     {{-- ── PAG-IBIG Fixed + Editable ── --}}
                     <td class="num-cell" style="color:#7c3aed;font-weight:700;">{{ number_format($pagibigEe,2) }}</td>
                     <td class="num-cell employer-col">{{ number_format($pagibigGov,2) }}</td>
-                    <td class="editable-cell" data-field="pagibig_mpl"      onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-field="pagibig_calamity" onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="pagibig_mpl"      data-field="pagibig_mpl"      onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_pagibig_mpl, 2, '.', '') }}"      data-default="{{ number_format($v_pagibig_mpl, 2, '.', '') }}"      class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="pagibig_calamity" data-field="pagibig_calamity" onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_pagibig_calamity, 2, '.', '') }}" data-default="{{ number_format($v_pagibig_calamity, 2, '.', '') }}" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
 
                     {{-- ── PhilHealth Fixed ── --}}
                     <td class="num-cell" style="color:#0891b2;font-weight:700;">{{ number_format($phicEe,2) }}</td>
                     <td class="num-cell employer-col">{{ number_format($phicGovt,2) }}</td>
 
                     {{-- ── Withholding Tax ── --}}
-                    <td class="editable-cell" data-field="withholding_tax"  onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="withholding_tax"  data-field="withholding_tax"  onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_withholding_tax, 2, '.', '') }}"  data-default="{{ number_format($v_withholding_tax, 2, '.', '') }}"  class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
 
                     {{-- ── Other Loans ── --}}
-                    <td class="editable-cell" data-field="loan_dbp"         onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-field="loan_lbp"         onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-field="loan_paracle"     onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-field="overpayment"      onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-field="other_deduction"  onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="0" class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="loan_dbp"         data-field="loan_dbp"         onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_loan_dbp, 2, '.', '') }}"         data-default="{{ number_format($v_loan_dbp, 2, '.', '') }}"         class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="loan_lbp"         data-field="loan_lbp"         onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_loan_lbp, 2, '.', '') }}"         data-default="{{ number_format($v_loan_lbp, 2, '.', '') }}"         class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="loan_paracle"     data-field="loan_paracle"     onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_loan_paracle, 2, '.', '') }}"     data-default="{{ number_format($v_loan_paracle, 2, '.', '') }}"     class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="overpayment"      data-field="overpayment"      onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_overpayment, 2, '.', '') }}"      data-default="{{ number_format($v_overpayment, 2, '.', '') }}"      class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="other_deduction"  data-field="other_deduction"  onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_other_deduction, 2, '.', '') }}"  data-default="{{ number_format($v_other_deduction, 2, '.', '') }}"  class="loan-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
 
                     {{-- ── CNGWPC Cooperative ── --}}
                     @foreach($cngCols as $field => $label)
-                    <td class="editable-cell" data-field="{{ $field }}" onclick="event.stopPropagation()">
-                        <input type="number" step="0.01" min="0" value="0" class="loan-input dyn-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)">
+                    @php $v_cng = $getCarried($field); @endphp
+                    <td class="editable-cell" data-col="{{ $field }}" data-field="{{ $field }}" onclick="event.stopPropagation()">
+                        <input type="number" step="0.01" min="0" value="{{ number_format($v_cng, 2, '.', '') }}" data-default="{{ number_format($v_cng, 2, '.', '') }}" class="loan-input dyn-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)">
+                    </td>
+                    @endforeach
+
+                    {{-- ── Dynamic Deductions ── --}}
+                    @foreach($dynamicDeductions as $d)
+                    <td class="editable-cell" data-col="dyn_{{ $d->id }}" data-field="{{ $d->id }}" onclick="event.stopPropagation()">
+                        <input type="number" step="0.01" min="0" value="{{ number_format($dynValues[$d->id], 2, '.', '') }}" data-default="{{ number_format($dynValues[$d->id], 2, '.', '') }}" data-dyn-id="{{ $d->id }}" class="loan-input dyn-ded-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)">
                     </td>
                     @endforeach
 
@@ -661,6 +803,7 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
 
                     {{-- ── RA: editable for PA, locked (0) for others ── --}}
                     <td class="editable-cell {{ $isAgri ? 'agri-allowance' : 'agri-locked' }}"
+                        data-col="allowance_ra"
                         data-field="allowance_ra"
                         onclick="event.stopPropagation()">
                         <input type="number" step="0.01" min="0"
@@ -674,6 +817,7 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
 
                     {{-- ── TA: editable for PA, locked (0) for others ── --}}
                     <td class="editable-cell {{ $isAgri ? 'agri-allowance' : 'agri-locked' }}"
+                        data-col="allowance_ta"
                         data-field="allowance_ta"
                         onclick="event.stopPropagation()">
                         <input type="number" step="0.01" min="0"
@@ -685,9 +829,16 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                                onblur="blurCell(this)">
                     </td>
 
+                    {{-- ── Dynamic Allowances ── --}}
+                    @foreach($dynamicAllowances as $a)
+                    <td class="editable-cell" data-col="dyn_{{ $a->id }}" data-field="{{ $a->id }}" onclick="event.stopPropagation()">
+                        <input type="number" step="0.01" min="0" value="{{ number_format($dynAddValues[$a->id], 2, '.', '') }}" data-default="{{ number_format($dynAddValues[$a->id], 2, '.', '') }}" data-dyn-id="{{ $a->id }}" class="loan-input dyn-add-input" onchange="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)">
+                    </td>
+                    @endforeach
+
                     {{-- ── Net Pay cell ── --}}
                     <td class="net-cell"
-                        id="net_{{ $emp->employee_id }}"
+                        id="net_{{ $emp->user_id }}"
                         data-gross="{{ $gross }}"
                         data-gsis-ee="{{ $gsisEe }}"
                         data-gsis-govt="{{ $gsisGovt }}"
@@ -710,17 +861,17 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                                     <svg style="width:13px;height:13px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     View / Edit
                                 </button>
-                                <button class="dot-item" onclick="excludeRow({{ $emp->employee_id }})">
+                                <button class="dot-item" onclick="excludeRow({{ $emp->user_id }})">
                                     <svg style="width:13px;height:13px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                                     Exclude from Payroll
                                 </button>
-                                <button class="dot-item" onclick="includeRow({{ $emp->employee_id }})">
+                                <button class="dot-item" onclick="includeRow({{ $emp->user_id }})">
                                     <svg style="width:13px;height:13px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     Include in Payroll
                                 </button>
-                                <button class="dot-item danger" onclick="resetRow({{ $emp->employee_id }})">
+                                <button class="dot-item danger" onclick="resetRow({{ $emp->user_id }})">
                                     <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                    Reset Loans to 0
+                                    Reset Loans to Default
                                 </button>
                             </div>
                         </div>
@@ -748,6 +899,122 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
 
 </div>{{-- /main-card --}}
 </div>{{-- /pay-create-page --}}
+
+{{-- Quick Add Column Modal --}}
+<div id="quickAddModal" class="cmodal-bg" onclick="if(event.target===this)closeQuickAddModal()">
+  <div class="cmodal-card">
+      <h3 style="font-size:16px;font-weight:800;color:#111827;margin:0 0 4px;">➕ New Column</h3>
+      <p style="font-size:12px;color:#6b7280;margin:0 0 20px;">Create a new deduction or allowance. <strong style="color:#b91c1c;">Note: Saving will refresh the page to rebuild the table.</strong></p>
+      
+      <label class="modal-label">Category Name</label>
+      <input type="text" id="qaName" class="modal-input" placeholder="e.g. Palarong Panlalawigan">
+      
+      <label class="modal-label">Column Type</label>
+      <select id="qaType" class="modal-input" style="padding-right:30px;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 fill=%22none%22 stroke=%22%239ca3af%22 viewBox=%220 0 24 24%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 12px center;">
+          <option value="deduction">Deduction (Minus from Net)</option>
+          <option value="addition">Allowance (Add to Net)</option>
+      </select>
+      
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
+          <button onclick="closeQuickAddModal()" style="padding:9px 18px;font-size:12px;font-weight:600;border:1.5px solid #e9ecef;border-radius:10px;color:#374151;background:#fff;cursor:pointer;">Cancel</button>
+          <button onclick="submitQuickAdd()" id="qaBtn" style="padding:9px 18px;font-size:12px;font-weight:700;border:none;border-radius:10px;color:#fff;background:linear-gradient(135deg, #1a3a1a, #2d5a1b);cursor:pointer;box-shadow:0 3px 10px rgba(26,58,26,.25);">Save & Refresh</button>
+      </div>
+  </div>
+</div>
+
+{{-- Manage Sub Columns Modal (Accordion Style) --}}
+<div id="manageColumnsModal" class="cmodal-bg" onclick="if(event.target===this)closeManageColumnsModal()">
+  <div class="cmodal-card" style="width: min(98vw, 540px); max-height: 90vh; display: flex; flex-direction: column; padding: 24px;">
+      <h3 style="font-size:16px;font-weight:800;color:#111827;margin:0 0 4px;">⚙️ Manage Columns</h3>
+      <p style="font-size:12px;color:#6b7280;margin:0 0 16px;">Quickly clear carried-over balances to 0.00 for everyone, or hide columns to save space.</p>
+      
+      <div style="flex:1; overflow-y:auto; padding-right:6px; margin-bottom: 16px; scrollbar-width: thin;" id="mc-accordion">
+          
+          {{-- Standard Hardcoded Groups --}}
+          @foreach($modalGroups as $groupName => $fields)
+          <div class="col-category">
+              <div class="cat-header" onclick="this.nextElementSibling.classList.toggle('open'); this.querySelector('.chev').classList.toggle('rot');">
+                  {{ $groupName }}
+                  <svg class="chev" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+              </div>
+              <div class="cat-content">
+                  @foreach($fields as $field => $label)
+                  <div class="manage-col-item">
+                      <div>
+                          <strong style="font-size:12.5px;color:#111827;">{{ $label }}</strong>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:12px;">
+                          <button onclick="zeroOutField('{{ $field }}')" style="padding:6px 12px;font-size:11px;font-weight:600;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;cursor:pointer;transition:all .15s;">Zero Out All</button>
+                          <label style="position:relative;display:inline-flex;align-items:center;cursor:pointer;gap:6px;">
+                              <span style="font-size:11px;font-weight:600;color:#374151;">Visible</span>
+                              <input type="checkbox" id="chk_hide_{{ $field }}" checked onchange="toggleCol('{{ $field }}', this.checked)" style="width:16px;height:16px;accent-color:#2d5a1b;cursor:pointer;">
+                          </label>
+                      </div>
+                  </div>
+                  @endforeach
+              </div>
+          </div>
+          @endforeach
+
+          {{-- Dynamic/Custom Deductions --}}
+          @if($dynamicDeductions->count() > 0)
+          <div class="col-category">
+              <div class="cat-header" onclick="this.nextElementSibling.classList.toggle('open'); this.querySelector('.chev').classList.toggle('rot');">
+                  Other Custom Deductions
+                  <svg class="chev" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+              </div>
+              <div class="cat-content">
+                  @foreach($dynamicDeductions as $col)
+                  <div class="manage-col-item">
+                      <div>
+                          <strong style="font-size:12.5px;color:#111827;">{{ $col->name }}</strong>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:12px;">
+                          <button onclick="zeroOutDynamic({{ $col->id }})" style="padding:6px 12px;font-size:11px;font-weight:600;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;cursor:pointer;transition:all .15s;">Zero Out All</button>
+                          <label style="position:relative;display:inline-flex;align-items:center;cursor:pointer;gap:6px;">
+                              <span style="font-size:11px;font-weight:600;color:#374151;">Visible</span>
+                              <input type="checkbox" id="chk_hide_dyn_{{ $col->id }}" checked onchange="toggleDynamicCol({{ $col->id }}, this.checked)" style="width:16px;height:16px;accent-color:#2d5a1b;cursor:pointer;">
+                          </label>
+                      </div>
+                  </div>
+                  @endforeach
+              </div>
+          </div>
+          @endif
+
+          {{-- Dynamic/Custom Allowances --}}
+          @if($dynamicAllowances->count() > 0)
+          <div class="col-category">
+              <div class="cat-header" onclick="this.nextElementSibling.classList.toggle('open'); this.querySelector('.chev').classList.toggle('rot');">
+                  Other Custom Allowances
+                  <svg class="chev" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+              </div>
+              <div class="cat-content">
+                  @foreach($dynamicAllowances as $col)
+                  <div class="manage-col-item">
+                      <div>
+                          <strong style="font-size:12.5px;color:#111827;">{{ $col->name }}</strong>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:12px;">
+                          <button onclick="zeroOutDynamic({{ $col->id }})" style="padding:6px 12px;font-size:11px;font-weight:600;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;cursor:pointer;transition:all .15s;">Zero Out All</button>
+                          <label style="position:relative;display:inline-flex;align-items:center;cursor:pointer;gap:6px;">
+                              <span style="font-size:11px;font-weight:600;color:#374151;">Visible</span>
+                              <input type="checkbox" id="chk_hide_dyn_{{ $col->id }}" checked onchange="toggleDynamicCol({{ $col->id }}, this.checked)" style="width:16px;height:16px;accent-color:#2d5a1b;cursor:pointer;">
+                          </label>
+                      </div>
+                  </div>
+                  @endforeach
+              </div>
+          </div>
+          @endif
+
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;">
+          <button onclick="closeManageColumnsModal()" class="btn-cancel-step">Done</button>
+      </div>
+  </div>
+</div>
 
 {{-- Slide panel overlay --}}
 <div id="empOverlay" onclick="closeEmpPanel()"></div>
@@ -829,17 +1096,7 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
 const DED_CONFIG       = @json($jsConfig);
 const EXISTING_PERIODS = @json($existingPeriodMap);
 const PAYROLL_INDEX_URL= '{{ route('payroll.index') }}';
-
-const HARD_DEDUCTION_FIELDS = [
-    'gsis_policy','gsis_emergency','gsis_real_estate',
-    'gsis_mpl','gsis_mpl_lite','gsis_gfal','gsis_computer','gsis_conso',
-    'pagibig_mpl','pagibig_calamity',
-    'withholding_tax',
-    'loan_dbp','loan_lbp','loan_paracle','overpayment','other_deduction',
-    'cng_capital_share', 'cng_kiddie_savings', 'cng_savings', 'cng_regular_loan',
-    'cng_crisis_loan', 'cng_coop_canteen', 'cng_coop_store', 'cng_calamity_loan',
-    'cng_abuloy', 'cng_handog', 'cng_b2b_loan', 'cng_petty_cash', 'cng_commodity_loan'
-];
+const CSRF = '{{ csrf_token() }}';
 
 /* ── Utility ── */
 function fmt(n)    { return parseFloat(n||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2}); }
@@ -857,6 +1114,165 @@ let selectedYear  = {{ now()->year }};
 let sortCol = -1, sortAsc = true;
 let _activeRow = null;
 let _isDuplicate = false;
+
+/* ── Session State Management ── */
+function saveSessionState() {
+    sessionStorage.setItem('payroll_step', '2');
+    sessionStorage.setItem('payroll_month', document.getElementById('s1Month').value);
+    sessionStorage.setItem('payroll_year', document.getElementById('s1Year').value);
+    sessionStorage.setItem('payroll_label', document.getElementById('s1Label').value);
+}
+
+function clearSessionState() {
+    sessionStorage.removeItem('payroll_step');
+}
+
+/* ── Quick Add Column ── */
+function openQuickAddModal() {
+    document.getElementById('qaName').value = '';
+    document.getElementById('qaType').value = 'deduction';
+    document.getElementById('quickAddModal').classList.add('show');
+}
+
+function closeQuickAddModal() {
+    document.getElementById('quickAddModal').classList.remove('show');
+}
+
+function submitQuickAdd() {
+    const name = document.getElementById('qaName').value.trim();
+    const kind = document.getElementById('qaType').value;
+    if (!name) return showToast('Required', 'Please enter a name.', 'error');
+
+    const btn = document.getElementById('qaBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const payload = {
+        name: name,
+        type: 'Not Fixed',
+        rate_type: 'flat',
+        rate_value: 0,
+        is_deducted: kind === 'deduction',
+        entry_kind: kind,
+        is_active: 1
+    };
+
+    fetch('/payroll/deductions', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => {
+        if(res.success) {
+            saveSessionState();
+            showToast('Success', 'Column created. Refreshing table...', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast('Error', 'Failed to create column.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Save & Refresh';
+        }
+    })
+    .catch(() => {
+        showToast('Error', 'Network error.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Save & Refresh';
+    });
+}
+
+/* ── Manage Sub-Columns (Toggle & Zero Out) ── */
+let hiddenCols = JSON.parse(localStorage.getItem('hiddenPayrollCols') || '[]');
+
+function applyHiddenCols() {
+    hiddenCols.forEach(colId => {
+        // Uncheck the checkbox in the modal
+        const chk = document.getElementById('chk_hide_' + colId);
+        if(chk) chk.checked = false;
+        // Hide DOM elements completely
+        document.querySelectorAll(`[data-col="${colId}"]`).forEach(el => el.style.display = 'none');
+    });
+    updateGroupColspans();
+}
+
+function updateGroupColspans() {
+    // Dynamically adjust the colspan of the main group headers based on visible children
+    document.querySelectorAll('.thead-group tr:first-child th[data-group]').forEach(grpTh => {
+        const grp = grpTh.dataset.group;
+        const allChildren = document.querySelectorAll(`.thead-group tr:nth-child(2) th[data-group="${grp}"]`);
+        let visibleCount = 0;
+        
+        allChildren.forEach(child => {
+            if(child.style.display !== 'none') visibleCount++;
+        });
+
+        if(visibleCount > 0) {
+            grpTh.style.display = '';
+            grpTh.colSpan = visibleCount;
+        } else {
+            grpTh.style.display = 'none';
+        }
+    });
+}
+
+function toggleCol(colId, isVisible) {
+    document.querySelectorAll(`[data-col="${colId}"]`).forEach(el => el.style.display = isVisible ? '' : 'none');
+    
+    // Save to local storage
+    if (!isVisible && !hiddenCols.includes(colId)) hiddenCols.push(colId);
+    if (isVisible) hiddenCols = hiddenCols.filter(id => id !== colId);
+    localStorage.setItem('hiddenPayrollCols', JSON.stringify(hiddenCols));
+    
+    updateGroupColspans();
+}
+
+function zeroOutField(field) {
+    document.querySelectorAll(`[data-field="${field}"] input`).forEach(inp => {
+        if(!inp.disabled) {
+            inp.value = "0.00";
+            recalcRow(inp);
+        }
+    });
+    showToast('Success', 'Column cleared for all employees.', 'info');
+}
+
+function zeroOutDynamic(id) {
+    document.querySelectorAll(`.dyn-ded-input[data-dyn-id="${id}"], .dyn-add-input[data-dyn-id="${id}"]`).forEach(inp => {
+        inp.value = "0.00";
+        recalcRow(inp);
+    });
+    showToast('Success', 'Column cleared for all employees.', 'info');
+}
+
+function toggleDynamicCol(id, isVisible) {
+    // 1. Immediately visually hide it using our local logic so it's snappy
+    toggleCol('dyn_' + id, isVisible);
+    
+    // 2. Also tell the database so it applies globally (no page reload needed anymore since UI is updated)
+    fetch(`/payroll/deductions/${id}/toggle`, {
+        method: 'PATCH',
+        headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' }
+    });
+}
+
+function openManageColumnsModal() {
+    document.getElementById('manageColumnsModal').classList.add('show');
+}
+
+function closeManageColumnsModal() {
+    document.getElementById('manageColumnsModal').classList.remove('show');
+}
+
+const HARD_DEDUCTION_FIELDS = [
+    'gsis_policy','gsis_emergency','gsis_real_estate',
+    'gsis_mpl','gsis_mpl_lite','gsis_gfal','gsis_computer','gsis_conso',
+    'pagibig_mpl','pagibig_calamity',
+    'withholding_tax',
+    'loan_dbp','loan_lbp','loan_paracle','overpayment','other_deduction',
+    'cng_capital_share', 'cng_kiddie_savings', 'cng_savings', 'cng_regular_loan',
+    'cng_crisis_loan', 'cng_coop_canteen', 'cng_coop_store', 'cng_calamity_loan',
+    'cng_abuloy', 'cng_handog', 'cng_b2b_loan', 'cng_petty_cash', 'cng_commodity_loan'
+];
 
 /* ── Duplicate check ── */
 function checkDuplicate() {
@@ -887,32 +1303,40 @@ function goToStep2() {
     if (_isDuplicate) { showToast('Duplicate Period','A payroll for this month/year already exists.','error'); return; }
     const label = document.getElementById('s1Label').value.trim();
     if (!label) { showToast('Required','Please enter a period label.','error'); return; }
+    
+    // Save state so reloads keep us on step 2
+    saveSessionState();
+    
     selectedMonth     = parseInt(document.getElementById('s1Month').value);
-    selectedMonthName = document.getElementById('s1Month').selectedOptions[0].dataset.name;
+    selectedMonthName = document.getElementById('s1Month').selectedOptions[0].dataset.name || document.getElementById('s1Month').selectedOptions[0].text;
     selectedYear      = parseInt(document.getElementById('s1Year').value);
+    
     document.getElementById('monthPillLabel').textContent = selectedMonthName;
     document.getElementById('yearPillLabel').textContent  = selectedYear;
     syncPillSelections();
+    
     document.getElementById('step1').style.display = 'none';
     document.getElementById('step2').style.display = 'flex';
-    document.getElementById('step2').style.flexDirection = 'column';
     document.getElementById('periodPills').style.display = 'flex';
     document.getElementById('bc3sep').style.display = '';
     document.getElementById('bc3').style.display    = '';
     document.getElementById('bc2').style.fontWeight = '400';
     updateCounts();
 }
+
 function goBack() {
+    clearSessionState();
     closeEmpPanel();
     document.getElementById('step2').style.display = 'none';
-    document.getElementById('step1').style.display = '';
+    document.getElementById('step1').style.display = 'flex';
     document.getElementById('periodPills').style.display = 'none';
     document.getElementById('bc3sep').style.display = 'none';
     document.getElementById('bc3').style.display    = 'none';
 }
+
 function updateLabel() {
     const mSel  = document.getElementById('s1Month');
-    const mName = mSel.selectedOptions[0].dataset.name;
+    const mName = mSel.selectedOptions[0].dataset.name || mSel.selectedOptions[0].text;
     document.getElementById('s1Label').value = mName + ' ' + document.getElementById('s1Year').value;
 }
 
@@ -932,6 +1356,7 @@ function selectMonth(m, name) {
     syncPillSelections();
     document.getElementById('s1Month').value = m;
     updateLabel(); checkDuplicate();
+    saveSessionState();
 }
 function selectYear(y) {
     selectedYear = y;
@@ -940,6 +1365,7 @@ function selectYear(y) {
     syncPillSelections();
     document.getElementById('s1Year').value = y;
     updateLabel(); checkDuplicate();
+    saveSessionState();
 }
 
 /* ── Cell focus ── */
@@ -967,13 +1393,25 @@ function recalcRow(input) {
     const ta = taCell ? (parseFloat(taCell.value) || 0) : 0;
 
     let totalDeductions = 0;
+    let dynAllowances   = 0;
 
+    // Fixed mapping deductions
     HARD_DEDUCTION_FIELDS.forEach(field => {
         const cell = row.querySelector(`[data-field="${field}"]`);
         if (cell) totalDeductions += parseFloat(cell.querySelector('input')?.value) || 0;
     });
 
-    const net = gross - gsisEe - pagibigEe - phicEe - totalDeductions + pera + ra + ta;
+    // Dynamic Deductions
+    row.querySelectorAll('.dyn-ded-input').forEach(inp => {
+        totalDeductions += parseFloat(inp.value) || 0;
+    });
+
+    // Dynamic Allowances
+    row.querySelectorAll('.dyn-add-input').forEach(inp => {
+        dynAllowances += parseFloat(inp.value) || 0;
+    });
+
+    const net = gross - gsisEe - pagibigEe - phicEe - totalDeductions + pera + ra + ta + dynAllowances;
     netCell.textContent = net.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
 
     if (_activeRow === row) {
@@ -982,9 +1420,9 @@ function recalcRow(input) {
     updateCounts();
 }
 
-/* ── Reset row (keeps agri RA/TA at their default, zeroes loans) ── */
-function resetRow(empId) {
-    const row = document.querySelector(`tr[data-emp-id="${empId}"]`);
+/* ── Reset row (keeps agri RA/TA at their default, reverts loans & dynamics to calculated defaults) ── */
+function resetRow(userId) {
+    const row = document.querySelector(`tr[data-user-id="${userId}"]`);
     if (!row) return;
     const isAgri = row.dataset.isAgri === '1';
 
@@ -995,7 +1433,7 @@ function resetRow(empId) {
         } else if (field === 'allowance_ta' && isAgri) {
             inp.value = computeFixed(DED_CONFIG.taType, DED_CONFIG.taValue, null, parseFloat(row.dataset.salary)||0).toFixed(2);
         } else if (!inp.disabled) {
-            inp.value = 0;
+            inp.value = inp.dataset.default !== undefined ? inp.dataset.default : 0.00;
         }
     });
     recalcRow(row.querySelector('.loan-input:not(:disabled)') || row.querySelector('.loan-input'));
@@ -1049,7 +1487,7 @@ function filterEmployees() {
     const search = document.getElementById('empSearch').value.toLowerCase();
     const dept   = document.getElementById('fDept')?.value   || '';
     const status = document.getElementById('fStatus')?.value || '';
-    document.querySelectorAll('#empTbody tr[data-emp-id]').forEach(row => {
+    document.querySelectorAll('#empTbody tr[data-user-id]').forEach(row => {
         const mSearch = !search || (row.dataset.name||'').includes(search);
         const mDept   = !dept   || row.dataset.dept === dept;
         const isIncl  = row.querySelector('.emp-chk')?.checked;
@@ -1066,8 +1504,8 @@ function clearFilter() {
 }
 
 /* ── Include/Exclude ── */
-function excludeRow(empId) { const chk = document.querySelector(`.emp-chk[value="${empId}"]`); if (chk) { chk.checked = false; updateRowStyle(chk); } closeDots(); onChkChange(); }
-function includeRow(empId) { const chk = document.querySelector(`.emp-chk[value="${empId}"]`); if (chk) { chk.checked = true;  updateRowStyle(chk); } closeDots(); onChkChange(); }
+function excludeRow(userId) { const chk = document.querySelector(`.emp-chk[value="${userId}"]`); if (chk) { chk.checked = false; updateRowStyle(chk); } closeDots(); onChkChange(); }
+function includeRow(userId) { const chk = document.querySelector(`.emp-chk[value="${userId}"]`); if (chk) { chk.checked = true;  updateRowStyle(chk); } closeDots(); onChkChange(); }
 function removeSelected()  { document.querySelectorAll('.emp-chk:checked').forEach(chk => { chk.checked = false; updateRowStyle(chk); }); onChkChange(); }
 
 /* ── Dots ── */
@@ -1077,7 +1515,7 @@ function toggleDot(btn) { const dd = btn.nextElementSibling; closeDots(); dd.cla
 /* ── Sort ── */
 function sortEmp(col) {
     const tbody = document.getElementById('empTbody');
-    const rows  = [...tbody.querySelectorAll('tr[data-emp-id]')];
+    const rows  = [...tbody.querySelectorAll('tr[data-user-id]')];
     if (sortCol === col) sortAsc = !sortAsc; else { sortCol = col; sortAsc = true; }
     rows.sort((a,b) => {
         let va = a.cells[col]?.textContent.trim() || '';
@@ -1096,7 +1534,7 @@ function openEmpPanel(row) {
     document.querySelectorAll('#empTbody tr').forEach(r => r.classList.remove('row-active'));
     row.classList.add('row-active');
 
-    const empId   = row.dataset.empId;
+    const userId  = row.dataset.userId;
     const name    = row.dataset.fullName  || '—';
     const desig   = row.dataset.designation || '—';
     const posName = row.dataset.positionName || desig;
@@ -1115,7 +1553,7 @@ function openEmpPanel(row) {
     const pera       = parseFloat(netCell?.dataset.pera)      || 0;
 
     document.getElementById('epName').textContent = name;
-    document.getElementById('epSub').textContent  = `${empId}  ·  ${posName}${isAgri ? '  🌾' : ''}`;
+    document.getElementById('epSub').textContent  = `${userId}  ·  ${posName}${isAgri ? '  🌾' : ''}`;
     document.getElementById('epNet').textContent  = netCell
         ? fmtPHP(parseFloat(netCell.textContent.replace(/,/g,'')))
         : fmtPHP(0);
@@ -1172,6 +1610,22 @@ function openEmpPanel(row) {
         coopRows
     );
 
+    /* Generate HTML specifically for Dynamic Deductions & Allowances */
+    const dynDedHtml = [
+        @foreach($dynamicDeductions as $d)
+            mkEdit('{{ addslashes($d->name) }}', '{{ $d->id }}'),
+        @endforeach
+    ].join('');
+
+    const dynAddHtml = [
+        @foreach($dynamicAllowances as $a)
+            mkEdit('{{ addslashes($a->name) }}', '{{ $a->id }}'),
+        @endforeach
+    ].join('');
+
+    let extraDedCard = dynDedHtml ? mkCard('M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4', 'Other Dynamic Deductions', dynDedHtml) : '';
+    let extraAddCard = dynAddHtml ? mkCard('M12 6v6m0 0v6m0-6h6m-6 0H6', 'Other Dynamic Allowances', dynAddHtml) : '';
+
     document.getElementById('epBody').innerHTML =
         mkCard('M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
             'Employee Information',
@@ -1214,13 +1668,13 @@ function openEmpPanel(row) {
             mkEdit('Overpayment',     'overpayment') +
             mkEdit('Other Deduction', 'other_deduction')
         ) +
-        coopCard +
+        coopCard + extraDedCard +
         mkCard('M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
             'Allowances',
             mkInfo('PERA', fmtPHP(pera), '#065f46') +
             mkEditAgri('RA (Representation Allowance)', 'allowance_ra') +
             mkEditAgri('TA (Transportation Allowance)', 'allowance_ta')
-        ) +
+        ) + extraAddCard +
         `<p style="font-size:10px;color:#9ca3af;text-align:center;padding:8px 16px 4px;">
             * Employer-paid — not deducted from employee net pay<br>
             🌾 RA &amp; TA apply to Provincial Agriculturist positions only
@@ -1296,18 +1750,18 @@ function submitPayroll() {
     const hOvr = document.getElementById('hOverrides'); hOvr.innerHTML = '';
 
     document.querySelectorAll('.emp-chk:checked').forEach(chk => {
-        const empId = chk.value;
+        const userId = chk.value; // Strictly using user_id here
         const row   = chk.closest('tr');
 
         const inp = document.createElement('input');
-        inp.type = 'hidden'; inp.name = 'employee_ids[]'; inp.value = empId;
+        inp.type = 'hidden'; inp.name = 'user_ids[]'; inp.value = userId; 
         hEmp.appendChild(inp);
 
         /* Send all input values. Backend computes loan_cngwmpc automatically. */
         row.querySelectorAll('[data-field] input.loan-input').forEach(fi => {
             const field = fi.closest('[data-field]').dataset.field;
             const oi = document.createElement('input');
-            oi.type = 'hidden'; oi.name = `overrides[${empId}][${field}]`; oi.value = fi.value || '0';
+            oi.type = 'hidden'; oi.name = `overrides[${userId}][${field}]`; oi.value = fi.value || '0';
             hOvr.appendChild(oi);
         });
     });
@@ -1334,17 +1788,43 @@ function showToast(title, msg, type) {
 
 /* ── Boot ── */
 document.addEventListener('DOMContentLoaded', () => {
-    updateCounts();
-    checkDuplicate();
+    
+    // Apply locally hidden columns FIRST so the UI doesn't jump around
+    applyHiddenCols();
+
+    // Check session state on standard page load / refresh
+    if (sessionStorage.getItem('payroll_step') === '2') {
+        const sm = sessionStorage.getItem('payroll_month');
+        const sy = sessionStorage.getItem('payroll_year');
+        const sl = sessionStorage.getItem('payroll_label');
+        
+        if(sm) document.getElementById('s1Month').value = sm;
+        if(sy) document.getElementById('s1Year').value = sy;
+        if(sl) document.getElementById('s1Label').value = sl;
+        
+        updateLabel();
+        checkDuplicate();
+        
+        if (!_isDuplicate) {
+            goToStep2(); 
+        } else {
+            clearSessionState();
+        }
+    } else {
+        updateCounts();
+        checkDuplicate();
+    }
+    
     document.querySelectorAll('.emp-chk').forEach(c => c.addEventListener('change', function () { updateRowStyle(this); onChkChange(); }));
 });
+
 document.addEventListener('click', e => {
     if (!e.target.closest('.period-pill') && !e.target.closest('.pill-dropdown'))
         document.querySelectorAll('.pill-dropdown').forEach(d => d.classList.remove('open'));
     if (!e.target.closest('.dot-menu')) closeDots();
 });
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeEmpPanel(); closeCModal(); }
+    if (e.key === 'Escape') { closeEmpPanel(); closeCModal(); closeQuickAddModal(); closeManageColumnsModal(); }
 });
 </script>
 @endsection

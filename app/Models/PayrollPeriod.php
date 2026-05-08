@@ -32,13 +32,13 @@ class PayrollPeriod extends Model
     }
 
     /**
-     * The employee who created this period.
-     * `created_by` stores an employee_id (NOT a Laravel users.id).
+     * The user who created this period.
+     * `created_by` stores a user_id.
      */
     public function createdBy(): BelongsTo
     {
         // ADDED withDefault to protect against missing employees
-        return $this->belongsTo(Employee::class, 'created_by', 'employee_id')->withDefault([
+        return $this->belongsTo(Employee::class, 'created_by', 'user_id')->withDefault([
             'first_name' => 'Unknown',
             'last_name' => 'User'
         ]);

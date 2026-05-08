@@ -3,7 +3,6 @@
 @section('page-title','Remittances')
 @section('content')
 
-<!-- Master Wrapper to Prevent Table Flexbox Blowout -->
 <div style="width: 100%; max-width: 100%; min-width: 0; position: relative;">
 
 <style>
@@ -11,11 +10,29 @@
 *,*::before,*::after{box-sizing:border-box;}
 body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
 
-.breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:#6b7280;margin-bottom:10px;flex-wrap:wrap;}
-.breadcrumb a{color:#6b7280;text-decoration:none;}.breadcrumb a:hover{color:#1a3a1a;}
-.breadcrumb .sep{color:#d1d5db;}.breadcrumb .current{color:#1a3a1a;font-weight:600;}
+/* ── TOP BAR ── */
+.top-bar {
+    position: sticky; top: 0; z-index: 100;
+    margin-bottom: 16px;
+    background: #fff; border-radius: 12px;
+    border: 0.5px solid #e5e7eb;
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+.top-bar-left { display: flex; align-items: center; gap: 10px; }
+.top-bar-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: #1a3a1a;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.top-bar-icon svg { width: 16px; height: 16px; stroke: #fff; }
+.top-bar-title { font-size: 15px; font-weight: 700; color: #111827; margin: 0; }
+.top-bar-sub { font-size: 11px; color: #6b7280; margin: 2px 0 0; }
+.top-bar-right { display: flex; align-items: center; gap: 12px; }
 
-.period-select{
+.period-select {
     appearance:none;-webkit-appearance:none;
     padding:6px 28px 6px 10px;font-size:12px;font-weight:600;
     border:1.5px solid #e5e7eb;border-radius:8px;
@@ -24,99 +41,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
 }
 .period-select:hover{border-color:#1a3a1a;}
 .period-select:focus{border-color:#1a3a1a;box-shadow:0 0 0 3px rgba(26,58,26,.08);}
-.period-status-badge{display:inline-flex;align-items:center;font-size:10px;padding:3px 9px;border-radius:20px;font-weight:700;white-space:nowrap;}
-
-/* =========================================
-   MODERN STAT CARDS & AGENCY STRIP
-========================================= */
-.stats-header-wrap { margin: 0 0 24px; }
-
-.stats-row {
-    display: grid;
-    grid-template-columns: 1.3fr 1fr 1fr;
-    gap: 16px;
-}
-
-.stat-card {
-    background: #fff;
-    border-radius: 16px;
-    border: 1px solid #e5e7eb;
-    padding: 20px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.02);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.04), 0 10px 20px rgba(0,0,0,0.04);
-}
-.stat-card.dark {
-    background: linear-gradient(135deg, #166534 0%, #14532d 100%);
-    border: none;
-}
-
-.stat-lbl {
-    font-size: 12px; font-weight: 700; color: #6b7280;
-    margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em;
-}
-.stat-card.dark .stat-lbl { color: rgba(255,255,255,.7); }
-
-.stat-val {
-    font-size: 28px; font-weight: 800; color: #111827;
-    letter-spacing: -1px; line-height: 1;
-}
-.stat-card.dark .stat-val { color: #fff; }
-
-.stat-sub {
-    font-size: 12px; color: #9ca3af; margin-top: 6px;
-}
-.stat-card.dark .stat-sub { color: rgba(255,255,255,.5); }
-
-.stat-icon {
-    width: 52px; height: 52px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.stat-icon.green { background: #f0fdf4; color: #16a34a; }
-.stat-icon.dk    { background: rgba(255,255,255,.15); color: #fff; }
-.stat-icon svg { width: 24px; height: 24px; }
-
-.agency-strip-wrap { margin-top: 16px; }
-.agency-strip { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; }
-
-.agency-card {
-    background: #fff; border-radius: 14px; border: 1px solid #e5e7eb; 
-    padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,.02);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    position: relative; overflow: hidden;
-}
-.agency-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,0,0,.05);
-}
-
-/* Color accents for agencies */
-.agency-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
-.agency-card.gsis::before { background: #1e40af; }
-.agency-card.pagibig::before { background: #7c3aed; }
-.agency-card.phic::before { background: #0891b2; }
-.agency-card.wtax::before { background: #ea580c; }
-.agency-card.loans::before { background: #059669; }
-
-.agency-card-top { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
-.agency-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-.agency-name { font-size:11.5px; font-weight:800; color:#4b5563; text-transform:uppercase; letter-spacing:.05em;}
-
-.agency-total { font-size:20px; font-weight:800; color:#111827; letter-spacing:-.5px; font-family:'JetBrains Mono',monospace; margin-bottom: 12px;}
-
-.agency-divider { border: 0; height: 1px; background: #f3f4f6; margin: 0 0 12px 0; }
-
-.agency-rows { display:flex; flex-direction:column; gap:6px; }
-.agency-row { display:flex; justify-content:space-between; align-items: center; font-size:11px; }
-.agency-row .lbl { color:#6b7280; font-weight: 500; }
-.agency-row .val { font-weight:700; color:#374151; font-family:'JetBrains Mono',monospace; }
+.period-status-badge{display:inline-flex;align-items:center;font-size:10px;padding:4px 10px;border-radius:20px;font-weight:700;white-space:nowrap;}
 
 /* =========================================
    TABLE SCALING & TABS
@@ -145,10 +70,6 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
 .psub{font-size:11px;color:#9ca3af;margin:0;}
 .ptoolbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 
-.toolbar-period-wrap{display:flex;align-items:center;gap:6px;padding:5px 10px 5px 8px;background:#fff;border:1.5px solid #e5e7eb;border-radius:9px;flex-shrink:0;}
-.toolbar-period-label{font-size:10.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;}
-.toolbar-period-divider{width:1px;height:14px;background:#e5e7eb;flex-shrink:0;}
-
 .search-wrap{position:relative;}
 .search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:#9ca3af;}
 .search-wrap input{padding:7px 10px 7px 30px;font-size:12px;border:1.5px solid #e5e7eb;border-radius:8px;outline:none;width:190px;transition:border-color .15s;background:#fff;color:#374151;}
@@ -157,17 +78,25 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
 .btn-pdf:hover{border-color:#1a3a1a;color:#1a3a1a;}
 
 .tsa{
-    overflow-x:auto;
-    scrollbar-width:thin;
-    scrollbar-color:#d1d5db transparent;
     width: 100%;
     display: block;
+    max-height: calc(100vh - 200px); /* Height bound for sticky scrolling */
+    overflow-y: auto;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db transparent;
 }
-.tsa::-webkit-scrollbar{height:6px;}.tsa::-webkit-scrollbar-thumb{background:#9ca3af;border-radius:99px;}
+.tsa::-webkit-scrollbar{height:6px;width:6px;}.tsa::-webkit-scrollbar-thumb{background:#9ca3af;border-radius:99px;}
 
-/* Shrunk table fonts and paddings to fit screen */
-.data-table{width:100%; border-collapse:collapse; font-size:11px;}
-.data-table thead tr{background:#fafafa; border-bottom:1px solid #f3f4f6;}
+/* Shrunk table fonts and paddings to fit screen + Sticky logic */
+.data-table{width:100%; border-collapse:collapse; font-size:11px; position:relative;}
+.data-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fafafa;
+    box-shadow: 0 1px 0 #f3f4f6; /* Bottom border equivalent for sticky header */
+}
 .data-table th{padding:8px 6px; text-align:left; font-size:8.5px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0; white-space:nowrap;}
 .data-table th.r{text-align:right;}
 .data-table th.c{text-align:center;}
@@ -179,10 +108,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
 .data-table tbody tr:hover{background:#f0fdf4;}
 
 /* COLOR CODED ROW BORDERS */
-.data-table tbody tr {
-    border-left: 3px solid transparent; 
-}
-/* Ensure the first cell doesn't stick too far left because of the border */
+.data-table tbody tr { border-left: 3px solid transparent; }
 .data-table tbody tr td:first-child { padding-left: 5px; }
 
 #tbl-gsis tbody tr { border-left-color: #1e40af; }
@@ -190,7 +116,6 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
 #tbl-phic tbody tr { border-left-color: #0891b2; }
 #tbl-wtax tbody tr { border-left-color: #ea580c; }
 #tbl-dbp tbody tr, #tbl-lbp tbody tr, #tbl-cng tbody tr, #tbl-paracle tbody tr { border-left-color: #059669; }
-
 
 .emp-name{font-weight:700;color:#111827;font-size:11.5px;}
 .emp-id{font-size:9.5px;color:#9ca3af;font-family:'JetBrains Mono',monospace;margin-top:1px;}
@@ -203,7 +128,18 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
 .amt-teal{color:#047857;font-weight:600;}
 .amt-orange{color:#92400e;font-weight:600;}
 .zero{color:#d1d5db;}
-.tfoot-row td{font-weight:700;background:#f0fdf4;border-top:2px solid #bbf7d0;border-bottom:none;padding:8px 8px;font-family:'JetBrains Mono',monospace;font-size:11px;}
+
+.data-table tfoot td {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    font-weight: 700;
+    background: #f0fdf4;
+    box-shadow: 0 -2px 0 #bbf7d0; /* Top border equivalent for sticky footer */
+    padding: 8px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+}
 
 .btn-del-row{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;border:1px solid #fee2e2;background:#fff5f5;color:#dc2626;cursor:pointer;transition:all .15s;flex-shrink:0;padding:0;}
 .btn-del-row:hover{background:#fee2e2;border-color:#fca5a5;transform:scale(1.1);}
@@ -274,24 +210,38 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
 #toast{position:fixed;bottom:20px;right:20px;z-index:500;min-width:210px;background:#fff;border-radius:13px;padding:12px 15px;box-shadow:0 8px 32px rgba(0,0,0,.15);display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(12px);transition:all .3s;pointer-events:none;}
 #toast.show{opacity:1;transform:translateY(0);}
 
-@media(max-width:1024px){.agency-strip{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:768px){
-    .stats-row{grid-template-columns:1fr 1fr;}
-    .stats-row .stat-card:first-child{grid-column:span 2;}
-    .agency-strip{grid-template-columns:1fr 1fr;}
     #detailPanel{width:100%;min-width:0;}
-}
-@media(max-width:480px){
-    .stats-row{grid-template-columns:1fr;}
-    .stats-row .stat-card:first-child{grid-column:span 1;}
-    .agency-strip{grid-template-columns:1fr;}
 }
 </style>
 
-<div class="breadcrumb">
-    <a href="{{ route('payroll.index') }}">Payroll</a>
-    <span class="sep">›</span>
-    <span class="current">Remittances</span>
+<div class="top-bar">
+    <div class="top-bar-left">
+        <div class="top-bar-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+        </div>
+        <div>
+            <h1 class="top-bar-title">Remittance Reports</h1>
+            <p class="top-bar-sub">Manage and export payroll deductions and allowances</p>
+        </div>
+    </div>
+    <div class="top-bar-right">
+        @if($selectedPeriod)
+            <span class="period-status-badge" style="{{ $selectedPeriod->status === 'FINALIZED' ? 'background:#dcfce7;color:#15803d;' : 'background:#fef3c7;color:#92400e;' }}">
+                {{ $selectedPeriod->status }}
+            </span>
+        @endif
+        <form method="GET" id="periodForm" style="margin:0; display:flex;">
+            <select name="period_id" class="period-select" onchange="document.getElementById('periodForm').submit()">
+                <option value="">-- Select Period --</option>
+                @foreach($periods as $p)
+                    <option value="{{ $p->period_id }}" {{ $p->period_id == optional($selectedPeriod)->period_id ? 'selected' : '' }}>{{ $p->period_label }}</option>
+                @endforeach
+            </select>
+        </form>
+    </div>
 </div>
 
 @if($selectedPeriod)
@@ -340,95 +290,6 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
     $isFinalized = $selectedPeriod->status === 'FINALIZED';
 @endphp
 
-<div class="stats-header-wrap">
-    <div class="stats-row">
-        <div class="stat-card dark">
-            <div>
-                <div class="stat-lbl">Total Employees</div>
-                <div class="stat-val" id="statEmpCount">{{ $empCount }}</div>
-                <div class="stat-sub">Active · {{ $selectedPeriod->period_label }}</div>
-            </div>
-            <div class="stat-icon dk">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div>
-                <div class="stat-lbl">Total Gross Salary</div>
-                <div class="stat-val" id="hdr-gross-total">₱{{ number_format($totGross,0) }}</div>
-                <div class="stat-sub">{{ $selectedPeriod->period_label }}</div>
-            </div>
-            <div class="stat-icon green">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div>
-                <div class="stat-lbl">Total Net Pay</div>
-                <div class="stat-val" id="hdr-net-total">₱{{ number_format($totNet,0) }}</div>
-                <div class="stat-sub">After all deductions</div>
-            </div>
-            <div class="stat-icon green">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-            </div>
-        </div>
-    </div>
-
-    <div class="agency-strip-wrap">
-        <div class="agency-strip">
-            <div class="agency-card gsis">
-                <div class="agency-card-top"><div class="agency-dot" style="background:#1e40af;"></div><span class="agency-name">GSIS</span></div>
-                <div class="agency-total mono" id="strip-gsis">₱{{ number_format($totGsisTotal,2) }}</div>
-                <hr class="agency-divider">
-                <div class="agency-rows">
-                    <div class="agency-row"><span class="lbl">EE Share (9%)</span><span class="val" id="strip-gsis-ee">{{ number_format($totGsisEe,2) }}</span></div>
-                    <div class="agency-row"><span class="lbl">Gov't Share (12%)</span><span class="val">{{ number_format($totGsisGovt,2) }}</span></div>
-                    <div class="agency-row"><span class="lbl">EC Fund</span><span class="val" id="strip-gsis-ec">{{ number_format($totGsisEc,2) }}</span></div>
-                </div>
-            </div>
-            <div class="agency-card pagibig">
-                <div class="agency-card-top"><div class="agency-dot" style="background:#7c3aed;"></div><span class="agency-name">Pag-IBIG</span></div>
-                <div class="agency-total mono" id="strip-pagibig">₱{{ number_format($totPagibigTotal,2) }}</div>
-                <hr class="agency-divider">
-                <div class="agency-rows">
-                    <div class="agency-row"><span class="lbl">Personal Share</span><span class="val" id="strip-pagibig-govt">{{ number_format($totPagibigGov,2) }}</span></div>
-                    <div class="agency-row"><span class="lbl">MPL Loan</span><span class="val" id="strip-pagibig-mpl">{{ number_format($totPagibigMpl,2) }}</span></div>
-                    <div class="agency-row"><span class="lbl">Calamity Loan</span><span class="val" id="strip-pagibig-cal">{{ number_format($totPagibigCal,2) }}</span></div>
-                </div>
-            </div>
-            <div class="agency-card phic">
-                <div class="agency-card-top"><div class="agency-dot" style="background:#0891b2;"></div><span class="agency-name">PhilHealth</span></div>
-                <div class="agency-total mono" id="strip-phic">₱{{ number_format($totPhicTotal,2) }}</div>
-                <hr class="agency-divider">
-                <div class="agency-rows">
-                    <div class="agency-row"><span class="lbl">EE Share (2.5%)</span><span class="val" id="strip-phic-ee">{{ number_format($totPhicEe,2) }}</span></div>
-                    <div class="agency-row"><span class="lbl">Gov't Share (2.5%)</span><span class="val">{{ number_format($totPhicGovt,2) }}</span></div>
-                </div>
-            </div>
-            <div class="agency-card wtax">
-                <div class="agency-card-top"><div class="agency-dot" style="background:#ea580c;"></div><span class="agency-name">Withholding Tax</span></div>
-                <div class="agency-total mono" id="strip-wtax">₱{{ number_format($totWtax,2) }}</div>
-                <hr class="agency-divider">
-                <div class="agency-rows">
-                    <div class="agency-row"><span class="lbl">BIR Remittance</span><span class="val" id="strip-wtax-total">{{ number_format($totWtax,2) }}</span></div>
-                    <div class="agency-row"><span class="lbl">Employees w/ Tax</span><span class="val" id="strip-wtax-count">{{ $records->filter(fn($r)=>($r->withholding_tax??0)>0)->count() }}</span></div>
-                </div>
-            </div>
-            <div class="agency-card loans">
-                <div class="agency-card-top"><div class="agency-dot" style="background:#059669;"></div><span class="agency-name">Bank Loans</span></div>
-                <div class="agency-total mono" id="strip-loans">₱{{ number_format($totDbp+$totLbp+$totCng+$totPar,2) }}</div>
-                <hr class="agency-divider">
-                <div class="agency-rows">
-                    <div class="agency-row"><span class="lbl">DBP</span><span class="val" id="strip-dbp">{{ number_format($totDbp,2) }}</span></div>
-                    <div class="agency-row"><span class="lbl">LBP</span><span class="val" id="strip-lbp">{{ number_format($totLbp,2) }}</span></div>
-                    <div class="agency-row"><span class="lbl">CNGWMPC</span><span class="val" id="strip-cng">{{ number_format($totCng,2) }}</span></div>
-                    <div class="agency-row"><span class="lbl">PARACLE</span><span class="val" id="strip-par">{{ number_format($totPar,2) }}</span></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 @if(!$isFinalized)
 <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:10px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;font-size:12px;color:#92400e;">
     <svg style="width:15px;height:15px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -451,30 +312,11 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
         <button class="rem-tab" onclick="switchTab('allowances',this)">Allowances <span class="tab-badge" id="badge-allowances">{{ $empCount }}</span></button>
     </div>
 
-    @php
-        $periodPillHtml = '
-        <div class="toolbar-period-wrap">
-            <span class="toolbar-period-label">Period</span>
-            <div class="toolbar-period-divider"></div>
-            <form method="GET" style="display:contents;">
-                <select name="period_id" class="period-select" onchange="this.form.submit()">'
-                . collect($periods)->map(fn($p)=>'<option value="'.$p->period_id.'"'.($p->period_id == optional($selectedPeriod)->period_id ? ' selected' : '').'>'.$p->period_label.'</option>')->implode('')
-                .'</select>
-            </form>
-            <span class="period-status-badge" style="'
-                .($selectedPeriod->status === 'FINALIZED'
-                    ? 'background:#dcfce7;color:#15803d;'
-                    : 'background:#fef3c7;color:#92400e;')
-                .'">'.$selectedPeriod->status.'</span>
-        </div>';
-    @endphp
-
     {{-- ══ ALL EMPLOYEES ══ --}}
     <div class="rem-tab-panel active" id="panel-all">
         <div class="panel-toolbar">
-            <div><p class="ptitle">Employee Breakdown — {{ $selectedPeriod->period_label }}</p><p class="psub">Click any row for details · Click any cell to edit</p></div>
+            <div><p class="ptitle">Employee Breakdown</p><p class="psub">Click any row for details · Click any cell to edit</p></div>
             <div class="ptoolbar-right">
-                {!! $periodPillHtml !!}
                 <div class="search-wrap"><svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg><input type="text" placeholder="Search employee…" oninput="filterTable('tbl-all',this.value)"></div>
             </div>
         </div>
@@ -496,7 +338,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
                 <td class="c pad" onclick="openPanel({{ $r->payroll_id }},event)" style="cursor:pointer;"><span class="row-num">{{ $i+1 }}</span></td>
                 <td class="pad" style="min-width:160px;cursor:pointer;" onclick="openPanel({{ $r->payroll_id }},event)">
                     <div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div>
-                    <div class="emp-id">{{ $r->employee->employee_id ?? '' }}</div>
+                    <div class="emp-id">{{ $r->user_id ?? '' }}</div>
                 </td>
                 <td class="r pad mono" style="font-weight:700;color:#111827;" onclick="openPanel({{ $r->payroll_id }},event)" style="cursor:pointer;">{{ number_format($r->gross_salary,2) }}</td>
                 <td class="r">@include('payroll._editable_cell',['pid'=>$r->payroll_id,'field'=>'gsis_ee','val'=>$r->gsis_ee,'cls'=>'amt-blue','locked'=>$isFinalized,'auto'=>true])</td>
@@ -545,9 +387,8 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
     {{-- ══ GSIS ══ --}}
     <div class="rem-tab-panel" id="panel-gsis">
         <div class="panel-toolbar">
-            <div><p class="ptitle">GSIS — Government Service Insurance System</p><p class="psub">EE 9% (auto), Gov't 12% (informational), ECF ₱100, and all GSIS loans · {{ $selectedPeriod->period_label }}</p></div>
+            <div><p class="ptitle">GSIS — Government Service Insurance System</p><p class="psub">EE 9% (auto), Gov't 12% (informational), ECF ₱100, and all GSIS loans</p></div>
             <div class="ptoolbar-right">
-                {!! $periodPillHtml !!}
                 <div class="search-wrap"><svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg><input type="text" placeholder="Search…" oninput="filterTable('tbl-gsis',this.value)"></div>
                 <a href="{{ route('payroll.remittance.pdf',[$selectedPeriod->period_id,'gsis']) }}" target="_blank" class="btn-pdf">📄 PDF</a>
             </div>
@@ -572,7 +413,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
             @endphp
             <tr data-pid="{{ $r->payroll_id }}">
                 <td class="c pad"><span class="row-num">{{ $i+1 }}</span></td>
-                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->employee->employee_id ?? '' }}</div></td>
+                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->user_id ?? '' }}</div></td>
                 <td class="r pad mono">{{ number_format($r->gross_salary,2) }}</td>
                 <td class="r">@include('payroll._editable_cell',['pid'=>$r->payroll_id,'field'=>'gsis_ee','val'=>$r->gsis_ee,'cls'=>'amt-blue','locked'=>$isFinalized,'auto'=>true])</td>
                 <td class="r pad mono" style="color:#6b7280;background:#f9fafb;">{{ number_format($r->gsis_govt??0,2) }}</td>
@@ -615,9 +456,8 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
     {{-- ══ PAG-IBIG ══ --}}
     <div class="rem-tab-panel" id="panel-pagibig">
         <div class="panel-toolbar">
-            <div><p class="ptitle">Pag-IBIG — Home Development Mutual Fund (HDMF)</p><p class="psub">Personal Share (deducted), Gov't Share ₱200 (informational), MPL & Calamity loans · {{ $selectedPeriod->period_label }}</p></div>
+            <div><p class="ptitle">Pag-IBIG — Home Development Mutual Fund (HDMF)</p><p class="psub">Personal Share (deducted), Gov't Share ₱200 (informational), MPL & Calamity loans</p></div>
             <div class="ptoolbar-right">
-                {!! $periodPillHtml !!}
                 <div class="search-wrap"><svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg><input type="text" placeholder="Search…" oninput="filterTable('tbl-pagibig',this.value)"></div>
                 <a href="{{ route('payroll.remittance.pdf',[$selectedPeriod->period_id,'pagibig']) }}" target="_blank" class="btn-pdf">📄 PDF</a>
             </div>
@@ -638,7 +478,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
             @php $pt=($r->pagibig_govt??0)+($r->pagibig_mpl??0)+($r->pagibig_calamity??0)+($r->overpayment??0); @endphp
             <tr data-pid="{{ $r->payroll_id }}">
                 <td class="c pad"><span class="row-num">{{ $i+1 }}</span></td>
-                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->employee->employee_id ?? '' }}</div></td>
+                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->user_id ?? '' }}</div></td>
                 <td class="r pad mono">{{ number_format($r->gross_salary,2) }}</td>
                 <td class="r">@include('payroll._editable_cell',['pid'=>$r->payroll_id,'field'=>'pagibig_govt','val'=>$r->pagibig_govt,'cls'=>'amt-purple','locked'=>$isFinalized,'auto'=>false])</td>
                 <td class="r pad mono" style="color:#6b7280;background:#f9fafb;">200.00</td>
@@ -669,9 +509,8 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
     {{-- ══ PHIC ══ --}}
     <div class="rem-tab-panel" id="panel-phic">
         <div class="panel-toolbar">
-            <div><p class="ptitle">PHIC — PhilHealth Contribution Remittance</p><p class="psub">EE share (auto, max ₱2,500) and Government share (informational) · {{ $selectedPeriod->period_label }}</p></div>
+            <div><p class="ptitle">PHIC — PhilHealth Contribution Remittance</p><p class="psub">EE share (auto, max ₱2,500) and Government share (informational)</p></div>
             <div class="ptoolbar-right">
-                {!! $periodPillHtml !!}
                 <div class="search-wrap"><svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg><input type="text" placeholder="Search…" oninput="filterTable('tbl-phic',this.value)"></div>
                 <a href="{{ route('payroll.remittance.pdf',[$selectedPeriod->period_id,'philhealth']) }}" target="_blank" class="btn-pdf">📄 PDF</a>
             </div>
@@ -689,7 +528,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
             @foreach($records as $i => $r)
             <tr data-pid="{{ $r->payroll_id }}">
                 <td class="c pad"><span class="row-num">{{ $i+1 }}</span></td>
-                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->employee->employee_id ?? '' }}</div></td>
+                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->user_id ?? '' }}</div></td>
                 <td class="r pad mono">{{ number_format($r->gross_salary,2) }}</td>
                 <td class="r pad mono">{{ number_format(($r->philhealth_ee??0)+($r->philhealth_govt??0),2) }}</td>
                 <td class="r">@include('payroll._editable_cell',['pid'=>$r->payroll_id,'field'=>'philhealth_ee','val'=>$r->philhealth_ee,'cls'=>'amt-teal','locked'=>$isFinalized,'auto'=>true])</td>
@@ -716,9 +555,8 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
     {{-- ══ W/TAX ══ --}}
     <div class="rem-tab-panel" id="panel-wtax">
         <div class="panel-toolbar">
-            <div><p class="ptitle">WTAX — BIR Withholding Tax Remittance</p><p class="psub">Manually entered per employee · deducted from net pay · {{ $selectedPeriod->period_label }}</p></div>
+            <div><p class="ptitle">WTAX — BIR Withholding Tax Remittance</p><p class="psub">Manually entered per employee · deducted from net pay</p></div>
             <div class="ptoolbar-right">
-                {!! $periodPillHtml !!}
                 <div class="search-wrap"><svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg><input type="text" placeholder="Search…" oninput="filterTable('tbl-wtax',this.value)"></div>
                 <a href="{{ route('payroll.remittance.pdf',[$selectedPeriod->period_id,'wtax']) }}" target="_blank" class="btn-pdf">📄 PDF</a>
             </div>
@@ -737,7 +575,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
             @foreach($records as $i => $r)
             <tr data-pid="{{ $r->payroll_id }}">
                 <td class="c pad"><span class="row-num">{{ $i+1 }}</span></td>
-                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->employee->employee_id ?? '' }}</div></td>
+                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->user_id ?? '' }}</div></td>
                 <td class="r pad mono">{{ number_format($r->gross_salary,2) }}</td>
                 <td class="r">@include('payroll._editable_cell',['pid'=>$r->payroll_id,'field'=>'withholding_tax','val'=>$r->withholding_tax,'cls'=>'amt-red','locked'=>$isFinalized,'auto'=>false])</td>
                 @if(!$isFinalized)
@@ -758,9 +596,8 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
     {{-- ══ DBP ══ --}}
     <div class="rem-tab-panel" id="panel-dbp">
         <div class="panel-toolbar">
-            <div><p class="ptitle">DBP — Development Bank of the Philippines</p><p class="psub">Loan amortization deductions · {{ $selectedPeriod->period_label }}</p></div>
+            <div><p class="ptitle">DBP — Development Bank of the Philippines</p><p class="psub">Loan amortization deductions</p></div>
             <div class="ptoolbar-right">
-                {!! $periodPillHtml !!}
                 <div class="search-wrap"><svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg><input type="text" placeholder="Search…" oninput="filterTable('tbl-dbp',this.value)"></div>
                 <a href="{{ route('payroll.remittance.pdf',[$selectedPeriod->period_id,'dbp_pdf']) }}" target="_blank" class="btn-pdf">📄 PDF</a>
             </div>
@@ -771,7 +608,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
             @foreach($records as $i => $r)
             <tr data-pid="{{ $r->payroll_id }}">
                 <td class="c pad"><span class="row-num">{{ $i+1 }}</span></td>
-                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->employee->employee_id ?? '' }}</div></td>
+                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->user_id ?? '' }}</div></td>
                 <td class="r pad mono">{{ number_format($r->gross_salary,2) }}</td>
                 <td class="r">@include('payroll._editable_cell',['pid'=>$r->payroll_id,'field'=>'loan_dbp','val'=>$r->loan_dbp,'cls'=>'amt-orange','locked'=>$isFinalized,'auto'=>false])</td>
                 @if(!$isFinalized)<td class="c pad"><button class="btn-del-row" onclick="askDeleteRow({{ $r->payroll_id }}, '{{ addslashes(($r->employee->last_name ?? '') . ', ' . ($r->employee->first_name ?? '')) }}')" title="Remove"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>@endif
@@ -785,9 +622,8 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
     {{-- ══ LBP ══ --}}
     <div class="rem-tab-panel" id="panel-lbp">
         <div class="panel-toolbar">
-            <div><p class="ptitle">LBP — Land Bank of the Philippines</p><p class="psub">Loan amortization deductions · {{ $selectedPeriod->period_label }}</p></div>
+            <div><p class="ptitle">LBP — Land Bank of the Philippines</p><p class="psub">Loan amortization deductions</p></div>
             <div class="ptoolbar-right">
-                {!! $periodPillHtml !!}
                 <div class="search-wrap"><svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg><input type="text" placeholder="Search…" oninput="filterTable('tbl-lbp',this.value)"></div>
                 <a href="{{ route('payroll.remittance.pdf',[$selectedPeriod->period_id,'lbp_pdf']) }}" target="_blank" class="btn-pdf">📄 PDF</a>
             </div>
@@ -798,7 +634,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
             @foreach($records as $i => $r)
             <tr data-pid="{{ $r->payroll_id }}">
                 <td class="c pad"><span class="row-num">{{ $i+1 }}</span></td>
-                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->employee->employee_id ?? '' }}</div></td>
+                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->user_id ?? '' }}</div></td>
                 <td class="r pad mono">{{ number_format($r->gross_salary,2) }}</td>
                 <td class="r">@include('payroll._editable_cell',['pid'=>$r->payroll_id,'field'=>'loan_lbp','val'=>$r->loan_lbp,'cls'=>'amt-orange','locked'=>$isFinalized,'auto'=>false])</td>
                 @if(!$isFinalized)<td class="c pad"><button class="btn-del-row" onclick="askDeleteRow({{ $r->payroll_id }}, '{{ addslashes(($r->employee->last_name ?? '') . ', ' . ($r->employee->first_name ?? '')) }}')" title="Remove"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>@endif
@@ -814,10 +650,9 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
         <div class="panel-toolbar">
             <div>
                 <p class="ptitle">CNGWMPC — Camarines Norte Government Workers Multi-Purpose Cooperative</p>
-                <p class="psub">All 13 sub-items inline — total auto-sums · {{ $selectedPeriod->period_label }}</p>
+                <p class="psub">All 13 sub-items inline — total auto-sums</p>
             </div>
             <div class="ptoolbar-right">
-                {!! $periodPillHtml !!}
                 <div class="search-wrap">
                     <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg>
                     <input type="text" placeholder="Search…" oninput="filterTable('tbl-cng',this.value)">
@@ -842,7 +677,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
                 <td class="c pad"><span class="row-num">{{ $i+1 }}</span></td>
                 <td class="pad">
                     <div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div>
-                    <div class="emp-id">{{ $r->employee->employee_id ?? '' }}</div>
+                    <div class="emp-id">{{ $r->user_id ?? '' }}</div>
                 </td>
                 <td class="r pad mono">{{ number_format($r->gross_salary,2) }}</td>
                 <td class="r">@include('payroll._editable_cell',['pid'=>$r->payroll_id,'field'=>'cng_capital_share','val'=>$r->cng_capital_share??0,'cls'=>'amt-orange','locked'=>$isFinalized,'auto'=>false])</td>
@@ -879,9 +714,8 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
     {{-- ══ OVERPAYMENT ══ --}}
     <div class="rem-tab-panel" id="panel-overpayment">
         <div class="panel-toolbar">
-            <div><p class="ptitle">Overpayment Recovery</p><p class="psub">Deductions for prior period overpayments · {{ $selectedPeriod->period_label }}</p></div>
+            <div><p class="ptitle">Overpayment Recovery</p><p class="psub">Deductions for prior period overpayments</p></div>
             <div class="ptoolbar-right">
-                {!! $periodPillHtml !!}
                 <div class="search-wrap"><svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg><input type="text" placeholder="Search…" oninput="filterTable('tbl-overpayment',this.value)"></div>
                 <a href="{{ route('payroll.remittance.pdf',[$selectedPeriod->period_id,'overpayment_pdf']) }}" target="_blank" class="btn-pdf">📄 PDF</a>
             </div>
@@ -892,7 +726,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
             @foreach($records as $i => $r)
             <tr data-pid="{{ $r->payroll_id }}">
                 <td class="c pad"><span class="row-num">{{ $i+1 }}</span></td>
-                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->employee->employee_id ?? '' }}</div></td>
+                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->user_id ?? '' }}</div></td>
                 <td class="r pad mono">{{ number_format($r->gross_salary,2) }}</td>
                 <td class="r">@include('payroll._editable_cell',['pid'=>$r->payroll_id,'field'=>'overpayment','val'=>$r->overpayment,'cls'=>'amt-red','locked'=>$isFinalized,'auto'=>false])</td>
                 @if(!$isFinalized)<td class="c pad"><button class="btn-del-row" onclick="askDeleteRow({{ $r->payroll_id }}, '{{ addslashes(($r->employee->last_name ?? '') . ', ' . ($r->employee->first_name ?? '')) }}')" title="Remove"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>@endif
@@ -906,9 +740,8 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
     {{-- ══ PARACLE ══ --}}
     <div class="rem-tab-panel" id="panel-paracle">
         <div class="panel-toolbar">
-            <div><p class="ptitle">PARACLE — Rural Bank of Paracale</p><p class="psub">Loan deductions · {{ $selectedPeriod->period_label }}</p></div>
+            <div><p class="ptitle">PARACLE — Rural Bank of Paracale</p><p class="psub">Loan deductions</p></div>
             <div class="ptoolbar-right">
-                {!! $periodPillHtml !!}
                 <div class="search-wrap"><svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg><input type="text" placeholder="Search…" oninput="filterTable('tbl-paracle',this.value)"></div>
                 <a href="{{ route('payroll.remittance.pdf',[$selectedPeriod->period_id,'paracle_pdf']) }}" target="_blank" class="btn-pdf">📄 PDF</a>
             </div>
@@ -919,7 +752,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
             @foreach($records as $i => $r)
             <tr data-pid="{{ $r->payroll_id }}">
                 <td class="c pad"><span class="row-num">{{ $i+1 }}</span></td>
-                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->employee->employee_id ?? '' }}</div></td>
+                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->user_id ?? '' }}</div></td>
                 <td class="r pad mono">{{ number_format($r->gross_salary,2) }}</td>
                 <td class="r">@include('payroll._editable_cell',['pid'=>$r->payroll_id,'field'=>'loan_paracle','val'=>$r->loan_paracle,'cls'=>'amt-orange','locked'=>$isFinalized,'auto'=>false])</td>
                 @if(!$isFinalized)<td class="c pad"><button class="btn-del-row" onclick="askDeleteRow({{ $r->payroll_id }}, '{{ addslashes(($r->employee->last_name ?? '') . ', ' . ($r->employee->first_name ?? '')) }}')" title="Remove"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>@endif
@@ -933,9 +766,8 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
     {{-- ══ ALLOWANCES ══ --}}
     <div class="rem-tab-panel" id="panel-allowances">
         <div class="panel-toolbar">
-            <div><p class="ptitle">Allowances — PERA, RATA, TA</p><p class="psub">PERA auto ₱2,000 · RATA ₱9,500 head of office · TA ₱9,500 head of office · {{ $selectedPeriod->period_label }}</p></div>
+            <div><p class="ptitle">Allowances — PERA, RATA, TA</p><p class="psub">PERA auto ₱2,000 · RATA/TA ₱9,500 head of office</p></div>
             <div class="ptoolbar-right">
-                {!! $periodPillHtml !!}
                 <div class="search-wrap"><svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg><input type="text" placeholder="Search…" oninput="filterTable('tbl-allow',this.value)"></div>
                 <a href="{{ route('payroll.remittance.pdf',[$selectedPeriod->period_id,'allowances_pdf']) }}" target="_blank" class="btn-pdf">📄 PDF</a>
             </div>
@@ -954,7 +786,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
             @php $ta=($r->allowance_pera??0)+($r->allowance_rata??0)+($r->allowance_ta??0)+($r->allowance_other??0); @endphp
             <tr data-pid="{{ $r->payroll_id }}">
                 <td class="c pad"><span class="row-num">{{ $i+1 }}</span></td>
-                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->employee->employee_id ?? '' }}</div></td>
+                <td class="pad"><div class="emp-name">{{ $r->employee->last_name ?? '—' }}, {{ $r->employee->first_name ?? '' }}</div><div class="emp-id">{{ $r->user_id ?? '' }}</div></td>
                 <td class="r pad mono">{{ number_format($r->gross_salary,2) }}</td>
                 <td class="r">@include('payroll._editable_cell',['pid'=>$r->payroll_id,'field'=>'allowance_pera','val'=>$r->allowance_pera,'cls'=>'amt-green','locked'=>$isFinalized,'auto'=>true])</td>
                 <td class="r">@include('payroll._editable_cell',['pid'=>$r->payroll_id,'field'=>'allowance_rata','val'=>$r->allowance_rata,'cls'=>'amt-green','locked'=>$isFinalized,'auto'=>false])</td>
@@ -1024,7 +856,7 @@ const PERIOD_ID       = '{{ optional($selectedPeriod)->period_id ?? "" }}';
 const PAYROLL_DATA = {!! json_encode($records->keyBy('payroll_id')->map(function($r){
     return [
         'payroll_id'       => $r->payroll_id,
-        'employee_id'      => $r->employee->employee_id ?? '—',
+        'user_id'          => $r->user_id ?? '—',
         'last_name'        => $r->employee->last_name ?? '—',
         'first_name'       => $r->employee->first_name ?? '',
         'position'         => optional($r->employee->position)->position_name ?? '—',
@@ -1154,9 +986,6 @@ function refreshAllTotals() {
     const ovBadge = document.getElementById('badge-overpayment');
     if (ovBadge) ovBadge.textContent = rows.filter(r=>(r.overpayment||0)>0).length;
 
-    const statEmpEl = document.getElementById('statEmpCount');
-    if (statEmpEl) statEmpEl.textContent = cnt;
-
     setEl('ft-all-gsis_ee',         sum('gsis_ee'));
     setEl('ft-all-philhealth_ee',   sum('philhealth_ee'));
     setEl('ft-all-pagibig_govt',    sum('pagibig_govt'));
@@ -1165,6 +994,7 @@ function refreshAllTotals() {
     setEl('ft-all-loan_lbp',        sum('loan_lbp'));
     setEl('ft-all-loan_cngwmpc',    sum('loan_cngwmpc'));
     setEl('ft-all-loan_paracle',    sum('loan_paracle'));
+    
     // Other deduction in All tab
     const otherDedTotal = sum('other_deduction');
     const otherDedEl = document.getElementById('ft-all-other_deduction');
@@ -1174,6 +1004,7 @@ function refreshAllTotals() {
         otherDedEl.style.color = otherDedTotal > 0 ? '#92400e' : '';
         otherDedEl.style.fontWeight = otherDedTotal > 0 ? '700' : '';
     }
+    
     setEl('ft-all-allowance_pera',  sum('allowance_pera'));
     setEl('ft-all-total_deductions',sum('total_deductions'));
     setEl('ft-all-net_pay',         sum('net_pay'));
@@ -1203,44 +1034,6 @@ function refreshAllTotals() {
     setEl('ft-allow-allowance_ta',    sum('allowance_ta'));
     setEl('ft-allow-allowance_other', sum('allowance_other'));
     setEl('ft-allow-total', sum('allowance_pera')+sum('allowance_rata')+sum('allowance_ta')+sum('allowance_other'));
-
-    const gsisTotal = gsisF.reduce((a,f)=>a+sum(f),0);
-    const gsisEl = document.getElementById('strip-gsis');
-    if (gsisEl) gsisEl.textContent = '₱'+fmt(gsisTotal);
-    const sp = (id,val) => { const e=document.getElementById(id); if(e) e.textContent=fmt(val); };
-    sp('strip-gsis-ee', sum('gsis_ee'));
-    sp('strip-gsis-ec', sum('gsis_ec'));
-
-    const pagibigT = sum('pagibig_govt')+sum('pagibig_mpl')+sum('pagibig_calamity');
-    const piEl = document.getElementById('strip-pagibig');
-    if (piEl) piEl.textContent = '₱'+fmt(pagibigT);
-    sp('strip-pagibig-govt', sum('pagibig_govt'));
-    sp('strip-pagibig-mpl',  sum('pagibig_mpl'));
-    sp('strip-pagibig-cal',  sum('pagibig_calamity'));
-
-    const phicEl = document.getElementById('strip-phic');
-    if (phicEl) phicEl.textContent = '₱'+fmt(sum('philhealth_ee')+sum('philhealth_govt'));
-    sp('strip-phic-ee', sum('philhealth_ee'));
-
-    const wtaxEl = document.getElementById('strip-wtax');
-    if (wtaxEl) wtaxEl.textContent = '₱'+fmt(sum('withholding_tax'));
-    sp('strip-wtax-total', sum('withholding_tax'));
-    const wtaxCnt = document.getElementById('strip-wtax-count');
-    if (wtaxCnt) wtaxCnt.textContent = rows.filter(r=>(r.withholding_tax||0)>0).length;
-
-    const loansT = sum('loan_dbp')+sum('loan_lbp')+sum('loan_cngwmpc')+sum('loan_paracle');
-    const loansEl = document.getElementById('strip-loans');
-    if (loansEl) loansEl.textContent = '₱'+fmt(loansT);
-    sp('strip-dbp', sum('loan_dbp'));
-    sp('strip-lbp', sum('loan_lbp'));
-    sp('strip-cng', sum('loan_cngwmpc'));
-    sp('strip-par', sum('loan_paracle'));
-
-    const hdrNet = document.getElementById('hdr-net-total');
-    if (hdrNet) hdrNet.textContent = '₱'+parseInt(sum('net_pay')).toLocaleString('en-PH');
-
-    const hdrGross = document.getElementById('hdr-gross-total');
-    if (hdrGross) hdrGross.textContent = '₱'+parseInt(sum('gross_salary')).toLocaleString('en-PH');
 
     const cngF = ['cng_capital_share','cng_kiddie_savings','cng_savings','cng_regular_loan','cng_crisis_loan','cng_coop_canteen','cng_coop_store','cng_calamity_loan','cng_abuloy','cng_handog','cng_b2b_loan','cng_petty_cash','cng_commodity_loan'];
     cngF.forEach(f => {
@@ -1344,7 +1137,6 @@ function saveToDB(pid, field, value, cell) {
         body: JSON.stringify({ field, value }),
     })
     .then(r => {
-        // Surface validation (422) and auth (403) errors properly
         if (!r.ok) return r.json().then(e => { e.__status = r.status; throw e; });
         return r.json();
     })
@@ -1382,15 +1174,12 @@ function saveToDB(pid, field, value, cell) {
             if (dedEl) dedEl.textContent = fmt(res.total_deductions);
             if (netEl) netEl.textContent = fmt(res.net_pay);
 
-            // When philhealth_ee changes, mirror the govt (employer) share display
             if (field === 'philhealth_ee') {
                 const govtVal = res.philhealth_govt !== undefined
                     ? res.philhealth_govt
                     : computePhilhealthGovt(PAYROLL_DATA[pid]?.gross_salary || 0);
-                // Static display cell in PHIC tab
                 const pgEl = document.getElementById('phic-govt-' + pid);
                 if (pgEl) pgEl.textContent = fmt(govtVal);
-                // Any editable-cell instances
                 document.querySelectorAll(`.ec[data-pid="${pid}"][data-field="philhealth_govt"] input`).forEach(i => {
                     i.value = govtVal > 0 ? govtVal.toFixed(2) : '';
                     const ec = i.closest('.ec');
@@ -1545,7 +1334,7 @@ function openPanel(id, evt) {
     <div class="dp-card">
         <div class="dp-card-head"><div class="dp-icon"></div><p class="dp-card-title">Employee Information</p></div>
         <div class="dp-grid">
-            <div class="dp-field"><label>Employee ID</label><p style="font-family:monospace;">${d.employee_id}</p></div>
+            <div class="dp-field"><label>Employee ID</label><p style="font-family:monospace;">${d.user_id}</p></div>
             <div class="dp-field"><label>Gross Salary</label><p style="font-family:'JetBrains Mono',monospace;font-weight:700;">${fmtPeso(d.gross_salary)}</p></div>
             <div class="dp-field"><label>Department</label><p>${d.department}</p></div>
             <div class="dp-field"><label>Position</label><p>${d.position}</p></div>
@@ -1673,4 +1462,4 @@ document.addEventListener('keydown', e => {
 </script>
 
 </div>
-@endsection
+@endsection 

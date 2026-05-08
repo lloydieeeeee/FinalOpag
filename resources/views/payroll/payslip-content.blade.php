@@ -278,7 +278,7 @@
                 <span class="emp-info-label">Employee ID:</span>
                 <span class="emp-info-value">
                     <input class="edit-field" name="employee_id_display"
-                        value="{{ $record->employee_id }}"
+                        value="{{ $record->user_id }}"
                         readonly>
                     <span class="edit-mode-hint">Display only — edit in Employees</span>
                 </span>

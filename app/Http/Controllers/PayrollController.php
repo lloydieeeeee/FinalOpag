@@ -73,7 +73,7 @@ class PayrollController extends Controller
             if (!empty($dyn)) {
                 $r->cng_capital_share  = $r->cng_capital_share ?: (float)($dyn[32] ?? 0);
                 $r->cng_kiddie_savings = $r->cng_kiddie_savings ?: (float)($dyn[33] ?? 0);
-                $r->cng_savings         = $r->cng_savings ?: (float)($dyn[34] ?? 0);
+                $r->cng_savings        = $r->cng_savings ?: (float)($dyn[34] ?? 0);
                 $r->cng_regular_loan   = $r->cng_regular_loan ?: (float)($dyn[35] ?? 0);
                 $r->cng_crisis_loan    = $r->cng_crisis_loan ?: (float)($dyn[36] ?? 0);
                 $r->cng_coop_canteen   = $r->cng_coop_canteen ?: (float)($dyn[37] ?? 0);
@@ -84,12 +84,12 @@ class PayrollController extends Controller
                 $r->cng_b2b_loan       = $r->cng_b2b_loan ?: (float)($dyn[42] ?? 0);
                 $r->cng_petty_cash     = $r->cng_petty_cash ?: (float)($dyn[43] ?? 0);
                 $r->cng_commodity_loan = $r->cng_commodity_loan ?: (float)($dyn[44] ?? 0);
-                
-                $cngSum = $r->cng_capital_share + $r->cng_kiddie_savings + $r->cng_savings + 
-                          $r->cng_regular_loan + $r->cng_crisis_loan + $r->cng_coop_canteen + 
-                          $r->cng_coop_store + $r->cng_calamity_loan + $r->cng_abuloy + 
+
+                $cngSum = $r->cng_capital_share + $r->cng_kiddie_savings + $r->cng_savings +
+                          $r->cng_regular_loan + $r->cng_crisis_loan + $r->cng_coop_canteen +
+                          $r->cng_coop_store + $r->cng_calamity_loan + $r->cng_abuloy +
                           $r->cng_handog + $r->cng_b2b_loan + $r->cng_petty_cash + $r->cng_commodity_loan;
-                
+
                 if ($cngSum > 0 && !$r->loan_cngwmpc) {
                     $r->loan_cngwmpc = $cngSum;
                 }
@@ -117,7 +117,7 @@ class PayrollController extends Controller
 
             $col   = $ded->resolveColumn();
             $isDyn = ($col === null);
-            $isAll = $ded->isAllowance();
+            $isAll = method_exists($ded, 'isAllowance') ? $ded->isAllowance() : ($ded->entry_kind === 'addition');
 
             if ($ded->isFixed()) {
                 if (!$isDyn && array_key_exists($col, $overrides)) {
@@ -170,26 +170,30 @@ class PayrollController extends Controller
 
         return array_merge($hardFields, [
             'gross_salary'       => $gross,
-            'dynamic_deductions' => empty($dynamicFields) ? null : $dynamicFields,
+            'dynamic_deductions' => empty($dynamicFields) ? null : json_encode($dynamicFields),
             'total_deductions'   => $totalDeductions,
             'total_allowances'   => $totalAllowances,
             'net_pay'            => $netPay,
         ]);
     }
 
-    private function generatePayrollForPeriod(PayrollPeriod $period, array $employeeIds = [], array $overrides = []): int {
+    private function generatePayrollForPeriod(PayrollPeriod $period, array $userIds = [], array $overrides = []): int
+    {
         $query = Employee::where('is_active', 1)->where('salary', '>', 0);
-        if (!empty($employeeIds)) $query->whereIn('employee_id', $employeeIds);
+        if (!empty($userIds)) $query->whereIn('user_id', $userIds);
 
         $count = 0;
         PayrollRecord::unguard();
         $query->each(function (Employee $emp) use ($period, $overrides, &$count) {
-            $empOverrides = $overrides[$emp->employee_id] ?? [];
+            $empOverrides = $overrides[$emp->user_id] ?? [];
             $data = $this->computeFromSalary((float) $emp->salary, $empOverrides, $emp);
             $data['designation'] = optional($emp->position)->position_code;
+            
+            // Still including employee_id for display purposes as requested
+            $data['employee_id'] = $emp->employee_id;
 
             PayrollRecord::updateOrCreate(
-                ['period_id' => $period->period_id, 'employee_id' => $emp->employee_id],
+                ['period_id' => $period->period_id, 'user_id' => $emp->user_id],
                 $data
             );
             $count++;
@@ -212,10 +216,10 @@ class PayrollController extends Controller
 
         $records = PayrollRecord::with(['employee.position', 'employee.department'])
             ->where('period_id', optional($selectedPeriod)->period_id)
-            ->orderBy('employee_id')
+            ->orderBy('user_id')
             ->get();
-            
-        $records = $this->mapOldCngData($records); 
+
+        $records = $this->mapOldCngData($records);
 
         $summary = (object) [
             'employees'  => $records->count(),
@@ -247,8 +251,8 @@ class PayrollController extends Controller
             'month'          => 'required|integer|between:1,12',
             'year'           => 'required|integer|min:2000|max:2100',
             'period_label'   => 'required|string|max:100',
-            'employee_ids'   => 'required|array|min:1',
-            'employee_ids.*' => 'integer',
+            'user_ids'       => 'required|array|min:1',
+            'user_ids.*'     => 'integer',
         ]);
 
         $existing = PayrollPeriod::where('month', $request->month)->where('year', $request->year)->first();
@@ -259,17 +263,17 @@ class PayrollController extends Controller
 
         $period = PayrollPeriod::create([
             'period_label' => $request->period_label, 'month' => $request->month,
-            'year' => $request->year, 'status' => 'DRAFT',
-            'created_by' => Auth::user()?->employee?->employee_id,
+            'year'         => $request->year,          'status' => 'DRAFT',
+            'created_by'   => Auth::user()?->employee?->user_id ?? Auth::id(),
         ]);
 
         $rawOverrides = $request->input('overrides', []);
         $overrides = [];
-        foreach ($rawOverrides as $empId => $fields) {
-            $overrides[$empId] = $this->normaliseOverrides((array) $fields);
+        foreach ($rawOverrides as $userId => $fields) {
+            $overrides[$userId] = $this->normaliseOverrides((array) $fields);
         }
 
-        $this->generatePayrollForPeriod($period, $request->employee_ids, $overrides);
+        $this->generatePayrollForPeriod($period, $request->user_ids, $overrides);
 
         return redirect()->route('payroll.index', ['period_id' => $period->period_id])
                          ->with('success', "Payroll for {$period->period_label} generated successfully.");
@@ -307,39 +311,68 @@ class PayrollController extends Controller
             'cng_crisis_loan', 'cng_coop_canteen', 'cng_coop_store', 'cng_calamity_loan',
             'cng_abuloy', 'cng_handog', 'cng_b2b_loan', 'cng_petty_cash', 'cng_commodity_loan',
             'overpayment', 'other_deduction', 'allowance_pera', 'allowance_rata', 'allowance_ta', 'allowance_other',
+            'allowance_other_2', 'allowance_other_3'
         ];
 
+        // Bypass mass assignment block
         foreach ($hardNumeric as $col) {
-            if ($request->has($col)) $record->$col = round((float) $request->input($col), 2);
+            if ($request->has($col)) $record->{$col} = round((float) $request->input($col), 2);
         }
+
         if ($request->has('allowance_ra')) $record->allowance_rata = round((float) $request->input('allowance_ra'), 2);
-        
-        // ADDED BACK: Save all your custom text labels that were missing!
+
         $labels = [
             'label_loan_lbp', 'label_loan_dbp', 'label_loan_cngwmpc', 'label_loan_paracle',
-            'label_pera', 'label_rata', 'label_ta', 'label_allowance_other', 'other_deduction_label'
+            'label_pera', 'label_rata', 'label_ta', 'label_allowance_other', 'other_deduction_label',
+            'overpayment_label', 'label_allowance_other_2', 'label_allowance_other_3',
+            'label_withholding_tax', 'label_gsis_ee', 'label_gsis_ec', 'label_gsis_policy',
+            'label_gsis_emergency', 'label_gsis_real_estate', 'label_gsis_mpl', 'label_gsis_mpl_lite',
+            'label_gsis_gfal', 'label_gsis_computer', 'label_gsis_conso', 'label_pagibig_govt',
+            'label_pagibig_mpl', 'label_pagibig_calamity', 'label_philhealth_ee',
         ];
+
         foreach ($labels as $lbl) {
             if ($request->has($lbl)) {
-                $record->$lbl = substr(trim($request->input($lbl, '')), 0, 100);
+                $record->{$lbl} = substr(trim($request->input($lbl, '')), 0, 100);
             }
         }
 
         $cngSum = 0;
-        foreach(self::CNG_FIELDS as $f) { $cngSum += (float) $record->$f; }
+        foreach (self::CNG_FIELDS as $f) { $cngSum += (float) $record->{$f}; }
         $record->loan_cngwmpc = $cngSum;
 
+        /* ── Handle Dynamic Deductions payload ── */
         $dynamicInput = $request->input('dynamic', []);
         if (!empty($dynamicInput)) {
-            $dynamic = $record->dynamic_deductions ?? [];
-            foreach ($dynamicInput as $dedId => $amount) { $dynamic[(int) $dedId] = round((float) $amount, 2); }
+            $dynamic = is_string($record->dynamic_deductions) ? json_decode($record->dynamic_deductions, true) : ($record->dynamic_deductions ?? []);
+            foreach ($dynamicInput as $dedId => $amount) { 
+                $dynamic[(int) $dedId] = round((float) $amount, 2); 
+            }
             $record->dynamic_deductions = $dynamic;
         }
 
         if (method_exists($record, 'recomputeTotals')) {
             $deductionConfig = PayrollDeduction::active()->ordered()->get()->keyBy('id');
             $record->recomputeTotals($deductionConfig);
+        } else {
+            // Manual fallback sum
+            $totalDeductions = ($record->gsis_ee ?? 0) + ($record->gsis_policy ?? 0) + ($record->gsis_emergency ?? 0) + 
+                               ($record->gsis_real_estate ?? 0) + ($record->gsis_mpl ?? 0) + ($record->gsis_mpl_lite ?? 0) + 
+                               ($record->gsis_gfal ?? 0) + ($record->gsis_computer ?? 0) + ($record->gsis_conso ?? 0) + 
+                               ($record->pagibig_govt ?? 0) + ($record->pagibig_mpl ?? 0) + ($record->pagibig_calamity ?? 0) + 
+                               ($record->philhealth_ee ?? 0) + ($record->withholding_tax ?? 0) + ($record->loan_dbp ?? 0) + 
+                               ($record->loan_lbp ?? 0) + ($record->loan_cngwmpc ?? 0) + ($record->loan_paracle ?? 0) + 
+                               ($record->overpayment ?? 0) + ($record->other_deduction ?? 0);
+
+            $totalAllowances = ($record->allowance_pera ?? 0) + ($record->allowance_rata ?? 0) + 
+                               ($record->allowance_ta ?? 0) + ($record->allowance_other ?? 0);
+
+            $record->total_deductions = round($totalDeductions, 2);
+            $record->total_allowances = round($totalAllowances, 2);
+            $record->net_pay          = round(($record->gross_salary ?? 0) - $totalDeductions + $totalAllowances, 2);
+            $record->philhealth_govt  = round($record->philhealth_ee ?? 0, 2);
         }
+
         $record->save();
 
         return response()->json(['success' => true, 'record' => $record]);
@@ -350,9 +383,9 @@ class PayrollController extends Controller
         if (!$period instanceof PayrollPeriod) $period = PayrollPeriod::findOrFail($period);
         $records = PayrollRecord::with(['employee.position'])
             ->where('period_id', $period->period_id)
-            ->orderBy('employee_id')
+            ->orderBy('user_id')
             ->get();
-        $records = $this->mapOldCngData($records); 
+        $records = $this->mapOldCngData($records);
 
         $pdf = app('dompdf.wrapper');
         $pdf->setPaper('legal', 'landscape');
@@ -365,12 +398,14 @@ class PayrollController extends Controller
         $period = PayrollPeriod::findOrFail($id);
         $query = PayrollRecord::with(['employee', 'period'])
             ->where('period_id', $period->period_id)
-            ->orderBy('employee_id');
+            ->orderBy('user_id');
 
-        if ($empId = $request->input('emp_id')) $query->where('employee_id', $empId);
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->input('user_id'));
+        }
 
         $records = $query->get();
-        $records = $this->mapOldCngData($records); 
+        $records = $this->mapOldCngData($records);
 
         $pdf = app('dompdf.wrapper');
         $pdf->setPaper('letter', 'portrait');
@@ -382,15 +417,18 @@ class PayrollController extends Controller
     {
         $periodObj = PayrollPeriod::findOrFail($period);
         $user = Auth::user();
-        
-        $empId = $request->input('emp_id', optional($user->employee)->employee_id);
 
-        $records = PayrollRecord::with(['employee', 'period'])
-            ->where('period_id', $periodObj->period_id)
-            ->where('employee_id', $empId)
-            ->get();
-            
-        $records = $this->mapOldCngData($records); 
+        $query = PayrollRecord::with(['employee', 'period'])
+            ->where('period_id', $periodObj->period_id);
+
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->input('user_id'));
+        } else {
+            $query->where('user_id', optional($user->employee)->user_id ?? Auth::id());
+        }
+
+        $records = $query->get();
+        $records = $this->mapOldCngData($records);
 
         $pdf = app('dompdf.wrapper');
         $pdf->setPaper('letter', 'portrait');
@@ -412,11 +450,11 @@ class PayrollController extends Controller
 
         $record = $employee
             ? PayrollRecord::with(['employee', 'period'])
-                ->where('employee_id', $employee->employee_id)
+                ->where('user_id', $employee->user_id)
                 ->where('period_id', $selectedPeriodId)
                 ->first()
             : null;
-            
+
         $record = $this->mapOldCngData($record);
         return view('payroll.payslip', compact('periods', 'selectedPeriodId', 'record'));
     }
@@ -441,15 +479,14 @@ class PayrollController extends Controller
         if ($selectedPeriodId) {
             $records = PayrollRecord::with(['employee.position', 'period.createdBy'])
                 ->where('period_id', $selectedPeriodId)
-                ->orderBy('employee_id')
+                ->orderBy('user_id')
                 ->get();
-            $records = $this->mapOldCngData($records); 
+            $records = $this->mapOldCngData($records);
         }
 
         return view('payroll.payslip-manage', compact('periods', 'selectedPeriodId', 'records'));
     }
 
-    // ── RESTORED REMITTANCES METHODS ──
     public function remittances(Request $request)
     {
         $periods = PayrollPeriod::orderByDesc('year')->orderByDesc('month')->get();
@@ -460,9 +497,9 @@ class PayrollController extends Controller
         if ($selectedPeriodId) {
             $records = PayrollRecord::with(['employee.position', 'employee.department'])
                 ->where('period_id', $selectedPeriodId)
-                ->orderBy('employee_id')
+                ->orderBy('user_id')
                 ->get();
-            $records = $this->mapOldCngData($records); 
+            $records = $this->mapOldCngData($records);
         }
 
         return view('payroll.remittances', compact('periods', 'selectedPeriod', 'records'));
@@ -473,15 +510,50 @@ class PayrollController extends Controller
         $period = PayrollPeriod::findOrFail($periodId);
         $records = PayrollRecord::with(['employee.position'])
             ->where('period_id', $period->period_id)
-            ->orderBy('employee_id')
+            ->orderBy('user_id')
             ->get();
-            
-        $records = $this->mapOldCngData($records); 
+
+        $records = $this->mapOldCngData($records);
+
+        $viewMap = [
+            'paracle'         => 'payroll.remittance-pdf.paracle_pdf',
+            'paracle_pdf'     => 'payroll.remittance-pdf.paracle_pdf',
+            'gsis'            => 'payroll.remittance-pdf.gsis',
+            'gsis_pdf'        => 'payroll.remittance-pdf.gsis',
+            'pagibig'         => 'payroll.remittance-pdf.pagibig',
+            'pagibig_pdf'     => 'payroll.remittance-pdf.pagibig',
+            'philhealth'      => 'payroll.remittance-pdf.philhealth',
+            'philhealth_pdf'  => 'payroll.remittance-pdf.philhealth',
+            'wtax'            => 'payroll.remittance-pdf.wtax',
+            'wtax_pdf'        => 'payroll.remittance-pdf.wtax',
+            'cngwmpc'         => 'payroll.remittance-pdf.cng_pdf',
+            'cng'             => 'payroll.remittance-pdf.cng_pdf',
+            'cng_pdf'         => 'payroll.remittance-pdf.cng_pdf',
+            'dbp'             => 'payroll.remittance-pdf.dbp_pdf',
+            'dbp_pdf'         => 'payroll.remittance-pdf.dbp_pdf',
+            'lbp'             => 'payroll.remittance-pdf.lbp_pdf',
+            'lbp_pdf'         => 'payroll.remittance-pdf.lbp_pdf',
+            'allowances'      => 'payroll.remittance-pdf.allowances_pdf',
+            'allowances_pdf'  => 'payroll.remittance-pdf.allowances_pdf',
+            'overpayment'     => 'payroll.remittance-pdf.overpayment_pdf',
+            'overpayment_pdf' => 'payroll.remittance-pdf.overpayment_pdf',
+        ];
+
+        $typeKey  = strtolower($type);
+        $viewName = $viewMap[$typeKey] ?? null;
+
+        if (!$viewName || !view()->exists($viewName)) {
+            $hint = $viewName
+                ? "Blade file missing: resources/views/" . str_replace('.', '/', $viewName) . ".blade.php"
+                : "No mapping found for type '{$type}'. Add it to \$viewMap in PayrollController::remittancePdf().";
+
+            abort(404, "Remittance PDF could not be generated. {$hint}");
+        }
 
         $pdf = app('dompdf.wrapper');
         $pdf->setPaper('legal', 'landscape');
-        $pdf->loadView('payroll.remittance-pdf', compact('period', 'records', 'type'));
-        
+        $pdf->loadView($viewName, compact('period', 'records', 'type'));
+
         return $pdf->stream("remittance_{$type}_{$period->period_label}.pdf");
     }
 }
