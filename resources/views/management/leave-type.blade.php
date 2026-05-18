@@ -4,24 +4,15 @@
 
 @section('content')
 <style>
-/*
- * KEY IDEA:
- * .mgmt-page   = full remaining viewport height, flex column, no overflow
- * .mgmt-static = breadcrumb + sub-tabs + card-header — flex-shrink:0, never scrolls
- * .mgmt-card   = flex:1, min-height:0 — fills remaining height
- * .tsa          = table scroll area — flex:1, overflow-y:auto — ONLY THIS SCROLLS
- */
-
 /* ── Full-height page wrapper ── */
 .mgmt-page {
     display: flex;
     flex-direction: column;
-    /* subtract topbar height (72px) + page padding (48px top+bottom) */
     height: calc(100vh - 120px);
     overflow: hidden;
 }
 
-/* ── Breadcrumb (never scrolls) ── */
+/* ── Breadcrumb ── */
 .breadcrumb {
     flex-shrink: 0;
     display: flex; align-items: center; gap: 8px;
@@ -32,7 +23,7 @@
 .breadcrumb .sep { color: #d1d5db; }
 .breadcrumb .current { color: #1a3a1a; font-weight: 600; }
 
-/* ── Sub-tab bar (never scrolls) ── */
+/* ── Sub-tab bar ── */
 .sub-tab-bar {
     flex-shrink: 0;
     display: flex; align-items: center;
@@ -50,12 +41,11 @@
 }
 .sub-tab-btn:hover { color: #1a3a1a; }
 .sub-tab-btn.active { color: #1a3a1a; border-bottom-color: #2d5a1b; font-weight: 700; }
-.sub-tab-btn.muted  { cursor: default; opacity: .38; pointer-events: none; }
 
-/* ── Card (flex column, fills remaining height) ── */
+/* ── Card ── */
 .mgmt-card {
     flex: 1;
-    min-height: 0; /* critical for flex children to scroll */
+    min-height: 0; 
     display: flex;
     flex-direction: column;
     background: #fff;
@@ -66,7 +56,7 @@
     overflow: hidden;
 }
 
-/* ── Card header (never scrolls) ── */
+/* ── Card header ── */
 .mgmt-card-header {
     flex-shrink: 0;
     padding: 16px 24px 14px;
@@ -93,7 +83,7 @@
 .btn-add { padding: 8px 18px; font-size: 13px; font-weight: 700; border: none; border-radius: 9px; background: #1a3a1a; color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background .15s; }
 .btn-add:hover { background: #2d5a1b; }
 
-/* ── Table scroll area (THIS IS THE ONLY THING THAT SCROLLS) ── */
+/* ── Table scroll area ── */
 .tsa {
     flex: 1;
     min-height: 0;
@@ -103,22 +93,22 @@
     scrollbar-color: #e5e7eb transparent;
 }
 .tsa::-webkit-scrollbar { width: 5px; height: 5px; }
-.tsa::-webkit-scrollbar-track { background: transparent; }
 .tsa::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 99px; }
-.tsa::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
 
 /* ── Table ── */
 .dt { width: 100%; border-collapse: collapse; font-size: 13px; }
 .dt thead { position: sticky; top: 0; z-index: 2; }
 .dt thead tr { background: #fafafa; border-bottom: 1px solid #f3f4f6; }
-.dt th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.dt th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.dt th.center { text-align: center; } /* Fixed alignment */
 .dt th.s { cursor: pointer; user-select: none; }
 .dt th.s:hover { color: #374151; }
 .dt td { padding: 12px 16px; border-bottom: 1px solid #f9fafb; color: #374151; vertical-align: middle; }
+.dt td.center { text-align: center; } /* Fixed alignment */
 .dt tbody tr:last-child td { border-bottom: none; }
 .dt tbody tr:hover td { background: #fafafa; }
 
-/* ── Card footer (never scrolls) ── */
+/* ── Card footer ── */
 .mgmt-footer {
     flex-shrink: 0;
     padding: 10px 24px;
@@ -134,9 +124,9 @@
 .cpill { font-family: monospace; font-size: 12px; background: #f3f4f6; padding: 3px 9px; border-radius: 6px; color: #374151; font-weight: 600; }
 
 /* ── Toggle ── */
-.tog { display: inline-flex; align-items: center; cursor: pointer; gap: 8px; }
+.tog { display: inline-flex; align-items: center; cursor: pointer; gap: 8px; margin:0; }
 .tog input { display: none; }
-.tsl { width: 38px; height: 20px; border-radius: 99px; background: #e5e7eb; position: relative; transition: background .2s; flex-shrink: 0; }
+.tsl { width: 38px; height: 20px; border-radius: 99px; background: #e5e7eb; position: relative; transition: background .2s; flex-shrink: 0; margin:0;}
 .tsl::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
 .tog input:checked + .tsl { background: #22c55e; }
 .tog input:checked + .tsl::after { left: 21px; }
@@ -146,12 +136,12 @@
 .ib { width: 32px; height: 32px; border-radius: 8px; border: none; background: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s; color: #9ca3af; }
 .ib.e:hover { background: #f0fdf4; color: #16a34a; }
 .ib.d:hover { background: #fee2e2; color: #dc2626; }
-.dt td input[type=checkbox], .dt th input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: #2d5a1b; }
+.dt td input[type=checkbox], .dt th input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: #2d5a1b; margin:0; }
 
 /* ── Modals ── */
 .ov { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.45); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .22s; }
 .ov.show { opacity: 1; pointer-events: all; }
-.mc { background: #fff; border-radius: 20px; padding: 32px; width: 490px; max-width: 94vw; box-shadow: 0 24px 64px rgba(0,0,0,.2); transform: scale(.93) translateY(10px); transition: transform .26s cubic-bezier(.34,1.56,.64,1); }
+.mc { background: #fff; border-radius: 20px; padding: 32px; width: 520px; max-width: 94vw; box-shadow: 0 24px 64px rgba(0,0,0,.2); transform: scale(.93) translateY(10px); transition: transform .26s cubic-bezier(.34,1.56,.64,1); }
 .ov.show .mc { transform: scale(1) translateY(0); }
 .mt { font-size: 16px; font-weight: 800; color: #111827; margin: 0 0 4px; }
 .ms { font-size: 12px; color: #9ca3af; margin: 0 0 22px; }
@@ -160,7 +150,7 @@
 .fi:focus { border-color: #2d5a1b; }
 .fi.err { border-color: #dc2626; }
 .ferr { font-size: 11px; color: #dc2626; margin-top: 4px; display: none; }
-.fr { margin-bottom: 16px; }
+.fr { margin-bottom: 16px; display: flex; align-items: center; gap: 12px; } /* Fixed modal grid align */
 .fr2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
 .mf { display: flex; justify-content: flex-end; gap: 10px; margin-top: 26px; }
 .bcm { padding: 9px 20px; font-size: 13px; font-weight: 600; border: 1.5px solid #e5e7eb; border-radius: 10px; background: #fff; color: #6b7280; cursor: pointer; }
@@ -177,17 +167,14 @@
 .ti { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 </style>
 
-{{-- ════ PAGE WRAPPER (full height, column flex) ════ --}}
 <div class="mgmt-page">
 
-    {{-- Breadcrumb — static, never scrolls --}}
     <div class="breadcrumb">
         <a href="{{ route('dashboard') }}">Management Settings</a>
         <span class="sep">›</span>
         <span class="current">Leave Type</span>
     </div>
 
-    {{-- Sub-tab bar — static, never scrolls --}}
     <div class="sub-tab-bar">
         <a href="{{ route('settings.leaveType') }}"       class="sub-tab-btn active">Leave Type</a>
         <a href="{{ route('settings.department') }}"      class="sub-tab-btn">Department</a>
@@ -199,10 +186,8 @@
         <a href="{{ route('settings.role') }}"            class="sub-tab-btn">Role</a>
     </div>
 
-    {{-- Card (fills remaining height) --}}
     <div class="mgmt-card">
 
-        {{-- Card header — static, never scrolls --}}
         <div class="mgmt-card-header">
             <div>
                 <p class="mgmt-card-title">Leave Type</p>
@@ -227,46 +212,55 @@
             </div>
         </div>
 
-        {{-- ★ THIS IS THE ONLY PART THAT SCROLLS ★ --}}
         <div class="tsa">
             <table class="dt">
                 <thead>
                     <tr>
-                        <th style="width:40px;"><input type="checkbox" id="chkAll" onchange="toggleAll(this)"></th>
+                        <th style="width:40px; text-align:center;"><input type="checkbox" id="chkAll" onchange="toggleAll(this)"></th>
                         <th class="s" onclick="sortBy('name')">Leave Name ↕</th>
-                        <th>Code</th>
-                        <th>Accrual Based</th>
-                        <th>Accrual Rate / mo.</th>
-                        <th class="s" onclick="sortBy('status')">Status ↕</th>
+                        <th class="center">Code</th>
+                        <th class="center">Annual Limit</th>
+                        <th class="center">Notice Rule</th>
+                        <th class="center">Accrual Based</th>
+                        <th class="center">Accrual Rate / mo.</th>
+                        <th class="center s" onclick="sortBy('status')">Status ↕</th>
                         <th style="text-align:right;padding-right:24px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="ltBody">
                     @forelse($leaveTypes as $lt)
                     <tr class="ltr" data-id="{{ $lt->leave_type_id }}" data-name="{{ strtolower($lt->type_name) }}" data-status="{{ $lt->is_active ? 'enabled' : 'disabled' }}">
-                        <td><input type="checkbox" class="rchk" value="{{ $lt->leave_type_id }}" onchange="onChk()"></td>
+                        <td class="center"><input type="checkbox" class="rchk" value="{{ $lt->leave_type_id }}" onchange="onChk()"></td>
                         <td style="font-weight:600;color:#111827;">{{ $lt->type_name }}</td>
-                        <td><span class="cpill">{{ $lt->type_code }}</span></td>
-                        <td>
+                        <td class="center"><span class="cpill">{{ $lt->type_code }}</span></td>
+                        <td class="center" style="color:#6b7280;">{{ $lt->max_days ? $lt->max_days.' days' : 'Unlimited' }}</td>
+                        <td class="center" style="color:#6b7280;">
+                            @if($lt->allow_past_filing)
+                                <span style="color:#d97706;font-weight:600;">Allows Late Filing</span>
+                            @else
+                                {{ $lt->notice_days ? $lt->notice_days.' days prior' : '—' }}
+                            @endif
+                        </td>
+                        <td class="center">
                             @if($lt->is_accrual_based)
                                 <span class="bon">Yes</span>
                             @else
                                 <span style="font-size:12px;color:#d1d5db;">—</span>
                             @endif
                         </td>
-                        <td style="color:#6b7280;">{{ $lt->is_accrual_based && $lt->accrual_rate ? number_format($lt->accrual_rate,2).' days' : '—' }}</td>
-                        <td>
+                        <td class="center" style="color:#6b7280;">{{ $lt->is_accrual_based && $lt->accrual_rate ? number_format($lt->accrual_rate,2).' days' : '—' }}</td>
+                        <td class="center">
                             <label class="tog">
                                 <input type="checkbox" {{ $lt->is_active ? 'checked' : '' }} onchange="toggleSt({{ $lt->leave_type_id }}, this)">
                                 <span class="tsl"></span>
                             </label>
-                            <span id="lbl_{{ $lt->leave_type_id }}" class="{{ $lt->is_active ? 'bon' : 'boff' }}">
+                            <span id="lbl_{{ $lt->leave_type_id }}" class="{{ $lt->is_active ? 'bon' : 'boff' }}" style="margin-left:6px;">
                                 {{ $lt->is_active ? 'Enabled' : 'Disabled' }}
                             </span>
                         </td>
                         <td>
                             <div class="ac">
-                                <button class="ib e" title="Edit" onclick="openEdit({{ $lt->leave_type_id }},'{{ addslashes($lt->type_name) }}','{{ $lt->type_code }}',{{ $lt->is_accrual_based ? 1:0 }},'{{ $lt->accrual_rate ?? '' }}')">
+                                <button class="ib e" title="Edit" onclick="openEdit({{ $lt->leave_type_id }},'{{ addslashes($lt->type_name) }}','{{ $lt->type_code }}',{{ $lt->is_accrual_based ? 1:0 }},'{{ $lt->accrual_rate ?? '' }}', '{{ $lt->max_days ?? '' }}', '{{ $lt->notice_days ?? '' }}', {{ $lt->allow_past_filing ? 1:0 }})">
                                     <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </button>
                                 <button class="ib d" title="Delete" onclick="openDel({{ $lt->leave_type_id }},'{{ addslashes($lt->type_name) }}')">
@@ -276,21 +270,17 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="7" style="padding:52px;text-align:center;color:#9ca3af;font-size:13px;">No leave types found.</td></tr>
+                    <tr><td colspan="9" style="padding:52px;text-align:center;color:#9ca3af;font-size:13px;">No leave types found.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        {{-- END scroll area --}}
 
-        {{-- Footer — static, never scrolls --}}
         <div class="mgmt-footer">{{ count($leaveTypes) }} leave type(s)</div>
 
-    </div>{{-- end .mgmt-card --}}
+    </div>
 
-</div>{{-- end .mgmt-page --}}
-
-{{-- ════ MODALS (outside page wrapper, always on top) ════ --}}
+</div>
 
 {{-- ADD / EDIT --}}
 <div id="fo" class="ov" onclick="if(event.target===this)closeForm()">
@@ -309,7 +299,30 @@
                 <p class="ferr" id="eC">Type code is required.</p>
             </div>
         </div>
-        <div class="fr" style="display:flex;align-items:center;gap:10px;">
+        
+        <div class="fr2">
+            <div>
+                <label class="fl">Annual Limit (Days)</label>
+                <input class="fi" id="fM" type="number" step="0.5" min="0.5" placeholder="Blank for unlimited">
+            </div>
+            <div>
+                <label class="fl">Prior Notice (Days)</label>
+                <input class="fi" id="fND" type="number" step="1" min="0" placeholder="e.g. 5">
+            </div>
+        </div>
+
+        <div class="fr">
+            <label class="tog">
+                <input type="checkbox" id="fAPF">
+                <span class="tsl"></span>
+            </label>
+            <div>
+                <p style="font-size:13px;font-weight:600;color:#374151;margin:0;">Allow Past / Emergency Filing</p>
+                <p style="font-size:11px;color:#9ca3af;margin:2px 0 0;">Overrides prior notice. Allows filing after the leave date.</p>
+            </div>
+        </div>
+
+        <div class="fr">
             <label class="tog">
                 <input type="checkbox" id="fA" onchange="onAcc()">
                 <span class="tsl"></span>
@@ -319,10 +332,12 @@
                 <p style="font-size:11px;color:#9ca3af;margin:2px 0 0;">Earns credits monthly (e.g. VL &amp; SL = 1.25 days/month)</p>
             </div>
         </div>
-        <div class="fr" id="accRow" style="display:none;">
+        
+        <div id="accRow" style="display:none;margin-top:16px;">
             <label class="fl">Accrual Rate (days / month)</label>
             <input class="fi" id="fR" type="number" step="0.01" min="0" placeholder="e.g. 1.25">
         </div>
+        
         <div class="mf">
             <button class="bcm" onclick="closeForm()">Cancel</button>
             <button class="bsm" id="bS" onclick="saveForm()">Add Leave Type</button>
@@ -365,12 +380,86 @@ function toggleAll(cb){document.querySelectorAll('.rchk').forEach(c=>{if(c.close
 function onChk(){const ch=[...document.querySelectorAll('.rchk:checked')],vi=[...document.querySelectorAll('.rchk')].filter(c=>c.closest('tr').style.display!=='none');document.getElementById('chkAll').indeterminate=ch.length>0&&ch.length<vi.length;document.getElementById('chkAll').checked=ch.length>0&&ch.length===vi.length;document.getElementById('bds').classList.toggle('show',ch.length>0);}
 function deleteSelected(){const ids=[...document.querySelectorAll('.rchk:checked')].map(c=>c.value);if(!ids.length)return;if(!confirm(`Delete ${ids.length} item(s)?`))return;Promise.all(ids.map(id=>fetch(`${BASE}/${id}`,{method:'DELETE',headers:{'X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest'}}).then(r=>r.json()))).then(()=>{toast('Deleted',`${ids.length} removed.`,'error');setTimeout(()=>location.reload(),900);});}
 function toggleSt(id,cb){fetch(`${BASE}/${id}/toggle`,{method:'PATCH',headers:{'X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest','Content-Type':'application/json'}}).then(r=>r.json()).then(d=>{if(d.success){const l=document.getElementById('lbl_'+id);l.className=d.is_active?'bon':'boff';l.textContent=d.is_active?'Enabled':'Disabled';const row=cb.closest('tr');if(row)row.dataset.status=d.is_active?'enabled':'disabled';toast(d.is_active?'Enabled':'Disabled','Status updated.',d.is_active?'success':'info');}else{cb.checked=!cb.checked;toast('Error',d.message,'error');}}).catch(()=>{cb.checked=!cb.checked;toast('Error','Network error.','error');});}
-function openAdd(){eid=null;document.getElementById('mT').textContent='Add Leave Type';document.getElementById('mS').textContent='Fill in the details to add a new leave category.';document.getElementById('bS').textContent='Add Leave Type';document.getElementById('fN').value='';document.getElementById('fC').value='';document.getElementById('fA').checked=false;document.getElementById('fR').value='';document.getElementById('accRow').style.display='none';clearE();document.getElementById('fo').classList.add('show');setTimeout(()=>document.getElementById('fN').focus(),150);}
-function openEdit(id,nm,cd,ac,rt){eid=id;document.getElementById('mT').textContent='Edit Leave Type';document.getElementById('mS').textContent='Update the details for this leave category.';document.getElementById('bS').textContent='Save Changes';document.getElementById('fN').value=nm;document.getElementById('fC').value=cd;document.getElementById('fA').checked=ac==1;document.getElementById('fR').value=rt||'';document.getElementById('accRow').style.display=ac==1?'':'none';clearE();document.getElementById('fo').classList.add('show');}
+
+function openAdd(){
+    eid=null;
+    document.getElementById('mT').textContent='Add Leave Type';
+    document.getElementById('mS').textContent='Fill in the details to add a new leave category.';
+    document.getElementById('bS').textContent='Add Leave Type';
+    document.getElementById('fN').value='';
+    document.getElementById('fC').value='';
+    document.getElementById('fA').checked=false;
+    document.getElementById('fR').value='';
+    document.getElementById('fM').value='';
+    document.getElementById('fND').value='';
+    document.getElementById('fAPF').checked=false;
+    document.getElementById('accRow').style.display='none';
+    clearE();
+    document.getElementById('fo').classList.add('show');
+    setTimeout(()=>document.getElementById('fN').focus(),150);
+}
+
+function openEdit(id,nm,cd,ac,rt, md, nd, apf){
+    eid=id;
+    document.getElementById('mT').textContent='Edit Leave Type';
+    document.getElementById('mS').textContent='Update the details for this leave category.';
+    document.getElementById('bS').textContent='Save Changes';
+    document.getElementById('fN').value=nm;
+    document.getElementById('fC').value=cd;
+    document.getElementById('fA').checked=ac==1;
+    document.getElementById('fR').value=rt||'';
+    document.getElementById('fM').value=md||'';
+    document.getElementById('fND').value=nd||'';
+    document.getElementById('fAPF').checked=apf==1;
+    document.getElementById('accRow').style.display=ac==1?'':'none';
+    clearE();
+    document.getElementById('fo').classList.add('show');
+}
+
 function closeForm(){document.getElementById('fo').classList.remove('show');}
 function onAcc(){document.getElementById('accRow').style.display=document.getElementById('fA').checked?'':'none';}
 function clearE(){['fN','fC'].forEach(i=>document.getElementById(i).classList.remove('err'));document.querySelectorAll('.ferr').forEach(e=>e.style.display='none');}
-function saveForm(){clearE();const nm=document.getElementById('fN').value.trim(),cd=document.getElementById('fC').value.trim(),ac=document.getElementById('fA').checked,rt=document.getElementById('fR').value;let ok=true;if(!nm){document.getElementById('eN').style.display='block';document.getElementById('fN').classList.add('err');ok=false;}if(!cd){document.getElementById('eC').style.display='block';document.getElementById('fC').classList.add('err');ok=false;}if(!ok)return;const b=document.getElementById('bS');b.disabled=true;b.textContent='Saving…';fetch(eid?`${BASE}/${eid}`:BASE,{method:eid?'PUT':'POST',headers:{'X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest','Content-Type':'application/json'},body:JSON.stringify({type_name:nm,type_code:cd,is_accrual_based:ac,accrual_rate:ac?rt:null})}).then(r=>r.json()).then(d=>{b.disabled=false;b.textContent=eid?'Save Changes':'Add Leave Type';if(d.success){closeForm();toast(eid?'Updated':'Added',d.message,'success');setTimeout(()=>location.reload(),900);}else toast('Error',d.message,'error');}).catch(()=>{b.disabled=false;b.textContent='Save';toast('Error','Network error.','error');});}
+
+function saveForm(){
+    clearE();
+    const nm=document.getElementById('fN').value.trim(),
+          cd=document.getElementById('fC').value.trim(),
+          ac=document.getElementById('fA').checked,
+          rt=document.getElementById('fR').value,
+          md=document.getElementById('fM').value,
+          nd=document.getElementById('fND').value,
+          apf=document.getElementById('fAPF').checked;
+          
+    let ok=true;
+    if(!nm){document.getElementById('eN').style.display='block';document.getElementById('fN').classList.add('err');ok=false;}
+    if(!cd){document.getElementById('eC').style.display='block';document.getElementById('fC').classList.add('err');ok=false;}
+    if(!ok)return;
+    
+    const b=document.getElementById('bS');
+    b.disabled=true; b.textContent='Saving…';
+    
+    fetch(eid?`${BASE}/${eid}`:BASE,{
+        method:eid?'PUT':'POST',
+        headers:{'X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest','Content-Type':'application/json'},
+        body:JSON.stringify({
+            type_name:nm,
+            type_code:cd,
+            is_accrual_based:ac,
+            accrual_rate:ac?rt:null,
+            max_days:md||null,
+            notice_days:nd||null,
+            allow_past_filing:apf
+        })
+    })
+    .then(r=>r.json())
+    .then(d=>{
+        b.disabled=false; b.textContent=eid?'Save Changes':'Add Leave Type';
+        if(d.success){closeForm();toast(eid?'Updated':'Added',d.message,'success');setTimeout(()=>location.reload(),900);}
+        else toast('Error',d.message,'error');
+    })
+    .catch(()=>{b.disabled=false;b.textContent='Save';toast('Error','Network error.','error');});
+}
+
 function openDel(id,nm){did=id;document.getElementById('dN').textContent=nm;document.getElementById('do').classList.add('show');}
 function closeDel(){document.getElementById('do').classList.remove('show');did=null;}
 function execDel(){if(!did)return;fetch(`${BASE}/${did}`,{method:'DELETE',headers:{'X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest'}}).then(r=>r.json()).then(d=>{closeDel();if(d.success){toast('Deleted',d.message,'error');setTimeout(()=>location.reload(),900);}else toast('Error',d.message,'error');});}

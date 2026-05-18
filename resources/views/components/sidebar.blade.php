@@ -19,7 +19,7 @@
         ['label' => 'Deduction Management', 'route' => 'payroll.deductions.index'],
     ]],
         ['label' => 'Management Settings', 'route' => 'settings.leaveType', 'icon' => 'settings'],
-        ['label' => 'User Logs',           'route' => 'logs.index',         'icon' => 'file'],
+        //['label' => 'User Logs',           'route' => 'logs.index',         'icon' => 'file'],
     ];
 
     $employeeNav = [

@@ -108,7 +108,9 @@
 .action-menu { position:relative; display:inline-block; }
 .action-menu-btn { background:none; border:none; cursor:pointer; padding:4px 8px; border-radius:6px; color:#9ca3af; font-size:18px; letter-spacing:2px; line-height:1; }
 .action-menu-btn:hover { background:#f3f4f6; color:#374151; }
-.action-dropdown { position:absolute; right:0; top:100%; margin-top:4px; z-index:50; background:#fff; border:1px solid #e5e7eb; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.1); min-width:170px; display:none; }
+
+/* FIXED: Action dropdown now uses position: fixed to prevent clipping in scrollable tables */
+.action-dropdown { position:fixed; z-index:9999; background:#fff; border:1px solid #e5e7eb; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.1); min-width:170px; display:none; }
 .action-dropdown.open { display:block; }
 .action-item { display:flex; align-items:center; gap:8px; padding:9px 14px; font-size:13px; color:#374151; cursor:pointer; border:none; background:none; width:100%; text-align:left; }
 .action-item:hover { background:#f9fafb; }
@@ -608,7 +610,7 @@
                             </td>
                             <td class="mob-action" onclick="event.stopPropagation()" style="text-align:center;padding-right:8px;">
                                 <div class="action-menu">
-                                    <button class="action-menu-btn" onclick="toggleMenu(this)">···</button>
+                                    <button class="action-menu-btn" onclick="toggleMenu(this, event)">···</button>
                                     <div class="action-dropdown">
                                         <button class="action-item" onclick="openDetailPanel({{ $hdId }}, event)">
                                             <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -773,7 +775,7 @@
                             </td>
                             <td class="mob-action" onclick="event.stopPropagation()" style="text-align:center;padding-right:8px;">
                                 <div class="action-menu">
-                                    <button class="action-menu-btn" onclick="toggleMenu(this)">···</button>
+                                    <button class="action-menu-btn" onclick="toggleMenu(this, event)">···</button>
                                     <div class="action-dropdown">
                                         <button class="action-item" onclick="openDetailPanel({{ $hdId }}, event)">
                                             <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -1027,14 +1029,45 @@ function toggleStatusDropdown(key, e) {
     }
 }
 
+/* ── Action Dropdown Toggle (Fixed Positioning fix) ── */
+function toggleMenu(btn, e) {
+    if(e) e.stopPropagation();
+    const dd = btn.nextElementSibling;
+    const isOpen = dd.classList.contains('open');
+    document.querySelectorAll('.action-dropdown.open').forEach(d => { if(d!==dd) d.classList.remove('open'); });
+    if (!isOpen) {
+        dd.classList.add('open');
+        const rect = btn.getBoundingClientRect();
+        // Float the menu right below the button, aligned to the right side
+        dd.style.top = (rect.bottom + 4) + 'px';
+        dd.style.left = (rect.right - 170) + 'px'; // 170 is min-width of the dropdown
+    } else {
+        dd.classList.remove('open');
+    }
+}
+
 document.addEventListener('click', () => {
     document.querySelectorAll('.status-changer.open').forEach(el => el.classList.remove('open'));
     document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
 });
-window.addEventListener('scroll', () =>
-    document.querySelectorAll('.status-changer.open').forEach(el => el.classList.remove('open')), true);
-window.addEventListener('resize', () =>
-    document.querySelectorAll('.status-changer.open').forEach(el => el.classList.remove('open')));
+
+// Hide menus when scrolling the table so they don't visually detach from the row
+const scrollWraps = document.querySelectorAll('.tsa');
+scrollWraps.forEach(wrap => {
+    wrap.addEventListener('scroll', () => {
+        document.querySelectorAll('.status-changer.open').forEach(el => el.classList.remove('open'));
+        document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
+    });
+});
+
+window.addEventListener('scroll', () => {
+    document.querySelectorAll('.status-changer.open').forEach(el => el.classList.remove('open'));
+    document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
+}, true);
+window.addEventListener('resize', () => {
+    document.querySelectorAll('.status-changer.open').forEach(el => el.classList.remove('open'));
+    document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
+});
 
 /* ── Change status ── */
 function changeStatus(hdId, newStatus, e) {
@@ -1055,6 +1088,27 @@ function changeStatus(hdId, newStatus, e) {
     doStatusUpdate(hdId, newStatus, null);
 }
 
+/* ── AUTO PRINT PDF ENGINE ── */
+function autoPrintPdf(id, empName, dateStr) {
+    const safeName = (empName || 'Employee').replace(/[^a-zA-Z0-9]/g, '_');
+    const fileName = `${safeName}_HalfDay_${(dateStr||'').replace(/[^a-zA-Z0-9]/g, '')}.pdf`;
+
+    fetch(`${CERT_URL}/${id}/cert`)
+        .then(r => r.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = fileName; 
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            setTimeout(() => a.remove(), 100);
+        })
+        .catch(err => console.error('Auto-PDF failed:', err));
+}
+
 /* ── AJAX update ── */
 function doStatusUpdate(hdId, newStatus, reason) {
     const spin = document.getElementById('scspin_'+hdId);
@@ -1073,6 +1127,15 @@ function doStatusUpdate(hdId, newStatus, reason) {
     .then(data => {
         if (spin) spin.classList.remove('show');
         if (!data.success) { showToast('Error', data.message||'Could not update.','error'); return; }
+
+        // === NEW AUTO-PDF TRIGGER ===
+        if (newStatus === 'APPROVED') {
+            const d = HD_DATA[hdId];
+            const empName = d ? `${d.last_name}_${d.first_name}` : 'Employee';
+            const dateStr = d ? d.date_of_absence : 'Date';
+            autoPrintPdf(hdId, empName, dateStr);
+        }
+        // ============================
 
         if (HD_DATA[hdId]) {
             HD_DATA[hdId].status     = newStatus;
@@ -1186,7 +1249,7 @@ function moveRowToHistory(hdId, appRow, approvedDate, approvedBy) {
         <td data-label="Approved By" style="font-size:12px;color:#374151;">${approvedByFmt}</td>
         <td class="mob-action" onclick="event.stopPropagation()" style="text-align:center;padding-right:8px;">
             <div class="action-menu">
-                <button class="action-menu-btn" onclick="toggleMenu(this)">···</button>
+                <button class="action-menu-btn" onclick="toggleMenu(this, event)">···</button>
                 <div class="action-dropdown">
                     <button class="action-item" onclick="openDetailPanel(${hdId}, event)">
                         <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -1373,13 +1436,6 @@ function closeDetailPanel() {
     document.getElementById('overlay').classList.remove('show');
     document.body.style.overflow = '';
     activePanelId = null;
-}
-
-
-function toggleMenu(btn) {
-    const dd = btn.nextElementSibling;
-    document.querySelectorAll('.action-dropdown.open').forEach(d => { if(d!==dd) d.classList.remove('open'); });
-    dd.classList.toggle('open');
 }
 
 /* ── Certification modal ── */

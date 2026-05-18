@@ -99,7 +99,7 @@
 .action-menu { position:relative; display:inline-block; }
 .action-menu-btn { background:none; border:none; cursor:pointer; padding:4px 8px; border-radius:6px; color:#9ca3af; font-size:18px; letter-spacing:2px; line-height:1; }
 .action-menu-btn:hover { background:#f3f4f6; color:#374151; }
-.action-dropdown { position:absolute; right:0; top:100%; margin-top:4px; z-index:50; background:#fff; border:1px solid #e5e7eb; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.1); min-width:160px; display:none; }
+.action-dropdown { position:fixed; z-index:9999; background:#fff; border:1px solid #e5e7eb; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.1); min-width:160px; display:none; }
 .action-dropdown.open { display:block; }
 .action-item { display:flex; align-items:center; gap:8px; padding:9px 14px; font-size:13px; color:#374151; cursor:pointer; border:none; background:none; width:100%; text-align:left; }
 .action-item:hover { background:#f9fafb; }
@@ -579,15 +579,6 @@
     .detail-footer > button, .detail-footer > div { width:100%; }
     #dpActionBtns { display:flex; gap:8px; width:100%; }
     #dpActionBtns .btn-reject, #dpActionBtns .btn-approve { flex:1; text-align:center; }
-
-    .panel-toolbar .flex { flex-direction:column; align-items:stretch !important; gap:10px !important; }
-    .panel-toolbar .flex.sm\:flex-row { flex-wrap:wrap; gap:10px; }
-    .panel-toolbar input[type="text"], .panel-toolbar select { width:100% !important; }
-    .panel-toolbar .relative { width:100%; }
-    .tab-btn { font-size:12px; padding:10px 2px; }
-    .breadcrumb { font-size:12px; margin-bottom:12px; }
-    .alert-bar { font-size:12px; }
-    .confirm-card { padding:20px 18px; }
     .form-modal { padding:0; }
     .form-modal-shell { width:100vw; height:100vh; max-width:none; border-radius:0; transform:translateY(100%) !important; transition:transform 0.32s cubic-bezier(0.32,0.72,0,1) !important; }
     .form-modal.show .form-modal-shell { transform:translateY(0) !important; }
@@ -820,7 +811,7 @@
 
                         <td class="mob-action" onclick="event.stopPropagation()">
                             <div class="action-menu">
-                                <button class="action-menu-btn" onclick="toggleMenu(this)">···</button>
+                                <button class="action-menu-btn" onclick="toggleMenu(this, event)">···</button>
                                 <div class="action-dropdown">
                                     <button class="action-item" onclick="openDetailPanel({{ $app->leave_id }}, event)">
                                         <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -941,7 +932,7 @@
                         </td>
                         <td class="mob-action" onclick="event.stopPropagation()">
                             <div class="action-menu">
-                                <button class="action-menu-btn" onclick="toggleMenu(this)">···</button>
+                                <button class="action-menu-btn" onclick="toggleMenu(this, event)">···</button>
                                 <div class="action-dropdown">
                                     <button class="action-item" onclick="openDetailPanel({{ $app->leave_id }}, event)">
                                         <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -1061,7 +1052,7 @@
                         </td>
                         <td class="mob-action" onclick="event.stopPropagation()">
                             <div class="action-menu">
-                                <button class="action-menu-btn" onclick="toggleMenu(this)">···</button>
+                                <button class="action-menu-btn" onclick="toggleMenu(this, event)">···</button>
                                 <div class="action-dropdown">
                                     <button class="action-item" onclick="openDetailPanel({{ $app->leave_id }}, event)">
                                         <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -1130,7 +1121,7 @@
 </td>
                         <td class="mob-action" onclick="event.stopPropagation()">
                             <div class="action-menu">
-                                <button class="action-menu-btn" onclick="toggleMenu(this)">···</button>
+                                <button class="action-menu-btn" onclick="toggleMenu(this, event)">···</button>
                                 <div class="action-dropdown">
                                     <button class="action-item" onclick="openDetailPanel({{ $app->leave_id }}, event)">
                                         <svg style="width:14px;height:14px;color:#9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -1271,6 +1262,10 @@ const LEAVE_DATA = {!! json_encode(
             'contact_number'   => $emp->contact_number ?? '—',
             'address'          => $emp->address ?? '—',
             'leave_type'       => $a->leaveType->type_name ?? '—',
+            'allow_past_filing'=> (bool) ($a->leaveType->allow_past_filing ?? 0),
+            'notice_days'      => $a->leaveType->notice_days ?? 0,
+            'app_date_raw'     => $a->application_date ? $a->application_date->format('Y-m-d') : null,
+            'start_date_raw'   => $a->start_date ? $a->start_date->format('Y-m-d') : null,
             'application_date' => $a->application_date ? $a->application_date->format('M d, Y') : '—',
             'start_date'       => $a->start_date ? $a->start_date->format('M d, Y') : '—',
             'end_date'         => $a->end_date ? $a->end_date->format('M d, Y') : '—',
@@ -1330,31 +1325,20 @@ function switchTab(tab) {
 /* ══ SORT ══ */
 const STATUS_ORDER = { PENDING:0, RECEIVED:1, APPROVED:2, RECALLED:3, REJECTED:4, CANCELLED:5 };
 
-/**
- * Sorts a tbody by:
- * 1. Status priority (PENDING first, CANCELLED last)
- * 2. Within same status: updated_at DESC (most recently updated first)
- * Falls back to data-appdate if updated_at is unavailable.
- */
 function _sortTbody(tbodyId, rowClass) {
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
     const rows = [...tbody.querySelectorAll('tr.' + rowClass)];
     if (!rows.length) return;
     rows.sort((a, b) => {
-        // 1. Status priority
         const sa = STATUS_ORDER[a.dataset.status] ?? 99;
         const sb = STATUS_ORDER[b.dataset.status] ?? 99;
         if (sa !== sb) return sa - sb;
-
-        // 2. updated_at from LEAVE_DATA (most recent first)
         const idA = a.dataset.leaveId;
         const idB = b.dataset.leaveId;
         const ua  = LEAVE_DATA[idA]?.updated_at ? new Date(LEAVE_DATA[idA].updated_at) : new Date(0);
         const ub  = LEAVE_DATA[idB]?.updated_at ? new Date(LEAVE_DATA[idB].updated_at) : new Date(0);
         if (ub - ua !== 0) return ub - ua;
-
-        // 3. Fallback: application_date DESC
         const da = a.dataset.appdate ? new Date(a.dataset.appdate) : new Date(0);
         const db = b.dataset.appdate ? new Date(b.dataset.appdate) : new Date(0);
         return db - da;
@@ -1364,11 +1348,6 @@ function _sortTbody(tbodyId, rowClass) {
 
 function sortLeaveTable()    { _sortTbody('leaveTbody',    'leave-row');    }
 function sortMonetizeTable() { _sortTbody('monetizeTbody', 'monetize-row'); }
-
-/**
- * Sorts the History tbody by updated_at DESC (most recently actioned first).
- * Uses data-updated-at attribute on each row (ISO string from server).
- */
 function sortHistoryTable() {
     const tbody = document.getElementById('historyTbody');
     if (!tbody) return;
@@ -1377,7 +1356,7 @@ function sortHistoryTable() {
     rows.sort((a, b) => {
         const ua = a.dataset.updatedAt ? new Date(a.dataset.updatedAt) : new Date(0);
         const ub = b.dataset.updatedAt ? new Date(b.dataset.updatedAt) : new Date(0);
-        return ub - ua; // most recent first
+        return ub - ua; 
     });
     rows.forEach(r => tbody.appendChild(r));
 }
@@ -1500,19 +1479,6 @@ function openDetailPanel(leaveId, e) {
     const vacFill  = vacPct  < 20 ? '#ef4444' : vacPct  < 50 ? '#f59e0b' : '#22c55e';
     const sickFill = sickPct < 20 ? '#ef4444' : sickPct < 50 ? '#f59e0b' : '#22c55e';
 
-    const balanceHtml = `
-        <div class="leave-balance-bar">
-            <div class="lbb-row">
-                <div class="lbb-label"><span>Vacation Leave</span><span>${vacBal.toFixed(1)} / ${vacMax} days</span></div>
-                <div class="lbb-track"><div class="lbb-fill" style="width:${vacPct}%;background:${vacFill};"></div></div>
-            </div>
-            <div class="lbb-row">
-                <div class="lbb-label"><span>Sick Leave</span><span>${sickBal.toFixed(1)} / ${sickMax} days</span></div>
-                <div class="lbb-track"><div class="lbb-fill" style="width:${sickPct}%;background:${sickFill};"></div></div>
-            </div>
-            ${crossNote ? `<div class="lbb-note show">⚠ Cross-deduction: ${crossNote}</div>` : ''}
-        </div>`;
-
     const actionByHtml = d.actioned_by_name
         ? `<div class="dp-field span2"><label>Action Taken By</label><p>${d.actioned_by_name}</p></div>`
         : '';
@@ -1520,6 +1486,15 @@ function openDetailPanel(leaveId, e) {
     const estAmount = d.is_monetization
         ? '&#8369;' + (parseFloat(d.salary || 0) * parseFloat(d.no_of_days) * 0.0481927).toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2})
         : '';
+
+    let filingNote = '';
+    if (d.app_date_raw && d.start_date_raw && !d.is_monetization) {
+        const aDate = new Date(d.app_date_raw + 'T00:00:00');
+        const sDate = new Date(d.start_date_raw + 'T00:00:00');
+        if (aDate > sDate) {
+            filingNote = `<span style="display:inline-flex;align-items:center;padding:2px 6px;background:#fffbeb;color:#d97706;font-size:10px;font-weight:800;border-radius:4px;border:1px solid #fde68a;margin-left:8px;letter-spacing:0.02em;">LATE / EMERGENCY FILING</span>`;
+        }
+    }
 
     const monetizeFields = d.is_monetization
         ? `<div class="dp-field"><label>Days to Monetize</label><p>${d.no_of_days} day(s)</p></div>
@@ -1535,7 +1510,7 @@ function openDetailPanel(leaveId, e) {
     document.getElementById('dpBody').innerHTML = `
         <div class="dp-card">
             <div class="dp-section-heading">
-                <div class="dp-section-icon"><svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></div>
+                <div class="dp-section-icon"><svg style="width:14px;height:14px;" fillnone" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></div>
                 <p class="dp-section-title">Employee Information</p>
             </div>
             <div class="dp-grid">
@@ -1556,7 +1531,7 @@ function openDetailPanel(leaveId, e) {
             </div>
             <div class="dp-grid">
                 <div class="dp-field"><label>Leave Type</label><p>${d.leave_type}</p></div>
-                <div class="dp-field"><label>Application Date</label><p>${d.application_date}</p></div>
+                <div class="dp-field"><label>Application Date</label><p style="display:flex;align-items:center;">${d.application_date} ${filingNote}</p></div>
                 ${monetizeFields}
                 <div class="dp-field"><label>Current Status</label>
                     <p><span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${sBg};color:${sC};">&#9679; ${d.status}</span></p>
@@ -1676,12 +1651,59 @@ function toggleStatusDropdown(key, e) {
         }
     }
 }
+
+/* ── Action Dropdown Toggle (Fixed Positioning fix) ── */
+function toggleMenu(btn, e) {
+    if(e) e.stopPropagation();
+    const dd = btn.nextElementSibling;
+    const isOpen = dd.classList.contains('open');
+    document.querySelectorAll('.action-dropdown.open').forEach(d => { if(d!==dd) d.classList.remove('open'); });
+    if (!isOpen) {
+        dd.classList.add('open');
+        const rect = btn.getBoundingClientRect();
+        // Float the menu right below the button, aligned to the right side
+        dd.style.top = (rect.bottom + 4) + 'px';
+        dd.style.left = (rect.right - 170) + 'px'; // 170 is min-width of the dropdown
+    } else {
+        dd.classList.remove('open');
+    }
+}
+
 document.addEventListener('click', () => {
     document.querySelectorAll('.status-changer.open').forEach(el => el.classList.remove('open'));
     document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
 });
 window.addEventListener('scroll',  () => document.querySelectorAll('.status-changer.open').forEach(el => el.classList.remove('open')), true);
 window.addEventListener('resize',  () => document.querySelectorAll('.status-changer.open').forEach(el => el.classList.remove('open')));
+
+/* ══ AUTO DOWNLOAD TRICK ══ */
+function autoPrintPdf(id) {
+    const d = LEAVE_DATA[id];
+    if (!d) return;
+
+    // Build filename: Lastname_Firstname_LeaveType_Date
+    const lastName  = (d.last_name || '').replace(/[^a-zA-Z0-9]/g, '');
+    const firstName = (d.first_name || '').replace(/[^a-zA-Z0-9]/g, '');
+    const leaveType = (d.leave_type || '').replace(/[^a-zA-Z0-9]/g, '_');
+    const appDate   = (d.application_date || '').replace(/,/g, '').replace(/ /g, '_');
+    
+    const fileName  = `${lastName}_${firstName}_${leaveType}_${appDate}.pdf`;
+
+    fetch(`${PDF_URL}/${id}/pdf`)
+        .then(r => r.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            setTimeout(() => a.remove(), 100);
+        })
+        .catch(err => console.error('Auto-PDF failed:', err));
+}
 
 /* ══ CHANGE STATUS ══ */
 function changeStatus(leaveId, newStatus, e, scKey) {
@@ -1713,11 +1735,15 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
             const isTerminal = ['APPROVED','REJECTED','CANCELLED','RECALLED'].includes(newStatus);
             const now        = new Date().toISOString();
 
-            // Update local data store including updated_at timestamp
             if (LEAVE_DATA[leaveId]) {
                 LEAVE_DATA[leaveId].status     = newStatus;
                 LEAVE_DATA[leaveId].updated_at = now;
                 if (data.actioned_by_name) LEAVE_DATA[leaveId].actioned_by_name = data.actioned_by_name;
+            }
+
+            // 🌟 AUTO DOWNLOAD TRIGGER
+            if (newStatus === 'APPROVED') {
+                autoPrintPdf(leaveId);
             }
 
             if (isTerminal) {
@@ -1754,7 +1780,7 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
                     tr.dataset.status         = newStatus;
                     tr.dataset.recordType     = isMonetize ? 'monetization' : 'leave';
                     tr.dataset.search         = searchStr;
-                    tr.dataset.updatedAt      = now; // set updated_at for future re-sorts
+                    tr.dataset.updatedAt      = now; 
                     tr.style.cursor           = 'pointer';
                     tr.style.opacity          = '0';
                     tr.innerHTML = `
@@ -1793,7 +1819,6 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
                     const emptyRow = hTbody.querySelector('td[colspan="11"]');
                     if (emptyRow) emptyRow.closest('tr').remove();
 
-                    // Prepend so most recent action is always at top
                     hTbody.prepend(tr);
                     requestAnimationFrame(() => {
                         tr.style.transition = 'opacity 0.4s';
@@ -1804,7 +1829,6 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
                 closeDetailPanel();
 
             } else {
-                // Non-terminal: update the pill and row in place, also update data-updated-at
                 const row = document.querySelector(`tr[data-leave-id="${leaveId}"]`);
                 if (row) row.dataset.updatedAt = now;
 
@@ -1845,7 +1869,6 @@ function doStatusUpdate(leaveId, newStatus, key, reason) {
                 }
             }
 
-            /* ── Recalculate stat counters ── */
             const counts = { PENDING:0, RECEIVED:0, APPROVED:0, REJECTED:0 };
             document.querySelectorAll('.leave-row').forEach(r => {
                 if (counts[r.dataset.status] !== undefined) counts[r.dataset.status]++;
@@ -1908,13 +1931,6 @@ function generateLetter() {
 <script>window.onload=function(){window.print();}<\/script></body></html>`;
     const win = window.open('', '_blank', 'width=900,height=700');
     win.document.write(html); win.document.close();
-}
-
-/* ══ ACTION MENUS ══ */
-function toggleMenu(btn) {
-    const dd = btn.nextElementSibling;
-    document.querySelectorAll('.action-dropdown.open').forEach(d => { if (d !== dd) d.classList.remove('open'); });
-    dd.classList.toggle('open');
 }
 
 /* ══ FILTERS ══ */

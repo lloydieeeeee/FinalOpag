@@ -104,8 +104,6 @@ class PayrollController extends Controller
         $deductions = PayrollDeduction::active()->ordered()->get();
         $hardFields    = [];
         $dynamicFields = [];
-        $totalDeductions = 0.0;
-        $totalAllowances = 0.0;
 
         $isPA = false;
         if ($employee && $employee->position) {
@@ -117,7 +115,6 @@ class PayrollController extends Controller
 
             $col   = $ded->resolveColumn();
             $isDyn = ($col === null);
-            $isAll = method_exists($ded, 'isAllowance') ? $ded->isAllowance() : ($ded->entry_kind === 'addition');
 
             if ($ded->isFixed()) {
                 if (!$isDyn && array_key_exists($col, $overrides)) {
@@ -140,16 +137,12 @@ class PayrollController extends Controller
             $amount = round($amount, 2);
             if ($isDyn) $dynamicFields[$ded->id] = $amount;
             else $hardFields[$col] = ($hardFields[$col] ?? 0) + $amount;
-
-            if ($isAll) $totalAllowances += $amount;
-            elseif (!$this->isGovtShareColumn($col)) $totalDeductions += $amount;
         }
 
         $cngTotal = 0;
         foreach (self::CNG_FIELDS as $f) {
             $val = isset($overrides[$f]) ? round((float) $overrides[$f], 2) : 0.0;
             $hardFields[$f] = $val;
-            $totalDeductions += $val;
             $cngTotal += $val;
         }
         $hardFields['loan_cngwmpc'] = $cngTotal;
@@ -164,6 +157,33 @@ class PayrollController extends Controller
         ];
 
         $hardFields = array_merge($hardDefaults, $hardFields);
+        
+        foreach ($hardDefaults as $key => $default) {
+            if (array_key_exists($key, $overrides)) {
+                $hardFields[$key] = (float) $overrides[$key];
+            }
+        }
+
+        $totalDeductions = 0.0;
+        $totalAllowances = 0.0;
+
+        foreach ($hardFields as $k => $v) {
+            if (in_array($k, ['allowance_pera', 'allowance_rata', 'allowance_ta', 'allowance_other'])) {
+                $totalAllowances += $v;
+            } elseif (!in_array($k, ['gsis_govt', 'pagibig_govt', 'philhealth_govt', 'loan_cngwmpc'])) {
+                $totalDeductions += $v;
+            }
+        }
+
+        foreach ($dynamicFields as $id => $v) {
+            $ded = $deductions->firstWhere('id', $id);
+            if ($ded && (method_exists($ded, 'isAllowance') ? $ded->isAllowance() : ($ded->entry_kind === 'addition'))) {
+                $totalAllowances += $v;
+            } else {
+                $totalDeductions += $v;
+            }
+        }
+
         $totalDeductions = round($totalDeductions, 2);
         $totalAllowances = round($totalAllowances, 2);
         $netPay          = round($gross - $totalDeductions + $totalAllowances, 2);
@@ -189,7 +209,6 @@ class PayrollController extends Controller
             $data = $this->computeFromSalary((float) $emp->salary, $empOverrides, $emp);
             $data['designation'] = optional($emp->position)->position_code;
             
-            // Still including employee_id for display purposes as requested
             $data['employee_id'] = $emp->employee_id;
 
             PayrollRecord::updateOrCreate(
@@ -314,7 +333,6 @@ class PayrollController extends Controller
             'allowance_other_2', 'allowance_other_3'
         ];
 
-        // Bypass mass assignment block
         foreach ($hardNumeric as $col) {
             if ($request->has($col)) $record->{$col} = round((float) $request->input($col), 2);
         }
@@ -341,7 +359,6 @@ class PayrollController extends Controller
         foreach (self::CNG_FIELDS as $f) { $cngSum += (float) $record->{$f}; }
         $record->loan_cngwmpc = $cngSum;
 
-        /* ── Handle Dynamic Deductions payload ── */
         $dynamicInput = $request->input('dynamic', []);
         if (!empty($dynamicInput)) {
             $dynamic = is_string($record->dynamic_deductions) ? json_decode($record->dynamic_deductions, true) : ($record->dynamic_deductions ?? []);
@@ -355,7 +372,6 @@ class PayrollController extends Controller
             $deductionConfig = PayrollDeduction::active()->ordered()->get()->keyBy('id');
             $record->recomputeTotals($deductionConfig);
         } else {
-            // Manual fallback sum
             $totalDeductions = ($record->gsis_ee ?? 0) + ($record->gsis_policy ?? 0) + ($record->gsis_emergency ?? 0) + 
                                ($record->gsis_real_estate ?? 0) + ($record->gsis_mpl ?? 0) + ($record->gsis_mpl_lite ?? 0) + 
                                ($record->gsis_gfal ?? 0) + ($record->gsis_computer ?? 0) + ($record->gsis_conso ?? 0) + 
@@ -387,9 +403,31 @@ class PayrollController extends Controller
             ->get();
         $records = $this->mapOldCngData($records);
 
+        // Fetch ONLY the exact signatories from your database
+        $sigs = DB::table('signatory_options')->get()->keyBy('label');
+        
+        $getSig = function($label) use ($sigs) {
+            $s = $sigs->get($label);
+            return (object) [
+                'full_name' => $s->full_name ?? '',
+                'title'     => $s->title ?? '',
+            ];
+        };
+
+        $signatories = [
+            'clerk' => $getSig('Payroll Clerk'),
+            'phrmo' => $getSig('PHRMO'),
+            'pa'    => $getSig('Provincial Agriculturist'),
+            'gov'   => $getSig('Governor'),
+        ];
+
+        // Override clerk with period-specific data if it was customized during Finalize
+        if (!empty($period->sig_clerk_name))  $signatories['clerk']->full_name = $period->sig_clerk_name;
+        if (!empty($period->sig_clerk_title)) $signatories['clerk']->title = $period->sig_clerk_title;
+
         $pdf = app('dompdf.wrapper');
         $pdf->setPaper('legal', 'landscape');
-        $pdf->loadView('payroll.payroll-pdf', compact('period', 'records'));
+        $pdf->loadView('payroll.payroll-pdf', compact('period', 'records', 'signatories'));
         return $pdf->stream("payroll_{$period->period_label}.pdf");
     }
 

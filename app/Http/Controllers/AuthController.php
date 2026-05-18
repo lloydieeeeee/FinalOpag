@@ -49,7 +49,9 @@ class AuthController extends Controller
         Auth::login($credential);
         $request->session()->regenerate();
 
-        $realAccess = $employee->access->user_access ?? 'employee';
+        // [FIX APPLIED HERE]: Normalize the user access string to lowercase
+        $rawAccess = $employee->access->user_access ?? 'employee';
+        $realAccess = strtolower($rawAccess);
 
         // 5. Store the stable user_id in the session
         $request->session()->put('user_id',       $employee->user_id);
@@ -65,8 +67,9 @@ class AuthController extends Controller
     // ─────────────────────────────────────────
     public function switchView(Request $request)
     {
-        // Only real admins can switch
-        $realAccess = session('user_access');
+        // [FIX APPLIED HERE]: Normalize session data to lowercase for safe comparison
+        $realAccess = strtolower(session('user_access', 'employee'));
+        
         if ($realAccess !== 'admin') {
             return back()->withErrors(['error' => 'Unauthorized.']);
         }

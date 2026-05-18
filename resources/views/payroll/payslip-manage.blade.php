@@ -584,12 +584,12 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                     </div>
                     <div class="form-row">
                         <div class="field-group" data-fieldname="rata label">
-                            <label class="field-label">RATA Label</label>
+                            <label class="field-label">RA Label</label>
                             <input type="text" class="field-input label-input" id="f_label_rata" data-label="label_rata"
-                                oninput="onLabelChange()" placeholder="RATA">
+                                oninput="onLabelChange()" placeholder="RA">
                         </div>
                         <div class="field-group" data-fieldname="rata amount">
-                            <label class="field-label">RATA Amount</label>
+                            <label class="field-label">RA Amount</label>
                             <input type="text" class="field-input" id="f_allowance_rata" data-field="allowance_rata"
                                 oninput="onFieldChange()" placeholder="0.00">
                         </div>
@@ -665,10 +665,10 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         <div class="field-group" data-fieldname="medicare philhealth label">
                             <label class="field-label">Medicare (PhilHealth) Label</label>
                             <input type="text" class="field-input label-input" id="f_label_philhealth_ee" data-label="label_philhealth_ee"
-                                oninput="onLabelChange()" placeholder="Medicare">
+                                oninput="onLabelChange()" placeholder="PhilHealth">
                         </div>
                         <div class="field-group" data-fieldname="medicare philhealth">
-                            <label class="field-label">Medicare (PhilHealth)</label>
+                            <label class="field-label">(PhilHealth)</label>
                             <input type="text" class="field-input" id="f_philhealth_ee" data-field="philhealth_ee"
                                 oninput="onFieldChange()" placeholder="0.00">
                         </div>
@@ -1038,7 +1038,7 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         <option value="gross_salary">Gross Salary</option>
                         <option value="designation">Designation</option>
                         <option value="allowance_pera" data-label-field="label_pera">PERA</option>
-                        <option value="allowance_rata" data-label-field="label_rata">RATA</option>
+                        <option value="allowance_rata" data-label-field="label_rata">RA</option>
                         <option value="allowance_ta" data-label-field="label_ta">TA</option>
                         <option value="allowance_other" data-label-field="label_allowance_other">Other Allowance</option>
                     </optgroup>
@@ -1046,7 +1046,7 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         <option value="withholding_tax" data-label-field="label_withholding_tax">Withholding Tax</option>
                         <option value="gsis_ee" data-label-field="label_gsis_ee">GSIS Premium</option>
                         <option value="pagibig_govt" data-label-field="label_pagibig_govt">PAG-IBIG</option>
-                        <option value="philhealth_ee" data-label-field="label_philhealth_ee">Medicare</option>
+                        <option value="philhealth_ee" data-label-field="label_philhealth_ee">Philhealth</option>
                         <option value="gsis_ec" data-label-field="label_gsis_ec">GSIS ECF</option>
                         <option value="loan_lbp" data-label-field="label_loan_lbp">LBP</option>
                         <option value="loan_dbp" data-label-field="label_loan_dbp">DBP</option>
@@ -1158,7 +1158,7 @@ const RECORDS = {!! json_encode(
             'total_allowances'      => (float)($r->total_allowances ?? 0),
             'net_pay'               => (float)($r->net_pay ?? 0),
             'label_pera'              => $r->label_pera ?? 'PERA',
-            'label_rata'              => $r->label_rata ?? 'RATA',
+            'label_rata'              => $r->label_rata ?? 'RA',
             'label_ta'                => $r->label_ta ?? 'TA',
             'label_allowance_other'   => $r->label_allowance_other ?? 'Other Allowance',
             'label_withholding_tax'   => $r->label_withholding_tax ?? 'Withholding Tax',
@@ -1175,7 +1175,7 @@ const RECORDS = {!! json_encode(
             'label_pagibig_govt'      => $r->label_pagibig_govt ?? 'PAG-IBIG',
             'label_pagibig_mpl'       => $r->label_pagibig_mpl ?? 'PAG IBIG Loyalty Card',
             'label_pagibig_calamity'  => $r->label_pagibig_calamity ?? 'GSIS Calamity Loan',
-            'label_philhealth_ee'     => $r->label_philhealth_ee ?? 'Medicare',
+            'label_philhealth_ee'     => $r->label_philhealth_ee ?? 'Philhealth',
             'label_loan_lbp'          => $r->label_loan_lbp ?? 'LBP',
             'label_loan_dbp'          => $r->label_loan_dbp ?? 'Development Bank of The Philippines',
             'label_loan_cngwmpc'      => $r->label_loan_cngwmpc ?? 'CNGWMPC',

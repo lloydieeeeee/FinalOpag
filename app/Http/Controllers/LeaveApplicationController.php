@@ -20,6 +20,8 @@ class LeaveApplicationController extends Controller
     // ─────────────────────────────────────────────────────────────
     public function index()
     {
+        // FIX: auth()->id() now correctly returns user_id because
+        // UserCredential::getAuthIdentifier() was overridden.
         $userId = auth()->id();
 
         $employee = Employee::with(['position', 'department'])
@@ -112,13 +114,12 @@ class LeaveApplicationController extends Controller
             ->toArray();
 
         $maxDaysJson = LeaveType::where('is_active', 1)
-            ->whereNotNull('max_days')
             ->get()
             ->keyBy('leave_type_id')
             ->map(fn($lt) => [
-                'max_days'  => (float) $lt->max_days,
+                'max_days'  => $lt->max_days ? (float) $lt->max_days : null,
                 'used_days' => (float) ($usedDaysThisYear[$lt->leave_type_id] ?? 0),
-                'remaining' => max(0, (float) $lt->max_days - (float) ($usedDaysThisYear[$lt->leave_type_id] ?? 0)),
+                'remaining' => $lt->max_days ? max(0, (float) $lt->max_days - (float) ($usedDaysThisYear[$lt->leave_type_id] ?? 0)) : null,
                 'type_name' => $lt->type_name,
             ])
             ->toArray();
@@ -137,7 +138,7 @@ class LeaveApplicationController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────
-    //  STORE
+    //  STORE (Where validation happens!)
     // ─────────────────────────────────────────────────────────────
     public function store(Request $request)
     {
@@ -147,9 +148,38 @@ class LeaveApplicationController extends Controller
             'end_date'      => 'required|date|after_or_equal:start_date',
         ]);
 
-        $userId     = auth()->id();
-        $year       = now()->year;
-        $leaveType  = LeaveType::findOrFail($request->leave_type_id);
+        $userId    = auth()->id();
+        $year      = now()->year;
+        $leaveType = LeaveType::findOrFail($request->leave_type_id);
+
+        $employee = Employee::where('user_id', $userId)->firstOrFail();
+
+        // ── NEW LOGIC: Filing Notice & Past Filing Enforcement ─────────────
+        if (!$leaveType->allow_past_filing) {
+            $start = \Carbon\Carbon::parse($request->start_date)->startOfDay();
+            $today = now()->startOfDay();
+
+            // Block retroactive filing
+            if ($start->lessThan($today)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "This leave type does not allow past or retroactive filing. Please select a date from today onwards.",
+                ], 422);
+            }
+
+            // Enforce prior notice days (e.g. must file 5 days in advance)
+            if ($leaveType->notice_days !== null && $leaveType->notice_days > 0) {
+                $requiredDate = $today->copy()->addDays($leaveType->notice_days);
+                
+                if ($start->lessThan($requiredDate)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "{$leaveType->type_name} requires at least {$leaveType->notice_days} day(s) prior notice. Please select a start date on or after {$requiredDate->format('M d, Y')}.",
+                    ], 422);
+                }
+            }
+        }
+        // ──────────────────────────────────────────────────────────────────
 
         // ── Count working days from the actual selected dates ─────────────
         $selectedDates = $request->input('leave_dates', []);
@@ -163,9 +193,6 @@ class LeaveApplicationController extends Controller
                 'message' => 'No leave dates were selected.',
             ], 422);
         }
-
-        $start = new \DateTime($selectedDates[0]);
-        $end   = new \DateTime($selectedDates[count($selectedDates) - 1]);
 
         // ── Conflict: date range must not overlap an existing active leave ──
         $overlapConflict = LeaveApplication::where('user_id', $userId)
@@ -185,11 +212,9 @@ class LeaveApplicationController extends Controller
         }
 
         // ── Conflict: no selected date may have an active half-day record ──
-        $requestedDates = $selectedDates;
-
         $halfDayConflict = HalfDay::where('user_id', $userId)
             ->whereNotIn('status', ['CANCELLED', 'REJECTED'])
-            ->whereIn(DB::raw('DATE(date_of_absence)'), $requestedDates)
+            ->whereIn(DB::raw('DATE(date_of_absence)'), $selectedDates)
             ->exists();
 
         if ($halfDayConflict) {
@@ -232,8 +257,10 @@ class LeaveApplicationController extends Controller
             ], 422);
         }
 
+        // FIX: include employee_id — leave_application.employee_id is NOT NULL
         $application = LeaveApplication::create([
             'user_id'           => $userId,
+            'employee_id'       => $employee->employee_id,
             'leave_type_id'     => $leaveType->leave_type_id,
             'credit_balance_id' => $creditBalance->credit_balance_id,
             'details_of_leave'  => $request->details_of_leave ?? null,
@@ -266,9 +293,11 @@ class LeaveApplicationController extends Controller
             'no_of_days'    => 'required|numeric|min:1|max:30',
         ]);
 
-        $userId        = auth()->id();
-        $year          = now()->year;
-        $leaveType     = LeaveType::findOrFail($request->leave_type_id);
+        $userId    = auth()->id();
+        $year      = now()->year;
+        $leaveType = LeaveType::findOrFail($request->leave_type_id);
+
+        $employee = Employee::where('user_id', $userId)->firstOrFail();
 
         if (!$leaveType->is_accrual_based) {
             return response()->json(['success' => false, 'message' => 'Only accrual-based leave types can be monetized.'], 422);
@@ -283,6 +312,7 @@ class LeaveApplicationController extends Controller
 
         $application = LeaveApplication::create([
             'user_id'           => $userId,
+            'employee_id'       => $employee->employee_id,
             'leave_type_id'     => $leaveType->leave_type_id,
             'credit_balance_id' => $creditBalance->credit_balance_id,
             'application_date'  => now()->toDateString(),
@@ -335,7 +365,7 @@ class LeaveApplicationController extends Controller
             ->where('user_id', $userId)
             ->firstOrFail();
 
-            // ── Decode stored selected dates ──────────────────────────────────
+        // ── Decode stored selected dates ──────────────────────────────────
         $leaveDates = collect();
         if (!empty($app->leave_dates)) {
             $raw = is_array($app->leave_dates) ? $app->leave_dates : json_decode($app->leave_dates, true);

@@ -288,6 +288,40 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
     $totTa   = $records->sum('allowance_ta');
 
     $isFinalized = $selectedPeriod->status === 'FINALIZED';
+
+    /* ── FIX PHILHEALTH FALLBACK IN REMITTANCE BLADE ── */
+    $allDeductions = \App\Models\PayrollDeduction::orderBy('sort_order')->get();
+    $dbDeductions = $allDeductions->keyBy(fn($d) => strtolower($d->name));
+    $ded = fn(string $name) => $dbDeductions->get(strtolower($name));
+
+    $gsisEeRec    = $ded('Life Retirement Insurance – Personal Share') ?? $ded('gsis employee share');
+    $gsisGovtRec  = $ded('Life Retirement Insurance – Government Share') ?? $ded("gsis gov't share");
+    $gsisEcRec    = $ded('ECF (Employee Compensation Fund)');
+    $pagibigEeRec = $ded('Employee Share') ?? $ded('pagibig employee share');
+    $pagibigGovRec= $ded('Employer Share') ?? $ded("pagibig gov't share");
+    $phicEeRec    = $ded('Personal Share')   ?? $ded('philhealth employee share') ?? $ded('philhealth');
+    $phicGovtRec  = $ded('Government Share') ?? $ded("philhealth gov't share") ?? $ded('philhealth');
+    $peraRec      = $ded('PERA');
+    
+    // Config values dynamically calculated
+    $jsConfig = [
+        'gsisEeType'      => $gsisEeRec?->rate_type    ?? 'percent',
+        'gsisEeValue'     => (float)($gsisEeRec?->rate_value   ?? 0.09),
+        'gsisGovtType'    => $gsisGovtRec?->rate_type  ?? 'percent',
+        'gsisGovtValue'   => (float)($gsisGovtRec?->rate_value ?? 0.12),
+        'gsisEcType'      => $gsisEcRec?->rate_type    ?? 'flat',
+        'gsisEcValue'     => (float)($gsisEcRec?->rate_value   ?? 100),
+        'pagibigEeType'   => $pagibigEeRec?->rate_type  ?? 'flat',
+        'pagibigEeValue'  => (float)($pagibigEeRec?->rate_value ?? 200),
+        'pagibigGovType'  => $pagibigGovRec?->rate_type ?? 'flat',
+        'pagibigGovValue' => (float)($pagibigGovRec?->rate_value ?? 200),
+        'phicEeType'      => $phicEeRec?->rate_type    ?? 'percent',
+        'phicEeValue'     => (float)($phicEeRec?->rate_value   ?? 0.025),
+        'phicGovtType'    => $phicGovtRec?->rate_type  ?? 'percent',
+        'phicGovtValue'   => (float)($phicGovtRec?->rate_value ?? 0.025),
+        'peraType'        => $peraRec?->rate_type      ?? 'flat',
+        'peraValue'       => (float)($peraRec?->rate_value     ?? 2000),
+    ];
 @endphp
 
 @if(!$isFinalized)
@@ -766,7 +800,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
     {{-- ══ ALLOWANCES ══ --}}
     <div class="rem-tab-panel" id="panel-allowances">
         <div class="panel-toolbar">
-            <div><p class="ptitle">Allowances — PERA, RATA, TA</p><p class="psub">PERA auto ₱2,000 · RATA/TA ₱9,500 head of office</p></div>
+            <div><p class="ptitle">Allowances — PERA, RA, TA</p><p class="psub">PERA auto ₱2,000 · RA/TA ₱9,500 head of office</p></div>
             <div class="ptoolbar-right">
                 <div class="search-wrap"><svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg><input type="text" placeholder="Search…" oninput="filterTable('tbl-allow',this.value)"></div>
                 <a href="{{ route('payroll.remittance.pdf',[$selectedPeriod->period_id,'allowances_pdf']) }}" target="_blank" class="btn-pdf">📄 PDF</a>
@@ -776,7 +810,7 @@ body,input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif;}
             <thead><tr>
                 <th class="c">#</th><th>Employee</th><th class="r">Gross</th>
                 <th class="r">PERA <span style="color:#1e40af;font-weight:400;">(₱2,000)</span></th>
-                <th class="r">RATA <span style="color:#9ca3af;font-weight:400;">(₱9,500 HOO)</span></th>
+                <th class="r">RA <span style="color:#9ca3af;font-weight:400;">(₱9,500 HOO)</span></th>
                 <th class="r">TA <span style="color:#9ca3af;font-weight:400;">(₱9,500 HOO)</span></th>
                 <th class="r">Other</th><th class="r">Total Allow.</th>
                 @if(!$isFinalized)<th class="del-col-header"></th>@endif
@@ -1462,4 +1496,4 @@ document.addEventListener('keydown', e => {
 </script>
 
 </div>
-@endsection 
+@endsection

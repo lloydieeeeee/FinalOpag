@@ -1226,7 +1226,8 @@ function openEditPanel(userId){
     // UPDATED: employee_id is now fully editable.
     const idf=document.getElementById('f_employee_id_display');
     idf.value=emp.formatted_id??emp.employee_id;
-    document.getElementById('f_employee_id_raw').value=emp.employee_id;
+    // Strip hyphens and ensure it is padded to 7 digits
+    document.getElementById('f_employee_id_raw').value = idf.value.replace(/\D/g, '').padStart(7, '0');
     
     document.getElementById('f_first_name').value=emp.first_name??'';
     document.getElementById('f_middle_name').value=emp.middle_name??'';

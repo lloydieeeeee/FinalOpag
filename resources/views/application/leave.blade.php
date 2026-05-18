@@ -775,7 +775,9 @@
                                         data-accrual="{{ $lt->is_accrual_based }}"
                                         data-code="{{ $lt->type_code }}"
                                         data-maxdays="{{ $lt->max_days ?? '' }}"
-                                        data-remaining="{{ $rawRemaining }}">{{ $lt->type_name }}</option>
+                                        data-remaining="{{ $rawRemaining }}"
+                                        data-noticedays="{{ $lt->notice_days ?? 0 }}"
+                                        data-allowpast="{{ $lt->allow_past_filing ?? 0 }}">{{ $lt->type_name }}</option>
                                 @endforeach
                             </select>
                             <p class="text-xs text-red-400 mt-1 hidden" id="err_leave_type">Please select a leave type.</p>
@@ -1349,12 +1351,21 @@ function renderHistoryRows() {
 let activePanelLeaveId = null;
 let pendingCancelId    = null;
 
+let activeNoticeDays   = 0;
+let activeAllowPast    = false;
+
 /* ════════════════════════════════════════════════════════
    MAX DAYS BANNER
 ════════════════════════════════════════════════════════ */
 function renderMaxDaysBanner(ltId) {
     const banner = document.getElementById('maxDaysBanner');
-    if (!MAX_DAYS_DATA[ltId]) { banner.style.display = 'none'; return; }
+    
+    // FIX: If there is no max_days data OR max_days is 0/null, hide the banner completely.
+    if (!MAX_DAYS_DATA[ltId] || !MAX_DAYS_DATA[ltId].max_days || MAX_DAYS_DATA[ltId].max_days <= 0) { 
+        banner.style.display = 'none'; 
+        return; 
+    }
+    
     const mx  = MAX_DAYS_DATA[ltId];
     const pct = mx.max_days > 0 ? Math.min(100, (mx.used_days / mx.max_days) * 100) : 0;
     const exhausted = mx.remaining <= 0;
@@ -1460,7 +1471,7 @@ function setCalMode(mode) {
         ind.className            = 'cal-range-indicator';
         ind.style.display        = 'none';
         if (leg)  leg.style.display  = 'none';
-        if (hint) hint.textContent   = 'Weekends are disabled. Red = existing leave. Yellow = existing half-day.';
+        if (hint) hint.textContent   = 'Weekends and dates blocked by notice periods are disabled.';
         const done = document.getElementById('calDoneBtn');
         if (done) done.disabled = false;
     }
@@ -1475,9 +1486,34 @@ function calInit() {
     calRender();
 }
 
+// RESTORED: Centralized check for all rules (Past Filing, Notice Days, Weekends, Conflicts)
+function isDateBlockedByRules(dateObj, dateStr) {
+    const today = new Date(); 
+    today.setHours(0,0,0,0);
+    const earliest = new Date(today); 
+    earliest.setDate(today.getDate() + activeNoticeDays);
+
+    const dow = dateObj.getDay();
+    const isWknd = dow === 0 || dow === 6;
+
+    if (isWknd && !calWeekendAllowed) return true;
+    
+    const isPastDate = dateObj < today && dateStr !== toYMD(today);
+    if (isPastDate && !activeAllowPast) return true;
+    
+    // Notice Days check: If it's not a past filing, but it violates the future notice gap
+    if (activeNoticeDays > 0 && dateObj < earliest && !isPastDate) return true;
+    
+    if (isDuplicateLeaveDate(dateStr) || HALF_DAY_DATES.includes(dateStr)) return true;
+
+    return false;
+}
+
 function buildMonthGrid(gridEl, year, month) {
     const today       = new Date(); today.setHours(0,0,0,0);
     const todayStr    = toYMD(today);
+    const earliest    = new Date(today); earliest.setDate(today.getDate() + activeNoticeDays);
+    
     const firstDay    = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month+1, 0).getDate();
     const prevDays    = new Date(year, month, 0).getDate();
@@ -1490,19 +1526,31 @@ function buildMonthGrid(gridEl, year, month) {
         const date    = new Date(year, month, day);
         const dateStr = toYMD(date);
         const dow     = date.getDay();
-        const isPast  = date < today && dateStr !== todayStr;
-        const isWknd  = dow === 0 || dow === 6;
+        
+        const isPastDate = date < today && dateStr !== todayStr;
+        const isWknd     = dow === 0 || dow === 6;
 
         let cls = 'cal-day';
         if (dateStr === todayStr) cls += ' cal-today';
 
+        let isBlocked = false;
+
+        // RESTORED: Evaluate visual CSS class based on rules
         if (isWknd && !calWeekendAllowed) {
             cls += ' cal-weekend';
-        } else if (isPast) {
+            isBlocked = true;
+        } else if (isPastDate && !activeAllowPast) {
             cls += ' cal-disabled';
-        } else {
-            if (isDuplicateLeaveDate(dateStr))         cls += ' cal-leave-conflict';
-            else if (HALF_DAY_DATES.includes(dateStr)) cls += ' cal-halfday-conflict';
+            isBlocked = true;
+        } else if (activeNoticeDays > 0 && date < earliest && !isPastDate) {
+            cls += ' cal-disabled';
+            isBlocked = true;
+        } else if (isDuplicateLeaveDate(dateStr)) {
+            cls += ' cal-leave-conflict';
+            isBlocked = true;
+        } else if (HALF_DAY_DATES.includes(dateStr)) {
+            cls += ' cal-halfday-conflict';
+            isBlocked = true;
         }
 
         if (calMode === 'multi' && calSelectedDates.has(dateStr)) cls += ' cal-selected';
@@ -1514,7 +1562,7 @@ function buildMonthGrid(gridEl, year, month) {
                     cls += ' cal-range-start';
                 } else if (hi && dateStr === hi) {
                     cls += calRangeEnd ? ' cal-range-end' : ' cal-range-preview';
-                } else if (hi && dateStr > lo && dateStr < hi && !isPast
+                } else if (hi && dateStr > lo && dateStr < hi && !isPastDate
                     && !cls.includes('cal-leave-conflict')
                     && !cls.includes('cal-halfday-conflict')) {
                     cls += ' cal-in-range';
@@ -1522,12 +1570,8 @@ function buildMonthGrid(gridEl, year, month) {
             }
         }
 
-        const blocked = (isWknd && !calWeekendAllowed) || isPast
-            || cls.includes('cal-leave-conflict')
-            || cls.includes('cal-halfday-conflict');
-
         const btn = makeCalBtn(day, cls, dateStr);
-        if (!blocked) {
+        if (!isBlocked) {
             btn.onclick = () => calToggleDate(dateStr);
             if (calMode === 'range') {
                 btn.onmouseenter = () => {
@@ -1621,13 +1665,10 @@ function fillRangeDates(startStr, endStr) {
     const cur = new Date(startStr + 'T00:00:00');
     const end = new Date(endStr   + 'T00:00:00');
     while (cur <= end) {
-        const dow    = cur.getDay();
-        const isWknd = dow === 0 || dow === 6;
-        if (!isWknd || calWeekendAllowed) {
-            const ds = toYMD(cur);
-            if (!isDuplicateLeaveDate(ds) && !HALF_DAY_DATES.includes(ds)) {
-                calSelectedDates.add(ds);
-            }
+        const ds = toYMD(cur);
+        // RESTORED: Use centralized rule checker
+        if (!isDateBlockedByRules(cur, ds)) {
+            calSelectedDates.add(ds);
         }
         cur.setDate(cur.getDate() + 1);
     }
@@ -1638,11 +1679,10 @@ function countRangeDays(startStr, endStr) {
     const cur = new Date(startStr + 'T00:00:00');
     const end = new Date(endStr   + 'T00:00:00');
     while (cur <= end) {
-        const dow    = cur.getDay();
-        const isWknd = dow === 0 || dow === 6;
-        if (!isWknd || calWeekendAllowed) {
-            const ds = toYMD(cur);
-            if (!isDuplicateLeaveDate(ds) && !HALF_DAY_DATES.includes(ds)) count++;
+        const ds = toYMD(cur);
+        // RESTORED: Use centralized rule checker
+        if (!isDateBlockedByRules(cur, ds)) {
+            count++;
         }
         cur.setDate(cur.getDate() + 1);
     }
@@ -1870,6 +1910,10 @@ function resetLeaveForm() {
     calRangePicking   = 'start';
     calHoverDate      = null;
     calSelectedDates.clear();
+    
+    // RESTORED: Reset global rules on form reset
+    activeNoticeDays  = 0;
+    activeAllowPast   = false;
 
     const popup      = document.getElementById('calPopup');
     const dualWrap   = document.getElementById('calDualWrap');
@@ -1883,7 +1927,7 @@ function resetLeaveForm() {
     const leg = document.getElementById('rangeLegendItem');
     if (leg) leg.style.display = 'none';
     const hint = document.getElementById('calModeHint');
-    if (hint) hint.textContent = 'Weekends are disabled. Red = existing leave. Yellow = existing half-day.';
+    if (hint) hint.textContent = 'Weekends and dates blocked by notice periods are disabled.';
 
     document.getElementById('calChipsArea').innerHTML   = '';
     document.getElementById('calHiddenInputs').innerHTML = '';
@@ -1963,6 +2007,10 @@ function onLeaveTypeChange(sel) {
     const code      = opt.dataset.code || '';
     const name      = opt.text || '';
     const hint      = document.getElementById('balanceHint');
+    
+    // RESTORED: Update the global rule variables whenever a leave type is selected
+    activeNoticeDays = parseInt(opt.dataset.noticedays) || 0;
+    activeAllowPast  = (opt.dataset.allowpast === '1' || opt.dataset.allowpast === 'true');
 
     if (isAccrual && CREDIT_BALANCES[ltId]) {
         const rawRem = CREDIT_BALANCES[ltId].remaining_balance;
@@ -2078,7 +2126,8 @@ function submitLeave() {
     if (conflictingLeave)   { showToast('Date Conflict', `${formatDateDisplay(conflictingLeave)} overlaps with an existing leave application.`, 'error'); return; }
     if (conflictingHalfDay) { showToast('Date Conflict', `${formatDateDisplay(conflictingHalfDay)} already has a half-day certification. Please cancel it first.`, 'error'); return; }
 
-    if (MAX_DAYS_DATA[ltId]) {
+    // Enforce the block ONLY if max_days actually exists and is greater than 0
+    if (MAX_DAYS_DATA[ltId] && MAX_DAYS_DATA[ltId].max_days && MAX_DAYS_DATA[ltId].max_days > 0) {
         const mx = MAX_DAYS_DATA[ltId];
         if (mx.remaining <= 0) { showToast('Annual Limit Reached', `You have used all ${mx.max_days} day(s) allowed for ${mx.type_name} this year.`, 'error'); return; }
         if (calSelectedDates.size > mx.remaining) { showToast('Annual Limit Exceeded', `${mx.type_name} allows ${mx.max_days} day(s)/year. You have ${mx.remaining} day(s) left but selected ${calSelectedDates.size}.`, 'error'); return; }
@@ -2428,7 +2477,6 @@ async function viewMonetizeRequest(leaveId) {
 
 <div class="page">
 
-  <!-- HEADER -->
   <div class="header">
     <div class="seal-row">
       <div class="seal">
@@ -2447,30 +2495,24 @@ async function viewMonetizeRequest(leaveId) {
   </div>
 
 
-  <!-- DATE -->
   <div class="date-line">${appDate}</div>
 
-  <!-- ADDRESSEE -->
   <div class="addressee">
     <p class="name">${govName}</p>
     <p>${govTitle}</p>
     <p>Province of Camarines Norte</p>
   </div>
 
-  <!-- SALUTATION -->
   <div class="salutation">Dear Sir:</div>
 
-  <!-- GREETING -->
   <div class="body-section">
     <p>Greetings!</p>
   </div>
 
-  <!-- BODY -->
   <div class="body-section">
     <p>Respectfully requesting your good office to kindly allow me to monetize <strong>${noDays} day(s)</strong> of my <strong>${creditLabel}</strong> with an estimated amount of <strong>₱${estAmount}</strong>, to be used for ${d.reason || 'the maintenance of my medicines'}.</p>
   </div>
 
-  <!-- CLOSING LINE -->
   <div class="body-section">
     <p>Anticipating with thanks and kind consideration on this request</p>
   </div>
@@ -2480,15 +2522,13 @@ async function viewMonetizeRequest(leaveId) {
   </div>
 
 
-  <!-- SIGNATURE BLOCK -->
-<div class="sig-block">
+  <div class="sig-block">
     <div class="sig-right">
       <p class="sig-name">${EMPLOYEE_NAME}</p>
       <p class="sig-title">{{ $employee->position->position_name ?? '' }}</p>
     </div>
   </div>
 
-  <!-- NOTED BY -->
   <div class="noted-block">
     <p class="noted-label">Noted:</p>
     <div style="display:inline-block; text-align:center;">
@@ -2497,7 +2537,6 @@ async function viewMonetizeRequest(leaveId) {
     </div>
   </div>
 
-  <!-- APPROVED BY -->
   <div class="approved-block" style="text-align:center;">
     <p class="noted-label">APPROVED:</p>
     <br>
@@ -2507,9 +2546,7 @@ async function viewMonetizeRequest(leaveId) {
     </div>
   </div>
 
-</div><!-- end .page -->
-
-</body>
+</div></body>
 </html>`;
 
    // ── Inject modal into current page instead of popup window ──

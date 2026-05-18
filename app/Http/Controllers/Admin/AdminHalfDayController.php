@@ -105,9 +105,8 @@ class AdminHalfDayController extends Controller
         }
 
         // ── Guard 4: check sufficient balance before approving ────────────────
-        // We only check here — the actual deduction is done by the DB trigger.
         if ($newStatus === 'APPROVED') {
-            $credit = LeaveCreditBalance::where('user_id',   $hd->user_id)
+            $credit = LeaveCreditBalance::where('user_id',       $hd->user_id)
                                         ->where('leave_type_id', $hd->leave_type_id)
                                         ->first();
 
@@ -127,13 +126,12 @@ class AdminHalfDayController extends Controller
         }
 
         try {
-            // ── Always stamp approved_date with today regardless of status.
-            //    The DB trigger fires after this UPDATE and handles the balance
-            //    deduction (APPROVED) or restoration (CANCELLED / REJECTED).
+            // FIX: auth()->id() now correctly returns user_id (via UserCredential override)
+            // No need for the fallback `auth()->user()->employee_id ?? auth()->id()` hack
             $updates = [
                 'status'        => $newStatus,
                 'updated_at'    => Carbon::now(),
-                'approved_by'   => auth()->user()->employee_id ?? auth()->id(),
+                'approved_by'   => auth()->id(),
                 'approved_date' => Carbon::now()->toDateString(),
             ];
 
@@ -152,8 +150,6 @@ class AdminHalfDayController extends Controller
             ], 422);
         }
 
-        // Reload the record with the approvedBy relationship so we can
-        // return the approver's formatted name to the frontend.
         $hd->refresh()->load('approvedBy');
 
         $approvedByName = null;

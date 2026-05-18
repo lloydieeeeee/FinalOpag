@@ -689,7 +689,7 @@ tfoot .net-footer {
 @php
 /* ─── Fetch All Active Deductions ─── */
 $allDeductions = \App\Models\PayrollDeduction::where('is_active', 1)->orderBy('sort_order')->get();
-$dbDeductions = $allDeductions->keyBy('name');
+$dbDeductions = $allDeductions->keyBy(fn($d) => strtolower($d->name));
 
 /* ─── Filter Dynamic Deductions & Allowances ─── */
 $dynamicDeductions = $allDeductions->filter(function($ded) {
@@ -705,36 +705,53 @@ $dynamicAllowances = $allDeductions->filter(function($ded) {
     return true;
 });
 
+/* Helper function */
+$ded = fn(string $name) => $dbDeductions->get(strtolower($name));
+
+$gsisEeRec    = $ded('Life Retirement Insurance – Personal Share') ?? $ded('gsis employee share');
+$gsisGovtRec  = $ded('Life Retirement Insurance – Government Share') ?? $ded("gsis gov't share");
+$gsisEcRec    = $ded('ECF (Employee Compensation Fund)');
+$pagibigEeRec = $ded('Employee Share') ?? $ded('pagibig employee share');
+$pagibigGovRec= $ded('Employer Share') ?? $ded("pagibig gov't share");
+
+// PHILHEALTH FIX
+$phicEeRec    = $ded('Personal Share')   ?? $ded('philhealth employee share') ?? $ded('philhealth');
+$phicGovtRec  = $ded('Government Share') ?? $ded("philhealth gov't share") ?? $ded('philhealth');
+
+$peraRec      = $ded('PERA');
+$raRec        = $ded('RA');
+$taRec        = $ded('TA');
+
+// Ensure Limits are strictly numeric and > 0, otherwise NULL
+$getLimit = function($rec) {
+    return (isset($rec->limit_amount) && (float)$rec->limit_amount > 0) ? (float)$rec->limit_amount : null;
+};
+
 $jsConfig = [
-    'gsisEeType'      => $dbDeductions->get('GSIS Employee Share')?->rate_type    ?? 'percent',
-    'gsisEeValue'     => (float)($dbDeductions->get('GSIS Employee Share')?->rate_value   ?? 0.09),
-    'gsisEeLimit'     => $dbDeductions->get('GSIS Employee Share')?->limit_amount !== null
-                            ? (float)$dbDeductions->get('GSIS Employee Share')->limit_amount : null,
-    'gsisGovtType'    => $dbDeductions->get("GSIS Gov't Share")?->rate_type  ?? 'percent',
-    'gsisGovtValue'   => (float)($dbDeductions->get("GSIS Gov't Share")?->rate_value ?? 0.12),
-    'gsisGovtLimit'   => $dbDeductions->get("GSIS Gov't Share")?->limit_amount !== null
-                            ? (float)$dbDeductions->get("GSIS Gov't Share")->limit_amount : null,
-    'gsisEcType'      => $dbDeductions->get('ECF (Employee Compensation Fund)')?->rate_type  ?? 'flat',
-    'gsisEcValue'     => (float)($dbDeductions->get('ECF (Employee Compensation Fund)')?->rate_value ?? 100),
-    'gsisEcLimit'     => null,
-    'pagibigEeType'   => $dbDeductions->get("PAGIBIG Gov't Share")?->rate_type  ?? 'flat',
-    'pagibigEeValue'  => (float)($dbDeductions->get("PAGIBIG Gov't Share")?->rate_value ?? 200),
-    'pagibigEeLimit'  => null,
-    'phicEeType'      => $dbDeductions->get('PhilHealth Employee Share')?->rate_type  ?? 'percent',
-    'phicEeValue'     => (float)($dbDeductions->get('PhilHealth Employee Share')?->rate_value ?? 0.025),
-    'phicEeLimit'     => $dbDeductions->get('PhilHealth Employee Share')?->limit_amount !== null
-                            ? (float)$dbDeductions->get('PhilHealth Employee Share')->limit_amount : null,
-    'phicGovtType'    => $dbDeductions->get("PhilHealth Gov't Share")?->rate_type  ?? 'percent',
-    'phicGovtValue'   => (float)($dbDeductions->get("PhilHealth Gov't Share")?->rate_value ?? 0.025),
-    'phicGovtLimit'   => $dbDeductions->get("PhilHealth Gov't Share")?->limit_amount !== null
-                            ? (float)$dbDeductions->get("PhilHealth Gov't Share")->limit_amount : null,
-    'peraType'        => $dbDeductions->get('PERA')?->rate_type   ?? 'flat',
-    'peraValue'       => (float)($dbDeductions->get('PERA')?->rate_value ?? 2000),
-    'peraLimit'       => null,
-    'raType'          => $dbDeductions->get('RA')?->rate_type     ?? 'flat',
-    'raValue'         => (float)($dbDeductions->get('RA')?->rate_value   ?? 9500),
-    'taType'          => $dbDeductions->get('TA')?->rate_type     ?? 'flat',
-    'taValue'         => (float)($dbDeductions->get('TA')?->rate_value   ?? 9500),
+    'gsisEeType'      => $gsisEeRec?->rate_type    ?? 'percent',
+    'gsisEeValue'     => (float)($gsisEeRec?->rate_value   ?? 0.09),
+    'gsisEeLimit'     => $getLimit($gsisEeRec),
+    'gsisGovtType'    => $gsisGovtRec?->rate_type  ?? 'percent',
+    'gsisGovtValue'   => (float)($gsisGovtRec?->rate_value ?? 0.12),
+    'gsisGovtLimit'   => $getLimit($gsisGovtRec),
+    'gsisEcType'      => $gsisEcRec?->rate_type    ?? 'flat',
+    'gsisEcValue'     => (float)($gsisEcRec?->rate_value   ?? 100),
+    'pagibigEeType'   => $pagibigEeRec?->rate_type  ?? 'flat',
+    'pagibigEeValue'  => (float)($pagibigEeRec?->rate_value ?? 200),
+    'pagibigGovType'  => $pagibigGovRec?->rate_type ?? 'flat',
+    'pagibigGovValue' => (float)($pagibigGovRec?->rate_value ?? 200),
+    'phicEeType'      => $phicEeRec?->rate_type    ?? 'percent',
+    'phicEeValue'     => (float)($phicEeRec?->rate_value   ?? 0.025),
+    'phicEeLimit'     => $getLimit($phicEeRec),
+    'phicGovtType'    => $phicGovtRec?->rate_type  ?? 'percent',
+    'phicGovtValue'   => (float)($phicGovtRec?->rate_value ?? 0.025),
+    'phicGovtLimit'   => $getLimit($phicGovtRec),
+    'peraType'        => $peraRec?->rate_type      ?? 'flat',
+    'peraValue'       => (float)($peraRec?->rate_value     ?? 2000),
+    'raType'          => $raRec?->rate_type        ?? 'flat',
+    'raValue'         => (float)($raRec?->rate_value       ?? 9500),
+    'taType'          => $taRec?->rate_type        ?? 'flat',
+    'taValue'         => (float)($taRec?->rate_value       ?? 9500),
 ];
 
 $computeFromConfig = function(string $type, float $value, ?float $limit, float $gross): float {

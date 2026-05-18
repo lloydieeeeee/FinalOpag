@@ -1,7 +1,7 @@
 <?php
 // app/Http/Controllers/Admin/AdminLeaveController.php
 // Balance is handled entirely by DB triggers:
-//   trg_leave_application_insert   → deducts on submission
+//   trg_leave_application_insert    → deducts on submission
 //   trg_leave_application_cancelled → restores on CANCELLED or REJECTED
 // Do NOT touch leave_credit_balance manually here.
 
@@ -88,7 +88,7 @@ class AdminLeaveController extends Controller
 
         $app->update([
             'status'      => 'APPROVED',
-            'approved_by' => auth()->id(), // Updated from session
+            'approved_by' => auth()->id(),
             'approved_at' => now(),
         ]);
 
@@ -128,7 +128,7 @@ class AdminLeaveController extends Controller
         $app->update([
             'status'        => 'REJECTED',
             'reject_reason' => $request->reason ?? 'Disapproved by administrator.',
-            'approved_by'   => auth()->id(), // Updated from session
+            'approved_by'   => auth()->id(),
             'approved_at'   => now(),
         ]);
 
@@ -188,7 +188,7 @@ class AdminLeaveController extends Controller
 
         $updateData = [
             'status'      => $newStatus,
-            'approved_by' => auth()->id(), // Updated from session
+            'approved_by' => auth()->id(),
             'approved_at' => now(),
         ];
 
@@ -244,11 +244,11 @@ class AdminLeaveController extends Controller
 
         $year = $app->start_date ? $app->start_date->year : now()->year;
 
-        $vlBalance = LeaveCreditBalance::where('user_id', $app->user_id) // Updated to user_id
+        $vlBalance = LeaveCreditBalance::where('user_id', $app->user_id)
             ->whereHas('leaveType', fn($q) => $q->where('type_code', 'VL'))
             ->where('year', $year)->first();
 
-        $slBalance = LeaveCreditBalance::where('user_id', $app->user_id) // Updated to user_id
+        $slBalance = LeaveCreditBalance::where('user_id', $app->user_id)
             ->whereHas('leaveType', fn($q) => $q->where('type_code', 'SL'))
             ->where('year', $year)->first();
 

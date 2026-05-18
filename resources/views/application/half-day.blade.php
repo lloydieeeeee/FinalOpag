@@ -665,6 +665,8 @@
                                 <option value="{{ $lt->leave_type_id }}"
                                         data-balance-id="{{ $cb->credit_balance_id ?? '' }}"
                                         data-remaining="{{ $rawRemaining }}"
+                                        data-noticedays="{{ $lt->notice_days ?? 0 }}"
+                                        data-allowpast="{{ $lt->allow_past_filing ?? 0 }}"
                                         {{ $lt->type_name == 'Vacation Leave' ? 'selected' : '' }}>
                                     {{ $lt->type_name }}
                                 </option>
@@ -708,7 +710,8 @@
                                         <div class="cal-wd">We</div><div class="cal-wd">Th</div><div class="cal-wd">Fr</div><div class="cal-wd">Sa</div>
                                     </div>
                                     <div class="cal-days" id="hdCalDays"></div>
-                                    <div class="cal-legend">
+                                    <p class="text-xs text-gray-400 mt-2 text-center" style="line-height:1.2;">Weekends and dates blocked by notice periods are disabled.</p>
+                                    <div class="cal-legend" style="margin-top:6px; padding-top:8px; border-top:1px solid #f3f4f6;">
                                         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#fee2e2;border:1px solid #fecaca;"></div> Leave conflict</div>
                                         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#fef9c3;border:1px solid #fde68a;"></div> Half-day filed</div>
                                     </div>
@@ -904,6 +907,9 @@ let activePanelHdId = null;
 let pendingCancelId = null;
 let successHdId     = null;
 
+let hdActiveNoticeDays = 0;
+let hdActiveAllowPast  = false;
+
 /* ════════════════════════════════════════════════════════
    TAB SWITCHING
 ════════════════════════════════════════════════════════ */
@@ -969,7 +975,7 @@ function filterHistory() {
 }
 
 /* ════════════════════════════════════════════════════════
-   CALENDAR PICKER
+   CALENDAR PICKER WITH RULES
 ════════════════════════════════════════════════════════ */
 const HD_MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 let hdCalYear, hdCalMonth, hdCalOpen = false, hdCalSelected = null;
@@ -986,6 +992,11 @@ function hdCalRender() {
     const grid  = document.getElementById('hdCalDays');
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const todayStr    = hdToYMD(today);
+    
+    // Calculate notice boundary date
+    const earliest = new Date(today);
+    earliest.setDate(today.getDate() + hdActiveNoticeDays);
+
     const firstDay    = new Date(hdCalYear, hdCalMonth, 1).getDay();
     const daysInMonth = new Date(hdCalYear, hdCalMonth + 1, 0).getDate();
     const prevDays    = new Date(hdCalYear, hdCalMonth, 0).getDate();
@@ -994,28 +1005,44 @@ function hdCalRender() {
     for (let i = 0; i < firstDay; i++) {
         grid.appendChild(hdMakeBtn(prevDays - firstDay + 1 + i, 'cal-day cal-other'));
     }
+    
     for (let day = 1; day <= daysInMonth; day++) {
         const date    = new Date(hdCalYear, hdCalMonth, day);
         const dateStr = hdToYMD(date);
         const dow     = date.getDay();
-        const isPast  = date < today && dateStr !== todayStr;
-        const isWknd  = dow === 0 || dow === 6;
+        const isPastDate = date < today && dateStr !== todayStr;
+        const isWknd     = dow === 0 || dow === 6;
+        
         let cls = 'cal-day';
         if (dateStr === todayStr) cls += ' cal-today';
-        if (isWknd) { cls += ' cal-weekend'; }
-        else if (isPast) { cls += ' cal-disabled'; }
-        else {
-            if (hdIsLeaveConflict(dateStr))   cls += ' cal-leave-conflict';
-            else if (hdIsHdConflict(dateStr)) cls += ' cal-halfday-conflict';
+        
+        let isBlocked = false;
+
+        // Visual rules application
+        if (isWknd) { 
+            cls += ' cal-weekend'; 
+            isBlocked = true;
+        } else if (isPastDate && !hdActiveAllowPast) { 
+            cls += ' cal-disabled'; 
+            isBlocked = true;
+        } else if (hdActiveNoticeDays > 0 && date < earliest && !isPastDate) {
+            cls += ' cal-disabled';
+            isBlocked = true;
+        } else if (hdIsLeaveConflict(dateStr)) {
+            cls += ' cal-leave-conflict';
+            isBlocked = true;
+        } else if (hdIsHdConflict(dateStr)) {
+            cls += ' cal-halfday-conflict';
+            isBlocked = true;
         }
+
         if (hdCalSelected === dateStr) cls += ' cal-selected';
+        
         const btn = hdMakeBtn(day, cls);
-        const isBlocked = isWknd || isPast
-            || cls.includes('cal-leave-conflict')
-            || cls.includes('cal-halfday-conflict');
         if (!isBlocked) btn.onclick = () => hdCalSelectDate(dateStr);
         grid.appendChild(btn);
     }
+    
     const total = firstDay + daysInMonth;
     const rem   = total % 7 === 0 ? 0 : 7 - (total % 7);
     for (let i = 1; i <= rem; i++) grid.appendChild(hdMakeBtn(i, 'cal-day cal-other'));
@@ -1112,6 +1139,13 @@ function selectLeaveType(sel) {
     const remaining = parseFloat(opt.dataset.remaining) || 0;
     const balanceId = opt.dataset.balanceId || '';
 
+    // NEW: Update global rules for calendar blocks dynamically
+    hdActiveNoticeDays = parseInt(opt.dataset.noticedays) || 0;
+    hdActiveAllowPast  = (opt.dataset.allowpast === '1' || opt.dataset.allowpast === 'true');
+
+    // Force calendar re-render if it's currently open so blocked dates update
+    if (hdCalOpen) hdCalRender();
+
     document.getElementById('f_credit_balance_id').value = balanceId;
     document.getElementById('err_leave_type').classList.add('hidden');
 
@@ -1169,6 +1203,9 @@ function hidePanelOverlayIfNoneOpen() {
 function resetApplyForm() {
     hdCalSelected = null;
     hdCalOpen     = false;
+    hdActiveNoticeDays = 0;
+    hdActiveAllowPast  = false;
+    
     document.getElementById('hdCalPopup').style.display = 'none';
     document.getElementById('hdCalTrigger').classList.remove('open');
     const trigText = document.getElementById('hdCalTriggerText');

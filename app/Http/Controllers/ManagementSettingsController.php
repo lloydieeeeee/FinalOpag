@@ -30,25 +30,32 @@ class ManagementSettingsController extends Controller
     public function storeLeaveType(Request $request)
     {
         $v = Validator::make($request->all(), [
-            'type_name'        => 'required|string|max:80',
-            'type_code'        => 'required|string|max:20|unique:leave_type,type_code',
-            'is_accrual_based' => 'nullable|boolean',
-            'accrual_rate'     => 'nullable|numeric|min:0',
-            'max_days'         => 'nullable|numeric|min:0.5',
+            'type_name'         => 'required|string|max:80',
+            'type_code'         => 'required|string|max:20|unique:leave_type,type_code',
+            'is_accrual_based'  => 'nullable|boolean',
+            'accrual_rate'      => 'nullable|numeric|min:0',
+            'max_days'          => 'nullable|numeric|min:0.5',
+            'notice_days'       => 'nullable|integer|min:0',
+            'allow_past_filing' => 'nullable|boolean',
         ], [
-            'max_days.min' => 'Max days must be at least 0.5. Leave blank for unlimited.',
+            'max_days.min' => 'Annual limit must be at least 0.5. Leave blank for unlimited.',
         ]);
+        
         if ($v->fails()) {
             return response()->json(['success' => false, 'message' => $v->errors()->first()], 422);
         }
+        
         $lt = LeaveType::create([
-            'type_name'        => $request->type_name,
-            'type_code'        => strtoupper($request->type_code),
-            'is_accrual_based' => $request->boolean('is_accrual_based'),
-            'accrual_rate'     => $request->boolean('is_accrual_based') ? $request->accrual_rate : null,
-            'max_days'         => $request->filled('max_days') ? $request->max_days : null,
-            'is_active'        => 1,
+            'type_name'         => $request->type_name,
+            'type_code'         => strtoupper($request->type_code),
+            'is_accrual_based'  => $request->boolean('is_accrual_based'),
+            'accrual_rate'      => $request->boolean('is_accrual_based') ? $request->accrual_rate : null,
+            'max_days'          => $request->filled('max_days') ? $request->max_days : null,
+            'notice_days'       => $request->filled('notice_days') ? $request->notice_days : null,
+            'allow_past_filing' => $request->boolean('allow_past_filing'),
+            'is_active'         => 1,
         ]);
+        
         return response()->json(['success' => true, 'data' => $lt, 'message' => 'Leave type added successfully.']);
     }
 
@@ -56,24 +63,31 @@ class ManagementSettingsController extends Controller
     {
         $lt = LeaveType::findOrFail($id);
         $v  = Validator::make($request->all(), [
-            'type_name'        => 'required|string|max:80',
-            'type_code'        => 'required|string|max:20|unique:leave_type,type_code,' . $id . ',leave_type_id',
-            'is_accrual_based' => 'nullable|boolean',
-            'accrual_rate'     => 'nullable|numeric|min:0',
-            'max_days'         => 'nullable|numeric|min:0.5',
+            'type_name'         => 'required|string|max:80',
+            'type_code'         => 'required|string|max:20|unique:leave_type,type_code,' . $id . ',leave_type_id',
+            'is_accrual_based'  => 'nullable|boolean',
+            'accrual_rate'      => 'nullable|numeric|min:0',
+            'max_days'          => 'nullable|numeric|min:0.5',
+            'notice_days'       => 'nullable|integer|min:0',
+            'allow_past_filing' => 'nullable|boolean',
         ], [
-            'max_days.min' => 'Max days must be at least 0.5. Leave blank for unlimited.',
+            'max_days.min' => 'Annual limit must be at least 0.5. Leave blank for unlimited.',
         ]);
+        
         if ($v->fails()) {
             return response()->json(['success' => false, 'message' => $v->errors()->first()], 422);
         }
+        
         $lt->update([
-            'type_name'        => $request->type_name,
-            'type_code'        => strtoupper($request->type_code),
-            'is_accrual_based' => $request->boolean('is_accrual_based'),
-            'accrual_rate'     => $request->boolean('is_accrual_based') ? $request->accrual_rate : null,
-            'max_days'         => $request->filled('max_days') ? $request->max_days : null,
+            'type_name'         => $request->type_name,
+            'type_code'         => strtoupper($request->type_code),
+            'is_accrual_based'  => $request->boolean('is_accrual_based'),
+            'accrual_rate'      => $request->boolean('is_accrual_based') ? $request->accrual_rate : null,
+            'max_days'          => $request->filled('max_days') ? $request->max_days : null,
+            'notice_days'       => $request->filled('notice_days') ? $request->notice_days : null,
+            'allow_past_filing' => $request->boolean('allow_past_filing'),
         ]);
+        
         return response()->json(['success' => true, 'data' => $lt, 'message' => 'Leave type updated successfully.']);
     }
 
@@ -339,24 +353,19 @@ class ManagementSettingsController extends Controller
     }
 
     public function destroySignatory($id) { return $this->optionDestroy('signatory_options', $id); }
+    
     /* ══════════════════════════════════
-   ROLE
-══════════════════════════════════ */
+       ROLE
+    ══════════════════════════════════ */
     public function role()                          { return $this->optionIndex('role_options', 'role'); }
     public function storeRole(Request $r)           { return $this->optionStore($r, 'role_options'); }
     public function updateRole(Request $r, $id)     { return $this->optionUpdate($r, 'role_options', $id); }
     public function destroyRole($id)                { return $this->optionDestroy('role_options', $id); }
 
-    /* ══════════════════════════════════
+    /* ══════════════════════════════════════════════════════
        LEAVE APPLICATION ENFORCEMENT
-       ══════════════════════════════════
-       Called from LeaveApplicationController::store() to enforce
-       the max_days limit set on each leave type.
-
-       Usage:
-           $error = ManagementSettingsController::checkMaxDays($leaveTypeId, $requestedDays);
-           if ($error) return response()->json(['success' => false, 'message' => $error], 422);
-    ══════════════════════════════════ */
+       ══════════════════════════════════════════════════════ */
+       
     public static function checkMaxDays(int $leaveTypeId, float $requestedDays): ?string
     {
         $lt = LeaveType::find($leaveTypeId);
@@ -364,8 +373,44 @@ class ManagementSettingsController extends Controller
             return 'Invalid leave type selected.';
         }
         if ($lt->max_days !== null && $requestedDays > (float) $lt->max_days) {
-            return "You may only apply for up to {$lt->max_days} day(s) of {$lt->type_name} per application. You requested {$requestedDays} day(s).";
+            return "This leave type has an annual limit of {$lt->max_days} day(s). You requested {$requestedDays} day(s).";
         }
+        return null; // OK
+    }
+
+    /**
+     * Checks if the start date complies with the filing notice rules.
+     * Call this in your LeaveApplicationController before saving.
+     */
+    public static function checkFilingNotice(int $leaveTypeId, $startDate): ?string
+    {
+        $lt = LeaveType::find($leaveTypeId);
+        if (! $lt) {
+            return 'Invalid leave type selected.';
+        }
+
+        // If emergency/past filing is explicitly allowed, return OK immediately
+        if ($lt->allow_past_filing) {
+            return null;
+        }
+
+        $start = \Carbon\Carbon::parse($startDate)->startOfDay();
+        $today = now()->startOfDay();
+
+        // If not allowed to file past dates, reject any date before today
+        if ($start->lessThan($today)) {
+            return "This leave type does not allow retrospective or past filing.";
+        }
+
+        // Check prior notice requirements (if set)
+        if ($lt->notice_days !== null && $lt->notice_days > 0) {
+            $requiredDate = $today->copy()->addDays($lt->notice_days);
+            
+            if ($start->lessThan($requiredDate)) {
+                return "{$lt->type_name} requires at least {$lt->notice_days} day(s) prior notice. Please select a date on or after {$requiredDate->format('M d, Y')}.";
+            }
+        }
+
         return null; // OK
     }
 }

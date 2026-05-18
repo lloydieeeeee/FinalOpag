@@ -7,6 +7,7 @@ use App\Models\PayrollPeriod;
 use App\Models\PayrollRecord;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use App\Models\PayrollDeduction;
 
 class PayrollRemittanceController extends Controller
 {
@@ -232,9 +233,25 @@ class PayrollRemittanceController extends Controller
             return response()->json(['error' => 'Period is finalized.'], 403);
         }
 
+        // --- PHILHEALTH DB LIMIT FALLBACK FIX ---
         if ($validated['field'] === 'philhealth_ee') {
-            $validated['value'] = min((float) $validated['value'], 2500.00);
+            $phicLimit = 2500.00; // Fallback default
+            
+            // Look up the exact limit from the database
+            $phicRec = PayrollDeduction::where(function($q) {
+                $q->where('name', 'Personal Share')
+                  ->orWhere('name', 'philhealth employee share')
+                  ->orWhere('name', 'PHILHEALTH')
+                  ->orWhere('name', 'philhealth');
+            })->where('is_active', 1)->first();
+
+            if ($phicRec && $phicRec->limit_amount > 0) {
+                $phicLimit = (float) $phicRec->limit_amount;
+            }
+
+            $validated['value'] = min((float) $validated['value'], $phicLimit);
         }
+        // ----------------------------------------
 
         $record->{$validated['field']} = (float) $validated['value'];
 

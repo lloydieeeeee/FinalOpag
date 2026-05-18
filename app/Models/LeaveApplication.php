@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class LeaveApplication extends Model
 {
-    protected $table      = 'leave_application';  // NOT pluralized
+    protected $table      = 'leave_application';
     protected $primaryKey = 'leave_id';
 
     protected $fillable = [
-        'user_id', // Changed from employee_id
+        'user_id',
+        'employee_id',       // FIX: was missing — leave_application.employee_id is NOT NULL
         'leave_type_id',
         'credit_balance_id',
         'details_of_leave',
@@ -39,7 +40,6 @@ class LeaveApplication extends Model
 
     public function employee()
     {
-        // Directly maps to Employee using user_id
         return $this->belongsTo(Employee::class, 'user_id', 'user_id');
     }
 
@@ -55,7 +55,6 @@ class LeaveApplication extends Model
 
     public function approvedBy()
     {
-        // Approver is also mapped to Employee via user_id
         return $this->belongsTo(Employee::class, 'approved_by', 'user_id');
     }
 }
