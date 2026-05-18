@@ -774,33 +774,33 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     <td class="num-cell employer-col">{{ number_format($gsisEc,2) }}</td>
 
                     {{-- ── GSIS Editable Loans ── --}}
-                    <td class="editable-cell" data-col="gsis_policy"      data-field="gsis_policy"      onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_policy, 2, '.', '') }}"      data-default="{{ number_format($v_gsis_policy, 2, '.', '') }}"      class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-col="gsis_emergency"   data-field="gsis_emergency"   onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_emergency, 2, '.', '') }}"   data-default="{{ number_format($v_gsis_emergency, 2, '.', '') }}"   class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-col="gsis_real_estate" data-field="gsis_real_estate" onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_real_estate, 2, '.', '') }}" data-default="{{ number_format($v_gsis_real_estate, 2, '.', '') }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-col="gsis_mpl"         data-field="gsis_mpl"         onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_mpl, 2, '.', '') }}"         data-default="{{ number_format($v_gsis_mpl, 2, '.', '') }}"         class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-col="gsis_mpl_lite"    data-field="gsis_mpl_lite"    onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_mpl_lite, 2, '.', '') }}"    data-default="{{ number_format($v_gsis_mpl_lite, 2, '.', '') }}"    class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-col="gsis_gfal"        data-field="gsis_gfal"        onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_gfal, 2, '.', '') }}"        data-default="{{ number_format($v_gsis_gfal, 2, '.', '') }}"        class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-col="gsis_computer"    data-field="gsis_computer"    onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_computer, 2, '.', '') }}"    data-default="{{ number_format($v_gsis_computer, 2, '.', '') }}"    class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-col="gsis_conso"       data-field="gsis_conso"       onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_gsis_conso, 2, '.', '') }}"       data-default="{{ number_format($v_gsis_conso, 2, '.', '') }}"       class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_policy"      data-field="gsis_policy"      onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_gsis_policy, 2) }}"      data-default="{{ number_format($v_gsis_policy, 2) }}"      class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_emergency"   data-field="gsis_emergency"   onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_gsis_emergency, 2) }}"   data-default="{{ number_format($v_gsis_emergency, 2) }}"   class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_real_estate" data-field="gsis_real_estate" onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_gsis_real_estate, 2) }}" data-default="{{ number_format($v_gsis_real_estate, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_mpl"         data-field="gsis_mpl"         onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_gsis_mpl, 2) }}"         data-default="{{ number_format($v_gsis_mpl, 2) }}"         class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_mpl_lite"    data-field="gsis_mpl_lite"    onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_gsis_mpl_lite, 2) }}"    data-default="{{ number_format($v_gsis_mpl_lite, 2) }}"    class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_gfal"        data-field="gsis_gfal"        onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_gsis_gfal, 2) }}"        data-default="{{ number_format($v_gsis_gfal, 2) }}"        class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_computer"    data-field="gsis_computer"    onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_gsis_computer, 2) }}"    data-default="{{ number_format($v_gsis_computer, 2) }}"    class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="gsis_conso"       data-field="gsis_conso"       onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_gsis_conso, 2) }}"       data-default="{{ number_format($v_gsis_conso, 2) }}"       class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
 
                     {{-- ── PAG-IBIG EE: editable if Not Fixed, else static ── --}}
                     @php $pagibigEeIsTypable = ($pagibigEeRec?->type === 'Not Fixed'); @endphp
                     @if($pagibigEeIsTypable)
                     <td class="editable-cell" data-col="pagibig_ee" data-field="pagibig_ee" onclick="event.stopPropagation()">
-                        <input type="number" step="0.01" min="0" value="{{ number_format($pagibigEe, 2, '.', '') }}" data-default="{{ number_format($pagibigEe, 2, '.', '') }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)" style="color:#7c3aed;font-weight:700;">
+                        <input type="text" inputmode="decimal" value="{{ number_format($pagibigEe, 2) }}" data-default="{{ number_format($pagibigEe, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)" style="color:#7c3aed;font-weight:700;">
                     </td>
                     @else
                     <td class="num-cell" style="color:#7c3aed;font-weight:700;">{{ number_format($pagibigEe,2) }}</td>
                     @endif
                     <td class="num-cell employer-col">{{ number_format($pagibigGov,2) }}</td>
-                    <td class="editable-cell" data-col="pagibig_mpl"      data-field="pagibig_mpl"      onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_pagibig_mpl, 2, '.', '') }}"      data-default="{{ number_format($v_pagibig_mpl, 2, '.', '') }}"      class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-col="pagibig_calamity" data-field="pagibig_calamity" onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_pagibig_calamity, 2, '.', '') }}" data-default="{{ number_format($v_pagibig_calamity, 2, '.', '') }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="pagibig_mpl"      data-field="pagibig_mpl"      onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_pagibig_mpl, 2) }}"      data-default="{{ number_format($v_pagibig_mpl, 2) }}"      class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="pagibig_calamity" data-field="pagibig_calamity" onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_pagibig_calamity, 2) }}" data-default="{{ number_format($v_pagibig_calamity, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
 
                     {{-- ── PhilHealth EE: editable if Not Fixed, else static ── --}}
                     @php $phicEeIsTypable = ($phicEeRec?->type === 'Not Fixed'); @endphp
                     @if($phicEeIsTypable)
                     <td class="editable-cell" data-col="philhealth_ee" data-field="philhealth_ee" onclick="event.stopPropagation()">
-                        <input type="number" step="0.01" min="0" value="{{ number_format($phicEe, 2, '.', '') }}" data-default="{{ number_format($phicEe, 2, '.', '') }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)" style="color:#0891b2;font-weight:700;">
+                        <input type="text" inputmode="decimal" value="{{ number_format($phicEe, 2) }}" data-default="{{ number_format($phicEe, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)" style="color:#0891b2;font-weight:700;">
                     </td>
                     @else
                     <td class="num-cell" style="color:#0891b2;font-weight:700;">{{ number_format($phicEe,2) }}</td>
@@ -808,27 +808,27 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     <td class="num-cell employer-col">{{ number_format($phicGovt,2) }}</td>
 
                     {{-- ── Withholding Tax ── --}}
-                    <td class="editable-cell" data-col="withholding_tax"  data-field="withholding_tax"  onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_withholding_tax, 2, '.', '') }}"  data-default="{{ number_format($v_withholding_tax, 2, '.', '') }}"  class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="withholding_tax"  data-field="withholding_tax"  onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_withholding_tax, 2) }}"  data-default="{{ number_format($v_withholding_tax, 2) }}"  class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
 
                     {{-- ── Other Loans ── --}}
-                    <td class="editable-cell" data-col="loan_dbp"         data-field="loan_dbp"         onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_loan_dbp, 2, '.', '') }}"         data-default="{{ number_format($v_loan_dbp, 2, '.', '') }}"         class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-col="loan_lbp"         data-field="loan_lbp"         onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_loan_lbp, 2, '.', '') }}"         data-default="{{ number_format($v_loan_lbp, 2, '.', '') }}"         class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-col="loan_paracle"     data-field="loan_paracle"     onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_loan_paracle, 2, '.', '') }}"     data-default="{{ number_format($v_loan_paracle, 2, '.', '') }}"     class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-col="overpayment"      data-field="overpayment"      onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_overpayment, 2, '.', '') }}"      data-default="{{ number_format($v_overpayment, 2, '.', '') }}"      class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
-                    <td class="editable-cell" data-col="other_deduction"  data-field="other_deduction"  onclick="event.stopPropagation()"><input type="number" step="0.01" min="0" value="{{ number_format($v_other_deduction, 2, '.', '') }}"  data-default="{{ number_format($v_other_deduction, 2, '.', '') }}"  class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="loan_dbp"         data-field="loan_dbp"         onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_loan_dbp, 2) }}"         data-default="{{ number_format($v_loan_dbp, 2) }}"         class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="loan_lbp"         data-field="loan_lbp"         onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_loan_lbp, 2) }}"         data-default="{{ number_format($v_loan_lbp, 2) }}"         class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="loan_paracle"     data-field="loan_paracle"     onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_loan_paracle, 2) }}"     data-default="{{ number_format($v_loan_paracle, 2) }}"     class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="overpayment"      data-field="overpayment"      onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_overpayment, 2) }}"      data-default="{{ number_format($v_overpayment, 2) }}"      class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
+                    <td class="editable-cell" data-col="other_deduction"  data-field="other_deduction"  onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_other_deduction, 2) }}"  data-default="{{ number_format($v_other_deduction, 2) }}"  class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
 
                     {{-- ── CNGWPC Cooperative ── --}}
                     @foreach($cngCols as $field => $label)
                     @php $v_cng = $getCarried($field); @endphp
                     <td class="editable-cell" data-col="{{ $field }}" data-field="{{ $field }}" onclick="event.stopPropagation()">
-                        <input type="number" step="0.01" min="0" value="{{ number_format($v_cng, 2, '.', '') }}" data-default="{{ number_format($v_cng, 2, '.', '') }}" class="loan-input dyn-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)">
+                        <input type="text" inputmode="decimal" value="{{ number_format($v_cng, 2) }}" data-default="{{ number_format($v_cng, 2) }}" class="loan-input dyn-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)">
                     </td>
                     @endforeach
 
                     {{-- ── Dynamic Deductions ── --}}
                     @foreach($dynamicDeductions as $d)
                     <td class="editable-cell" data-col="dyn_{{ $d->id }}" data-field="{{ $d->id }}" onclick="event.stopPropagation()">
-                        <input type="number" step="0.01" min="0" value="{{ number_format($dynValues[$d->id], 2, '.', '') }}" data-default="{{ number_format($dynValues[$d->id], 2, '.', '') }}" data-dyn-id="{{ $d->id }}" class="loan-input dyn-ded-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)">
+                        <input type="text" inputmode="decimal" value="{{ number_format($dynValues[$d->id], 2) }}" data-default="{{ number_format($dynValues[$d->id], 2) }}" data-dyn-id="{{ $d->id }}" class="loan-input dyn-ded-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)">
                     </td>
                     @endforeach
 
@@ -840,8 +840,8 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                         data-col="allowance_ra"
                         data-field="allowance_ra"
                         onclick="event.stopPropagation()">
-                        <input type="number" step="0.01" min="0"
-                               value="{{ number_format($raDefault, 2, '.', '') }}"
+                        <input type="text" inputmode="decimal"
+                               value="{{ number_format($raDefault, 2) }}"
                                class="loan-input"
                                {{ $isAgri ? '' : 'disabled' }}
                                oninput="recalcRow(this)"
@@ -854,8 +854,8 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                         data-col="allowance_ta"
                         data-field="allowance_ta"
                         onclick="event.stopPropagation()">
-                        <input type="number" step="0.01" min="0"
-                               value="{{ number_format($taDefault, 2, '.', '') }}"
+                        <input type="text" inputmode="decimal"
+                               value="{{ number_format($taDefault, 2) }}"
                                class="loan-input"
                                {{ $isAgri ? '' : 'disabled' }}
                                oninput="recalcRow(this)"
@@ -866,7 +866,7 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     {{-- ── Dynamic Allowances ── --}}
                     @foreach($dynamicAllowances as $a)
                     <td class="editable-cell" data-col="dyn_{{ $a->id }}" data-field="{{ $a->id }}" onclick="event.stopPropagation()">
-                        <input type="number" step="0.01" min="0" value="{{ number_format($dynAddValues[$a->id], 2, '.', '') }}" data-default="{{ number_format($dynAddValues[$a->id], 2, '.', '') }}" data-dyn-id="{{ $a->id }}" class="loan-input dyn-add-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)">
+                        <input type="text" inputmode="decimal" value="{{ number_format($dynAddValues[$a->id], 2) }}" data-default="{{ number_format($dynAddValues[$a->id], 2) }}" data-dyn-id="{{ $a->id }}" class="loan-input dyn-add-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)">
                     </td>
                     @endforeach
 
@@ -1135,6 +1135,12 @@ const CSRF = '{{ csrf_token() }}';
 /* ── Utility ── */
 function fmt(n)    { return parseFloat(n||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtPHP(n) { return '₱'+fmt(n); }
+
+// Helper to strip commas when doing math
+function getRawVal(val) {
+    if (val === null || val === undefined || val === '') return 0;
+    return parseFloat(val.toString().replace(/,/g, '')) || 0;
+}
 
 function computeFixed(type, value, limit, gross) {
     let amt = type === 'percent' ? Math.round(gross * value * 100) / 100 : Math.round(value * 100) / 100;
@@ -1466,23 +1472,87 @@ function selectYear(y) {
     saveSessionState();
 }
 
-/* ── Cell focus ── */
+/* ── Cell focus (UPDATED) ── */
 function focusCell(input) {
-    const cell = input.closest('.editable-cell');
-    if (!cell.classList.contains('agri-locked')) cell.classList.add('focused');
-}
-function blurCell(input)  { input.closest('.editable-cell').classList.remove('focused'); }
+    const cell = input.closest('.editable-cell') || input.closest('.ep-edit');
+    if (cell && !cell.classList.contains('agri-locked')) cell.classList.add('focused');
 
-/* ── RECALC ── */
+    // Vanish the zero instantly, but leave commas intact if modifying an existing number
+    if (getRawVal(input.value) === 0) {
+        input.value = '';
+    }
+}
+
+function blurCell(input)  { 
+    const cell = input.closest('.editable-cell') || input.closest('.ep-edit');
+    if (cell) cell.classList.remove('focused'); 
+
+    // If left completely blank, force it back to 0.00 and recalculate
+    if (input.value.trim() === '') {
+        input.value = '0.00';
+        recalcRow(input); 
+    } else {
+        // Lock in the 2 decimal places when clicking away
+        let raw = getRawVal(input.value);
+        input.value = raw.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+}
+
+/* ── Live Formatter (NEW) ── */
+function formatLive(input) {
+    if (!input || input.tagName !== 'INPUT') return;
+    
+    let cursor = input.selectionStart;
+    let oldLength = input.value.length;
+    
+    // 1. Strip everything except numbers and a decimal point (Blocks letters)
+    let clean = input.value.replace(/[^0-9.]/g, '');
+    
+    // 2. Prevent typing multiple decimal points
+    let parts = clean.split('.');
+    if (parts.length > 2) {
+        clean = parts[0] + '.' + parts.slice(1).join('');
+        parts = clean.split('.');
+    }
+    
+    // 3. Add commas dynamically while typing
+    if (parts[0]) {
+        if (parts[0].length > 1 && parts[0].startsWith('0')) {
+            parts[0] = parseInt(parts[0], 10).toString(); // Prevent leading zeros like '05'
+        }
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    
+    // 4. Limit to 2 decimal places maximum while typing
+    if (parts[1] && parts[1].length > 2) {
+        parts[1] = parts[1].substring(0, 2);
+    }
+    
+    let formatted = parts.length > 1 ? parts[0] + '.' + parts[1] : parts[0];
+    
+    // Update input and preserve cursor position so it doesn't jump to the end of the box
+    if (input.value !== formatted) {
+        input.value = formatted;
+        if (cursor !== null) {
+            let newCursor = cursor + (formatted.length - oldLength);
+            input.setSelectionRange(newCursor, newCursor);
+        }
+    }
+}
+
+/* ── RECALC (UPDATED) ── */
 function recalcRow(input, skipSave = false) {
-    const row     = input.closest('tr');
+    // Run the live formatter first to block letters & add commas
+    formatLive(input);
+
+    const row = input.closest('tr');
+    if (!row) return; // Safely exit if typing inside the slide-out panel
     const netCell = row.querySelector('.net-cell');
     if (!netCell) return;
 
     const gross     = parseFloat(netCell.dataset.gross)     || 0;
     const gsisEe    = parseFloat(netCell.dataset.gsisEe)    || 0;
     
-    // If Pag-IBIG/PhilHealth are typable, their editable cell is summed via HARD_DEDUCTION_FIELDS
     const pagibigEeCell = row.querySelector('[data-field="pagibig_ee"] input');
     const pagibigEe = pagibigEeCell ? 0 : (parseFloat(netCell.dataset.pagibigEe) || 0);
     
@@ -1493,23 +1563,27 @@ function recalcRow(input, skipSave = false) {
 
     const raCell = row.querySelector('[data-field="allowance_ra"] input');
     const taCell = row.querySelector('[data-field="allowance_ta"] input');
-    const ra = raCell ? (parseFloat(raCell.value) || 0) : 0;
-    const ta = taCell ? (parseFloat(taCell.value) || 0) : 0;
+    
+    // Strip commas for internal calculation!
+    const ra = raCell ? getRawVal(raCell.value) : 0;
+    const ta = taCell ? getRawVal(taCell.value) : 0;
 
     let totalDeductions = 0;
     let dynAllowances   = 0;
 
     HARD_DEDUCTION_FIELDS.forEach(field => {
         const cell = row.querySelector(`[data-field="${field}"]`);
-        if (cell) totalDeductions += parseFloat(cell.querySelector('input')?.value) || 0;
+        if (cell) {
+            totalDeductions += getRawVal(cell.querySelector('input')?.value);
+        }
     });
 
     row.querySelectorAll('.dyn-ded-input').forEach(inp => {
-        totalDeductions += parseFloat(inp.value) || 0;
+        totalDeductions += getRawVal(inp.value);
     });
 
     row.querySelectorAll('.dyn-add-input').forEach(inp => {
-        dynAllowances += parseFloat(inp.value) || 0;
+        dynAllowances += getRawVal(inp.value);
     });
 
     const net = gross - gsisEe - pagibigEe - phicEe - totalDeductions + pera + ra + ta + dynAllowances;
@@ -1526,7 +1600,7 @@ function recalcRow(input, skipSave = false) {
     }
 }
 
-/* ── Reset row (keeps agri RA/TA at their default, reverts loans & dynamics to calculated defaults) ── */
+/* ── Reset row ── */
 function resetRow(userId) {
     const row = document.querySelector(`tr[data-user-id="${userId}"]`);
     if (!row) return;
@@ -1535,11 +1609,11 @@ function resetRow(userId) {
     row.querySelectorAll('.loan-input').forEach(inp => {
         const field = inp.closest('[data-field]')?.dataset.field;
         if (field === 'allowance_ra' && isAgri) {
-            inp.value = computeFixed(DED_CONFIG.raType, DED_CONFIG.raValue, null, parseFloat(row.dataset.salary)||0).toFixed(2);
+            inp.value = computeFixed(DED_CONFIG.raType, DED_CONFIG.raValue, null, parseFloat(row.dataset.salary)||0).toLocaleString('en-US',{minimumFractionDigits:2});
         } else if (field === 'allowance_ta' && isAgri) {
-            inp.value = computeFixed(DED_CONFIG.taType, DED_CONFIG.taValue, null, parseFloat(row.dataset.salary)||0).toFixed(2);
+            inp.value = computeFixed(DED_CONFIG.taType, DED_CONFIG.taValue, null, parseFloat(row.dataset.salary)||0).toLocaleString('en-US',{minimumFractionDigits:2});
         } else if (!inp.disabled) {
-            inp.value = inp.dataset.default !== undefined ? inp.dataset.default : 0.00;
+            inp.value = inp.dataset.default !== undefined ? inp.dataset.default : '0.00';
         }
     });
     recalcRow(row.querySelector('.loan-input:not(:disabled)') || row.querySelector('.loan-input'));
@@ -1679,23 +1753,23 @@ function openEmpPanel(row) {
         `<div class="ep-field span2"><label>${label}</label><p>${val}</p></div>`;
     const mkEdit = (label, field) => {
         const inp = row.querySelector(`[data-field="${field}"] input`);
-        const val = inp ? parseFloat(inp.value||0).toFixed(2) : '0.00';
+        const val = inp ? (getRawVal(inp.value)).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}) : '0.00';
         return `<div class="ep-edit"><label>${label}</label>
-            <input type="number" step="0.01" min="0" value="${val}"
-                data-panel-field="${field}" oninput="syncPanelField(this)">
+            <input type="text" inputmode="decimal" value="${val}"
+                data-panel-field="${field}" oninput="syncPanelField(this)" onfocus="focusCell(this)" onblur="blurCell(this)">
         </div>`;
     };
     const mkEditAgri = (label, field) => {
         const inp = row.querySelector(`[data-field="${field}"] input`);
-        const val = inp ? parseFloat(inp.value||0).toFixed(2) : '0.00';
+        const val = inp ? (getRawVal(inp.value)).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}) : '0.00';
         if (isAgri) {
             return `<div class="ep-edit"><label>${label} <span style="color:#16a34a;font-size:9px;">(PA Only)</span></label>
-                <input type="number" step="0.01" min="0" value="${val}"
-                    data-panel-field="${field}" oninput="syncPanelField(this)">
+                <input type="text" inputmode="decimal" value="${val}"
+                    data-panel-field="${field}" oninput="syncPanelField(this)" onfocus="focusCell(this)" onblur="blurCell(this)">
             </div>`;
         }
         return `<div class="ep-edit"><label>${label} <span style="color:#d1d5db;font-size:9px;">(N/A for this position)</span></label>
-            <input type="number" step="0.01" min="0" value="0.00" disabled
+            <input type="text" inputmode="decimal" value="0.00" disabled
                 style="background:#f3f4f6;color:#9ca3af;cursor:not-allowed;">
         </div>`;
     };
@@ -1801,10 +1875,16 @@ function openEmpPanel(row) {
     closeDots();
 }
 
+/* ── Panel Syncing (UPDATED) ── */
 function syncPanelField(input) {
     if (!_activeRow) return;
     const field    = input.dataset.panelField;
     const rowInput = _activeRow.querySelector(`[data-field="${field}"] input`);
+    
+    // Live format the slide-out panel input
+    formatLive(input); 
+    
+    // Sync the formatted value back to the hidden table row and trigger math
     if (rowInput && !rowInput.disabled) { 
         rowInput.value = input.value; 
         recalcRow(rowInput); 
@@ -1814,7 +1894,7 @@ function syncPanelField(input) {
 function refreshPanelInputs(row) {
     document.querySelectorAll('#epBody [data-panel-field]').forEach(inp => {
         const rowInput = row.querySelector(`[data-field="${inp.dataset.panelField}"] input`);
-        if (rowInput) inp.value = parseFloat(rowInput.value||0).toFixed(2);
+        if (rowInput) inp.value = getRawVal(rowInput.value).toLocaleString('en-US',{minimumFractionDigits:2});
     });
     const netCell = row.querySelector('.net-cell');
     if (netCell) document.getElementById('epNet').textContent = fmtPHP(parseFloat(netCell.textContent.replace(/,/g,'')));
@@ -1833,7 +1913,7 @@ function closeEmpPanel() {
     _activeRow = null;
 }
 
-/* ── Confirm & Submit ── */
+/* ── Confirm & Submit (UPDATED) ── */
 function confirmProceed() {
     if (_isDuplicate) { showToast('Duplicate Period','A payroll for this month/year already exists.','error'); return; }
     const included = [...document.querySelectorAll('.emp-chk:checked')];
@@ -1875,11 +1955,13 @@ function submitPayroll() {
         inp.type = 'hidden'; inp.name = 'user_ids[]'; inp.value = userId; 
         hEmp.appendChild(inp);
 
-        // Fetch inputs that are strictly editable loans/customs
+        // Fetch inputs that are strictly editable loans/customs and STRIP COMMAS for the DB!
         row.querySelectorAll('[data-field] input.loan-input').forEach(fi => {
             const field = fi.closest('[data-field]').dataset.field;
             const oi = document.createElement('input');
-            oi.type = 'hidden'; oi.name = `overrides[${userId}][${field}]`; oi.value = fi.value || '0';
+            oi.type = 'hidden'; 
+            oi.name = `overrides[${userId}][${field}]`; 
+            oi.value = getRawVal(fi.value) || '0';
             hOvr.appendChild(oi);
         });
 

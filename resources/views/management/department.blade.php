@@ -30,7 +30,7 @@
 .bon{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#dcfce7;color:#14532d;}
 .boff{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#f3f4f6;color:#6b7280;}
 .bon::before,.boff::before{content:'●';font-size:8px;}
-.tog{display:inline-flex;align-items:center;cursor:pointer;gap:8px;}.tog input{display:none;}
+.tog{display:inline-flex;align-items:center;cursor:pointer;gap:8px;margin:0;}.tog input{display:none;}
 .tsl{width:38px;height:20px;border-radius:99px;background:#e5e7eb;position:relative;transition:background .2s;flex-shrink:0;}
 .tsl::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
 .tog input:checked+.tsl{background:#22c55e;}.tog input:checked+.tsl::after{left:21px;}
@@ -52,12 +52,6 @@
 </style>
 
 <div class="mgmt-page">
-
-    <div class="breadcrumb">
-        <a href="{{ route('dashboard') }}">Management Settings</a>
-        <span class="sep">›</span>
-        <span class="current">Department</span>
-    </div>
 
     <div class="sub-tab-bar">
         <a href="{{ route('settings.leaveType') }}"       class="sub-tab-btn">Leave Type</a>
@@ -103,13 +97,16 @@
                         <td style="color:#9ca3af;font-family:monospace;font-size:12px;">{{ str_pad($i+1,2,'0',STR_PAD_LEFT) }}</td>
                         <td style="font-weight:600;color:#111827;">{{ $d->department_name }}</td>
                         <td>
-                            <label class="tog">
-                                <input type="checkbox" {{ $d->is_active ? 'checked' : '' }} onchange="toggleSt({{ $d->department_id }},this)">
-                                <span class="tsl"></span>
-                            </label>
-                            <span id="lbl_{{ $d->department_id }}" class="{{ $d->is_active ? 'bon' : 'boff' }}">
-                                {{ $d->is_active ? 'Active' : 'Inactive' }}
-                            </span>
+                            {{-- Wrapped to fix horizontal/vertical alignment --}}
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <label class="tog">
+                                    <input type="checkbox" {{ $d->is_active ? 'checked' : '' }} onchange="toggleSt({{ $d->department_id }},this)">
+                                    <span class="tsl"></span>
+                                </label>
+                                <span id="lbl_{{ $d->department_id }}" class="{{ $d->is_active ? 'bon' : 'boff' }}">
+                                    {{ $d->is_active ? 'Active' : 'Inactive' }}
+                                </span>
+                            </div>
                         </td>
                         <td>
                             <div class="ac">

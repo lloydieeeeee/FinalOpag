@@ -161,11 +161,7 @@
 
 <div class="mgmt-page">
 
-    <div class="breadcrumb">
-        <a href="{{ route('dashboard') }}">Management Settings</a>
-        <span class="sep">›</span>
-        <span class="current">Details of Leave</span>
-    </div>
+    
 
     <div class="sub-tab-bar">
         <a href="{{ route('settings.leaveType') }}"       class="sub-tab-btn">Leave Type</a>

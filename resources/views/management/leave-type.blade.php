@@ -100,11 +100,11 @@
 .dt thead { position: sticky; top: 0; z-index: 2; }
 .dt thead tr { background: #fafafa; border-bottom: 1px solid #f3f4f6; }
 .dt th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
-.dt th.center { text-align: center; } /* Fixed alignment */
+.dt th.center { text-align: center; }
 .dt th.s { cursor: pointer; user-select: none; }
 .dt th.s:hover { color: #374151; }
 .dt td { padding: 12px 16px; border-bottom: 1px solid #f9fafb; color: #374151; vertical-align: middle; }
-.dt td.center { text-align: center; } /* Fixed alignment */
+.dt td.center { text-align: center; }
 .dt tbody tr:last-child td { border-bottom: none; }
 .dt tbody tr:hover td { background: #fafafa; }
 
@@ -117,7 +117,8 @@
     background: #fff;
 }
 
-/* ── Badges ── */
+/* ── Badges & Status Alignment ── */
+.st-wrap { display: flex; align-items: center; justify-content: center; gap: 8px; } /* NEW: wrapper for perfect alignment */
 .bon  { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #dcfce7; color: #14532d; }
 .boff { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #f3f4f6; color: #6b7280; }
 .bon::before, .boff::before { content: '●'; font-size: 8px; }
@@ -150,7 +151,7 @@
 .fi:focus { border-color: #2d5a1b; }
 .fi.err { border-color: #dc2626; }
 .ferr { font-size: 11px; color: #dc2626; margin-top: 4px; display: none; }
-.fr { margin-bottom: 16px; display: flex; align-items: center; gap: 12px; } /* Fixed modal grid align */
+.fr { margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
 .fr2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
 .mf { display: flex; justify-content: flex-end; gap: 10px; margin-top: 26px; }
 .bcm { padding: 9px 20px; font-size: 13px; font-weight: 600; border: 1.5px solid #e5e7eb; border-radius: 10px; background: #fff; color: #6b7280; cursor: pointer; }
@@ -168,12 +169,6 @@
 </style>
 
 <div class="mgmt-page">
-
-    <div class="breadcrumb">
-        <a href="{{ route('dashboard') }}">Management Settings</a>
-        <span class="sep">›</span>
-        <span class="current">Leave Type</span>
-    </div>
 
     <div class="sub-tab-bar">
         <a href="{{ route('settings.leaveType') }}"       class="sub-tab-btn active">Leave Type</a>
@@ -249,15 +244,19 @@
                             @endif
                         </td>
                         <td class="center" style="color:#6b7280;">{{ $lt->is_accrual_based && $lt->accrual_rate ? number_format($lt->accrual_rate,2).' days' : '—' }}</td>
+                        
                         <td class="center">
-                            <label class="tog">
-                                <input type="checkbox" {{ $lt->is_active ? 'checked' : '' }} onchange="toggleSt({{ $lt->leave_type_id }}, this)">
-                                <span class="tsl"></span>
-                            </label>
-                            <span id="lbl_{{ $lt->leave_type_id }}" class="{{ $lt->is_active ? 'bon' : 'boff' }}" style="margin-left:6px;">
-                                {{ $lt->is_active ? 'Enabled' : 'Disabled' }}
-                            </span>
+                            <div class="st-wrap">
+                                <label class="tog">
+                                    <input type="checkbox" {{ $lt->is_active ? 'checked' : '' }} onchange="toggleSt({{ $lt->leave_type_id }}, this)">
+                                    <span class="tsl"></span>
+                                </label>
+                                <span id="lbl_{{ $lt->leave_type_id }}" class="{{ $lt->is_active ? 'bon' : 'boff' }}">
+                                    {{ $lt->is_active ? 'Enabled' : 'Disabled' }}
+                                </span>
+                            </div>
                         </td>
+                        
                         <td>
                             <div class="ac">
                                 <button class="ib e" title="Edit" onclick="openEdit({{ $lt->leave_type_id }},'{{ addslashes($lt->type_name) }}','{{ $lt->type_code }}',{{ $lt->is_accrual_based ? 1:0 }},'{{ $lt->accrual_rate ?? '' }}', '{{ $lt->max_days ?? '' }}', '{{ $lt->notice_days ?? '' }}', {{ $lt->allow_past_filing ? 1:0 }})">

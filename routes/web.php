@@ -137,56 +137,56 @@ Route::middleware('auth')->group(function () {
             // Leave Type
             Route::get('/leave-type',               [ManagementSettingsController::class, 'leaveType'])->name('leaveType');
             Route::post('/leave-type',              [ManagementSettingsController::class, 'storeLeaveType'])->name('leaveType.store');
-            Route::put('/leave-type/{id}',          [ManagementSettingsController::class, 'updateLeaveType'])->name('leaveType.update');
+            Route::match(['put', 'patch'], '/leave-type/{id}', [ManagementSettingsController::class, 'updateLeaveType'])->name('leaveType.update');
             Route::patch('/leave-type/{id}/toggle', [ManagementSettingsController::class, 'toggleLeaveType'])->name('leaveType.toggle');
             Route::delete('/leave-type/{id}',       [ManagementSettingsController::class, 'destroyLeaveType'])->name('leaveType.destroy');
 
             // Department
             Route::get('/department',               [ManagementSettingsController::class, 'department'])->name('department');
             Route::post('/department',              [ManagementSettingsController::class, 'storeDepartment'])->name('department.store');
-            Route::put('/department/{id}',          [ManagementSettingsController::class, 'updateDepartment'])->name('department.update');
+            Route::match(['put', 'patch'], '/department/{id}', [ManagementSettingsController::class, 'updateDepartment'])->name('department.update');
             Route::patch('/department/{id}/toggle', [ManagementSettingsController::class, 'toggleDepartment'])->name('department.toggle');
             Route::delete('/department/{id}',       [ManagementSettingsController::class, 'destroyDepartment'])->name('department.destroy');
 
             // Position
             Route::get('/position',                 [ManagementSettingsController::class, 'position'])->name('position');
             Route::post('/position',                [ManagementSettingsController::class, 'storePosition'])->name('position.store');
-            Route::put('/position/{id}',            [ManagementSettingsController::class, 'updatePosition'])->name('position.update');
+            Route::match(['put', 'patch'], '/position/{id}', [ManagementSettingsController::class, 'updatePosition'])->name('position.update');
             Route::patch('/position/{id}/toggle',   [ManagementSettingsController::class, 'togglePosition'])->name('position.toggle');
             Route::delete('/position/{id}',         [ManagementSettingsController::class, 'destroyPosition'])->name('position.destroy');
 
             // Details of Leave
             Route::get('/details-of-leave',                                 [DetailsOfLeaveController::class, 'index'])->name('detailsOfLeave');
             Route::post('/details-of-leave/groups',                         [DetailsOfLeaveController::class, 'storeGroup'])->name('detailsOfLeave.group.store');
-            Route::put('/details-of-leave/groups/{id}',                     [DetailsOfLeaveController::class, 'updateGroup'])->name('detailsOfLeave.group.update');
+            Route::match(['put', 'patch'], '/details-of-leave/groups/{id}', [DetailsOfLeaveController::class, 'updateGroup'])->name('detailsOfLeave.group.update');
             Route::delete('/details-of-leave/groups/{id}',                  [DetailsOfLeaveController::class, 'destroyGroup'])->name('detailsOfLeave.group.destroy');
             Route::post('/details-of-leave/groups/{groupId}/items',         [DetailsOfLeaveController::class, 'storeItem'])->name('detailsOfLeave.item.store');
             Route::post('/details-of-leave/groups/{groupId}/items/reorder', [DetailsOfLeaveController::class, 'reorderItems'])->name('detailsOfLeave.item.reorder');
-            Route::put('/details-of-leave/items/{id}',                      [DetailsOfLeaveController::class, 'updateItem'])->name('detailsOfLeave.item.update');
+            Route::match(['put', 'patch'], '/details-of-leave/items/{id}',  [DetailsOfLeaveController::class, 'updateItem'])->name('detailsOfLeave.item.update');
             Route::delete('/details-of-leave/items/{id}',                   [DetailsOfLeaveController::class, 'destroyItem'])->name('detailsOfLeave.item.destroy');
 
             // Commutation
             Route::get('/commutation',              [ManagementSettingsController::class, 'commutation'])->name('commutation');
             Route::post('/commutation',             [ManagementSettingsController::class, 'storeCommutation'])->name('commutation.store');
-            Route::put('/commutation/{id}',         [ManagementSettingsController::class, 'updateCommutation'])->name('commutation.update');
+            Route::match(['put', 'patch'], '/commutation/{id}', [ManagementSettingsController::class, 'updateCommutation'])->name('commutation.update');
             Route::delete('/commutation/{id}',      [ManagementSettingsController::class, 'destroyCommutation'])->name('commutation.destroy');
 
             // Recommendation
             Route::get('/recommendation',           [ManagementSettingsController::class, 'recommendation'])->name('recommendation');
             Route::post('/recommendation',          [ManagementSettingsController::class, 'storeRecommendation'])->name('recommendation.store');
-            Route::put('/recommendation/{id}',      [ManagementSettingsController::class, 'updateRecommendation'])->name('recommendation.update');
+            Route::match(['put', 'patch'], '/recommendation/{id}', [ManagementSettingsController::class, 'updateRecommendation'])->name('recommendation.update');
             Route::delete('/recommendation/{id}',   [ManagementSettingsController::class, 'destroyRecommendation'])->name('recommendation.destroy');
 
             // Signatory
             Route::get('/signatory',                [ManagementSettingsController::class, 'signatory'])->name('signatory');
             Route::post('/signatory',               [ManagementSettingsController::class, 'storeSignatory'])->name('signatory.store');
-            Route::put('/signatory/{id}',           [ManagementSettingsController::class, 'updateSignatory'])->name('signatory.update');
+            Route::match(['put', 'patch'], '/signatory/{id}', [ManagementSettingsController::class, 'updateSignatory'])->name('signatory.update');
             Route::delete('/signatory/{id}',        [ManagementSettingsController::class, 'destroySignatory'])->name('signatory.destroy');
 
             // Role
             Route::get('/role',                     [ManagementSettingsController::class, 'role'])->name('role');
             Route::post('/role',                    [ManagementSettingsController::class, 'storeRole'])->name('role.store');
-            Route::put('/role/{id}',                [ManagementSettingsController::class, 'updateRole'])->name('role.update');
+            Route::match(['put', 'patch'], '/role/{id}', [ManagementSettingsController::class, 'updateRole'])->name('role.update');
             Route::delete('/role/{id}',             [ManagementSettingsController::class, 'destroyRole'])->name('role.destroy');
 
         });

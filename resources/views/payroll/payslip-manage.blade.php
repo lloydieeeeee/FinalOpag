@@ -400,6 +400,22 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
     $currentSigTitle = !empty(optional($currentPeriod)->sig_clerk_title)
         ? strtoupper(trim($currentPeriod->sig_clerk_title))
         : strtoupper(optional($payrollClerkOption)->title ?? 'Administrative Officer V');
+
+    /* ── FETCH DYNAMIC DEDUCTIONS FOR MANAGEMENT ── */
+    $allDeductions = \App\Models\PayrollDeduction::where('is_active', 1)->orderBy('sort_order')->get();
+    
+    $dynamicDeductions = $allDeductions->filter(function($ded) {
+        if ($ded->parent_id == 9 || strtoupper($ded->name) === 'CNGWPC') return false;
+        if (method_exists($ded, 'isAllowance') && $ded->isAllowance()) return false;
+        if (method_exists($ded, 'resolveColumn') && $ded->resolveColumn() !== null) return false;
+        return true;
+    });
+
+    $dynamicAllowances = $allDeductions->filter(function($ded) {
+        if (method_exists($ded, 'isAllowance') && !$ded->isAllowance()) return false;
+        if (method_exists($ded, 'resolveColumn') && $ded->resolveColumn() !== null) return false;
+        return true;
+    });
 @endphp
 
 <div class="pm-page">
@@ -433,7 +449,7 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
             </div>
 
             @if($records->isNotEmpty())
-            <a href="{{ url('payroll/'.$selectedPeriodId.'/payslip-pdf') }}" target="_blank" class="btn-primary">
+            <a href="{{ url('payroll/'.$selectedPeriodId.'/payslip-all-pdf') }}" target="_blank" class="btn-primary">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
@@ -618,6 +634,22 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                                 oninput="onFieldChange()" placeholder="0.00">
                         </div>
                     </div>
+
+                    {{-- DYNAMIC ALLOWANCES --}}
+                    @foreach($dynamicAllowances as $a)
+                    <div class="form-row">
+                        <div class="field-group" data-fieldname="{{ strtolower($a->name) }} label">
+                            <label class="field-label">{{ $a->name }} Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_dyn_{{ $a->id }}" data-label="label_dyn_{{ $a->id }}"
+                                oninput="onLabelChange()" value="{{ $a->name }}">
+                        </div>
+                        <div class="field-group" data-fieldname="{{ strtolower($a->name) }} amount">
+                            <label class="field-label">{{ $a->name }} Amt</label>
+                            <input type="text" class="field-input" id="f_dyn_{{ $a->id }}" data-field="dyn_{{ $a->id }}"
+                                oninput="onFieldChange()" placeholder="0.00">
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
 
                 {{-- STATUTORY --}}
@@ -872,7 +904,7 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                 {{-- OTHER --}}
                 <div class="form-section" data-section="other">
                     <div class="section-title">
-                        <span class="s-dot" style="background:#7c3aed;"></span>Other
+                        <span class="s-dot" style="background:#7c3aed;"></span>Other Deductions
                     </div>
                     <div class="form-row">
                         <div class="field-group" data-fieldname="overpayment label">
@@ -899,6 +931,22 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                                 oninput="onFieldChange()" placeholder="0.00">
                         </div>
                     </div>
+
+                    {{-- DYNAMIC DEDUCTIONS --}}
+                    @foreach($dynamicDeductions as $d)
+                    <div class="form-row">
+                        <div class="field-group" data-fieldname="{{ strtolower($d->name) }} label">
+                            <label class="field-label">{{ $d->name }} Label</label>
+                            <input type="text" class="field-input label-input" id="f_label_dyn_{{ $d->id }}" data-label="label_dyn_{{ $d->id }}"
+                                oninput="onLabelChange()" value="{{ $d->name }}">
+                        </div>
+                        <div class="field-group" data-fieldname="{{ strtolower($d->name) }} amount">
+                            <label class="field-label">{{ $d->name }} Amt</label>
+                            <input type="text" class="field-input" id="f_dyn_{{ $d->id }}" data-field="dyn_{{ $d->id }}"
+                                oninput="onFieldChange()" placeholder="0.00">
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
 
                 {{-- LIVE TOTALS --}}
@@ -1041,6 +1089,9 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         <option value="allowance_rata" data-label-field="label_rata">RA</option>
                         <option value="allowance_ta" data-label-field="label_ta">TA</option>
                         <option value="allowance_other" data-label-field="label_allowance_other">Other Allowance</option>
+                        @foreach($dynamicAllowances as $a)
+                            <option value="dyn_{{ $a->id }}" data-label-field="label_dyn_{{ $a->id }}">{{ $a->name }}</option>
+                        @endforeach
                     </optgroup>
                     <optgroup label="Deductions">
                         <option value="withholding_tax" data-label-field="label_withholding_tax">Withholding Tax</option>
@@ -1064,6 +1115,9 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
                         <option value="pagibig_calamity" data-label-field="label_pagibig_calamity">PAG-IBIG Calamity</option>
                         <option value="overpayment" data-label-field="overpayment_label">Overpayment</option>
                         <option value="other_deduction" data-label-field="other_deduction_label">Other Deduction</option>
+                        @foreach($dynamicDeductions as $d)
+                            <option value="dyn_{{ $d->id }}" data-label-field="label_dyn_{{ $d->id }}">{{ $d->name }}</option>
+                        @endforeach
                     </optgroup>
                 </select>
 
@@ -1102,7 +1156,7 @@ const currentSigTitle = {!! json_encode($currentSigTitle) !!};
 
 // ── Records data ───────────────────────────────────────────────────────────
 const RECORDS = {!! json_encode(
-    $records->mapWithKeys(function($r) use ($currentPeriod) {
+    $records->mapWithKeys(function($r) use ($currentPeriod, $dynamicDeductions, $dynamicAllowances) {
         $ln  = strtoupper($r->employee->last_name ?? '—');
         $fn  = strtoupper($r->employee->first_name ?? '');
         $ext = $r->employee->extension_name ? ' ' . strtoupper($r->employee->extension_name) : '';
@@ -1111,8 +1165,11 @@ const RECORDS = {!! json_encode(
         $periodLabel = optional($r->period)->period_label ?? optional($currentPeriod)->period_label ?? '—';
 
         $userId = (string)($r->user_id ?? '');
+        
+        // Parse dynamic deductions JSON
+        $dynData = is_string($r->dynamic_deductions) ? json_decode($r->dynamic_deductions, true) : (array)($r->dynamic_deductions ?? []);
 
-        return [(string)$r->payroll_id => [
+        $recArray = [
             'record_id'             => (string)$r->payroll_id,
             'user_id'               => $userId,
             'period_id'             => (int)$r->period_id,
@@ -1128,6 +1185,11 @@ const RECORDS = {!! json_encode(
 
             'period_label'          => $periodLabel,
             'gross_salary'          => (float)($r->gross_salary ?? 0),
+            
+            'gsis_govt'             => (float)($r->gsis_govt ?? 0),
+            'pagibig_ee'            => (float)($r->pagibig_ee ?? 0),
+            'philhealth_govt'       => (float)($r->philhealth_govt ?? 0),
+
             'gsis_ee'               => (float)($r->gsis_ee ?? 0),
             'gsis_ec'               => (float)($r->gsis_ec ?? 0),
             'gsis_policy'           => (float)($r->gsis_policy ?? 0),
@@ -1157,6 +1219,7 @@ const RECORDS = {!! json_encode(
             'total_deductions'      => (float)($r->total_deductions ?? 0),
             'total_allowances'      => (float)($r->total_allowances ?? 0),
             'net_pay'               => (float)($r->net_pay ?? 0),
+            
             'label_pera'              => $r->label_pera ?? 'PERA',
             'label_rata'              => $r->label_rata ?? 'RA',
             'label_ta'                => $r->label_ta ?? 'TA',
@@ -1180,7 +1243,19 @@ const RECORDS = {!! json_encode(
             'label_loan_dbp'          => $r->label_loan_dbp ?? 'Development Bank of The Philippines',
             'label_loan_cngwmpc'      => $r->label_loan_cngwmpc ?? 'CNGWMPC',
             'label_loan_paracle'      => $r->label_loan_paracle ?? 'UOLI',
-        ]];
+        ];
+
+        // Push dynamic deductions into JS payload
+        foreach($dynamicDeductions as $d) {
+            $recArray['dyn_' . $d->id] = (float)($dynData[$d->id] ?? 0);
+            $recArray['label_dyn_' . $d->id] = $d->name;
+        }
+        foreach($dynamicAllowances as $a) {
+            $recArray['dyn_' . $a->id] = (float)($dynData[$a->id] ?? 0);
+            $recArray['label_dyn_' . $a->id] = $a->name;
+        }
+
+        return [(string)$r->payroll_id => $recArray];
     })->toArray()
 ) !!};
 
@@ -1192,8 +1267,14 @@ const DEDUCTION_FIELDS = [
     'philhealth_ee','withholding_tax',
     'loan_dbp','loan_lbp','loan_cngwmpc','loan_paracle',
     'overpayment','other_deduction',
+    @foreach($dynamicDeductions as $d) 'dyn_{{ $d->id }}', @endforeach
 ];
-const ALLOWANCE_FIELDS = ['allowance_pera','allowance_rata','allowance_ta','allowance_other'];
+
+const ALLOWANCE_FIELDS = [
+    'allowance_pera','allowance_rata','allowance_ta','allowance_other',
+    @foreach($dynamicAllowances as $a) 'dyn_{{ $a->id }}', @endforeach
+];
+
 const NUMERIC_FIELDS   = ['gross_salary', ...DEDUCTION_FIELDS, ...ALLOWANCE_FIELDS];
 
 const LABEL_FIELD_KEYS = [
@@ -1204,6 +1285,8 @@ const LABEL_FIELD_KEYS = [
     'label_pagibig_mpl','label_pagibig_calamity','label_philhealth_ee',
     'label_loan_lbp','label_loan_dbp','label_loan_cngwmpc','label_loan_paracle',
     'overpayment_label',
+    @foreach($dynamicDeductions as $d) 'label_dyn_{{ $d->id }}', @endforeach
+    @foreach($dynamicAllowances as $a) 'label_dyn_{{ $a->id }}', @endforeach
 ];
 
 let currentRecordId = null;
@@ -1219,7 +1302,6 @@ function parseNum(s) {
     if (!s || String(s).trim() === '' || String(s).trim() === '—') return 0;
     return parseFloat(String(s).replace(/,/g, '')) || 0;
 }
-function fmtBlank(v) { return v > 0 ? fmt(v) : ''; }
 
 function getLabels() {
     const labels = {};
@@ -1347,32 +1429,26 @@ function renderPdf() {
     if (!r) return;
     const d = getFormData();
 
-    const allowParts = [];
-    let allowSum = 0;
-    if (d.allowance_pera > 0) { allowParts.push(d.label_pera || 'PERA'); allowSum += d.allowance_pera; }
-    if (d.allowance_rata > 0) { allowParts.push(d.label_rata || 'RATA'); allowSum += d.allowance_rata; }
-    if (d.allowance_ta > 0)   { allowParts.push(d.label_ta || 'TA'); allowSum += d.allowance_ta; }
+    const gsis_govt = r.gsis_govt || 0;
+    const pagibig_ee = r.pagibig_ee || 0;
     
-    let allowLabel = '';
-    if (allowParts.length > 0) {
-        allowLabel = allowParts.join('/');
-    } else {
-        allowLabel = [d.label_pera || 'PERA', d.label_rata || 'RATA', d.label_ta || 'TA'].filter(Boolean).join('/') || 'PERA/RATA/TA';
-    }
-    
-    const otherAllowLabel = d.label_allowance_other || 'Other Allowance';
+    // Auto-sum dynamic deductions into "Others" so the PDF matches reality
+    let dynDeductionsSum = 0;
+    @foreach($dynamicDeductions as $ded)
+        dynDeductionsSum += (d['dyn_{{ $ded->id }}'] || 0);
+    @endforeach
+
+    const others = (d.loan_dbp || 0) + (d.loan_lbp || 0) + (d.loan_paracle || 0) + (d.overpayment || 0) + (d.other_deduction || 0) + dynDeductionsSum;
 
     const row = (label, amount) => {
-        const val    = fmtBlank(amount);
-        const amtCls = val ? '' : 'pdf-zero';
         return `<tr class="pdf-row-sub">
             <td class="pdf-c-lbl">${escHtml(label)}</td>
             <td class="pdf-c-ul" style="border-bottom: 0.5pt solid #000;"></td>
-            <td class="pdf-c-amt ${amtCls}">${fmt(amount)}</td>
+            <td class="pdf-c-amt">${fmt(amount)}</td>
         </tr>`;
     };
 
-    const displayEmpId = r.employee_id || 'N/A';
+    const displayEmpId = r.employee_id || r.user_id || 'N/A';
     const displayPosition = document.getElementById('f_designation')?.value?.trim() || r.designation || r.position || 'N/A';
     
     const baseFontSize = 7;
@@ -1444,51 +1520,64 @@ function renderPdf() {
             </tr>
 
             <tr class="pdf-row-bold">
-                <td class="pdf-c-lbl">${escHtml(allowLabel)}</td>
+                <td class="pdf-c-lbl">PERA</td>
                 <td class="pdf-c-ul" style="border-bottom: 0.5pt solid #000;"></td>
-                <td class="pdf-c-amt" style="font-weight: bold;">${fmt(allowSum)}</td>
+                <td class="pdf-c-amt" style="font-weight: bold;">${fmt(d.allowance_pera)}</td>
+            </tr>
+            
+            <tr class="pdf-row-bold">
+                <td class="pdf-c-lbl">RA</td>
+                <td class="pdf-c-ul" style="border-bottom: 0.5pt solid #000;"></td>
+                <td class="pdf-c-amt" style="font-weight: bold;">${fmt(d.allowance_rata)}</td>
+            </tr>
+            
+            <tr class="pdf-row-bold">
+                <td class="pdf-c-lbl">TA</td>
+                <td class="pdf-c-ul" style="border-bottom: 0.5pt solid #000;"></td>
+                <td class="pdf-c-amt" style="font-weight: bold;">${fmt(d.allowance_ta)}</td>
             </tr>
             
             ${d.allowance_other > 0 ? `
             <tr class="pdf-row-bold">
-                <td class="pdf-c-lbl">${escHtml(otherAllowLabel)}</td>
+                <td class="pdf-c-lbl">${escHtml(d.label_allowance_other || 'Other Allowance')}</td>
                 <td class="pdf-c-ul" style="border-bottom: 0.5pt solid #000;"></td>
                 <td class="pdf-c-amt" style="font-weight: bold;">${fmt(d.allowance_other)}</td>
             </tr>` : ''}
 
+            @foreach($dynamicAllowances as $a)
+                ${d['dyn_{{ $a->id }}'] > 0 ? `
+                <tr class="pdf-row-bold">
+                    <td class="pdf-c-lbl">${escHtml(d['label_dyn_{{ $a->id }}'] || '{{ $a->name }}')}</td>
+                    <td class="pdf-c-ul" style="border-bottom: 0.5pt solid #000;"></td>
+                    <td class="pdf-c-amt" style="font-weight: bold;">${fmt(d['dyn_{{ $a->id }}'])}</td>
+                </tr>` : ''}
+            @endforeach
+
             <tr class="pdf-row-div"><td colspan="3" style="border-top: 0.3pt solid #ccc; padding-top: 1px;"></td></tr>
             <tr class="pdf-row-sect"><td colspan="3" style="padding-top: 1px;">Less Deductions</td></tr>
 
-            ${row('UCPB', 0)}
-            ${row(d.label_gsis_mpl        || 'MPL',              d.gsis_mpl)}
-            ${row('CBCN', 0)}
-            ${row('MSLAP', 0)}
-            ${row(d.label_withholding_tax  || 'Withholding Tax',  d.withholding_tax)}
-            ${row(d.label_gsis_conso       || 'GSIS salary Loan', d.gsis_conso)}
-            ${row(d.label_gsis_policy      || 'GSIS Policy Loan', d.gsis_policy)}
-            ${row(d.label_philhealth_ee    || 'Medicare',         d.philhealth_ee)}
-            ${row(d.label_gsis_ee          || 'GSIS Premium',     d.gsis_ee)}
-            ${row(d.label_pagibig_govt     || 'PAG-IBIG',         d.pagibig_govt)}
-            ${row(d.label_loan_lbp         || 'LBP',              d.loan_lbp)}
-            ${row(d.label_loan_dbp         || 'Development Bank of The Philippines', d.loan_dbp)}
-            ${row(d.label_loan_cngwmpc     || 'CNGWMPC',          d.loan_cngwmpc)}
-            ${row(d.label_loan_paracle     || 'UOLI',             d.loan_paracle)}
-            ${row(d.label_gsis_real_estate || 'GSIS Real State Loan', d.gsis_real_estate)}
-            ${row(d.label_pagibig_calamity || 'GSIS Calamity Loan',   d.pagibig_calamity)}
-            ${row('Nursery', 0)}
-            ${row(d.label_gsis_emergency   || 'GSIS Em. Loan',    d.gsis_emergency)}
-            ${row(d.label_gsis_computer    || 'GSIS Educ loan',   d.gsis_computer)}
-            ${row(d.label_pagibig_mpl      || 'PAG IBIG Loyalty Card', d.pagibig_mpl)}
-            ${row(d.label_gsis_ec          || 'ECF',              d.gsis_ec)}
-
-            ${d.gsis_gfal     > 0 ? row(d.label_gsis_gfal     || 'GSIS GFAL',     d.gsis_gfal)     : ''}
-            ${d.gsis_mpl_lite > 0 ? row(d.label_gsis_mpl_lite || 'GSIS MPL Lite', d.gsis_mpl_lite) : ''}
-            ${d.overpayment   > 0 ? row(d.overpayment_label   || 'Overpayment',   d.overpayment)   : ''}
-            ${d.other_deduction > 0 ? `<tr class="pdf-row-sub">
-                <td class="pdf-c-lbl" style="font-weight:700;">${escHtml(d.other_deduction_label || 'Other Deduction')}</td>
-                <td class="pdf-c-ul" style="border-bottom: 0.5pt solid #000;"></td>
-                <td class="pdf-c-amt" style="font-weight:700;">${fmt(d.other_deduction)}</td>
-            </tr>` : ''}
+            ${row('Life Retirement Insurance', 0)}
+            ${row('Life Retirement Insurance – Personal Share', d.gsis_ee)}
+            ${row('Employee Share', d.pagibig_govt)}
+            ${row('Life Retirement Insurance – Government Share', gsis_govt)}
+            ${row('ECF (Employee Compensation Fund)', d.gsis_ec)}
+            ${row('Employer Share', pagibig_ee)}
+            ${row('Conso Loan', d.gsis_conso)}
+            ${row('MPL', d.gsis_mpl)}
+            ${row('Policy Loan', d.gsis_policy)}
+            ${row('Calamity Loan', d.pagibig_calamity)}
+            ${row('Emergency Loan', d.gsis_emergency)}
+            ${row('Real Estate Loan', d.gsis_real_estate)}
+            ${row('Computer Loan', d.gsis_computer)}
+            ${row('GFAL', d.gsis_gfal)}
+            ${row('MPL', d.pagibig_mpl)}
+            ${row('GSIS', 0)}
+            ${row('MPL Lite', d.gsis_mpl_lite)}
+            ${row('PAGIBIG', 0)}
+            ${row('PHILHEALTH', d.philhealth_ee)}
+            ${row('Withholding Tax', d.withholding_tax)}
+            ${row('Others', others)}
+            ${row('CNGWPC', d.loan_cngwmpc)}
 
             <tr class="pdf-row-total">
                 <td class="pdf-c-lbl" style="border-top: 0.8pt solid #000; padding-top: 2px;">TOTAL DEDUCTIONS</td>
@@ -1530,7 +1619,16 @@ async function saveChanges() {
 
     const d       = getFormData();
     const payload = {};
-    NUMERIC_FIELDS.forEach(f => { payload[f] = d[f] || 0; });
+    
+    // Process field keys properly for the backend mapping
+    NUMERIC_FIELDS.forEach(f => { 
+        if (f.startsWith('dyn_')) {
+            payload[f.replace('dyn_', '')] = d[f] || 0;
+        } else {
+            payload[f] = d[f] || 0; 
+        }
+    });
+
     LABEL_FIELD_KEYS.forEach(key => { payload[key] = d[key] || ''; });
     payload.other_deduction_label = d.other_deduction_label || '';
     payload.designation = document.getElementById('f_designation')?.value?.trim() ?? '';
@@ -1551,7 +1649,13 @@ async function saveChanges() {
         const saved = data.record ?? data;
         if (saved && RECORDS[currentRecordId]) {
             NUMERIC_FIELDS.forEach(f => {
-                if (saved[f] !== undefined) RECORDS[currentRecordId][f] = parseFloat(saved[f]) || 0;
+                if (f.startsWith('dyn_')) {
+                    const rawId = f.replace('dyn_', '');
+                    // Depending on how controller returns the json, we sync directly into JS
+                    RECORDS[currentRecordId][f] = d[f] || 0; 
+                } else if (saved[f] !== undefined) {
+                    RECORDS[currentRecordId][f] = parseFloat(saved[f]) || 0;
+                }
             });
             LABEL_FIELD_KEYS.forEach(key => {
                 if (saved[key] !== undefined) RECORDS[currentRecordId][key] = saved[key];
@@ -1666,7 +1770,13 @@ async function applyBulkEdit() {
 
     for (const rid of selectedIds) {
         const payload = {};
-        payload[field] = value;
+        
+        if (field.startsWith('dyn_')) {
+            payload[field.replace('dyn_', '')] = value;
+        } else {
+            payload[field] = value;
+        }
+
         if (labelField && labelValue.trim() !== '') {
             payload[labelField] = labelValue.trim();
         }
@@ -1687,6 +1797,8 @@ async function applyBulkEdit() {
                 if (RECORDS[rid]) {
                     if (field === 'designation') {
                         RECORDS[rid][field] = saved[field] ?? value;
+                    } else if (field.startsWith('dyn_')) {
+                        RECORDS[rid][field] = value;
                     } else {
                         RECORDS[rid][field] = parseFloat(saved[field]) || 0;
                     }

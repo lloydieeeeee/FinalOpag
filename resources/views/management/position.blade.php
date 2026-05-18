@@ -27,6 +27,7 @@
 .dt td{padding:11px 16px;border-bottom:1px solid #f9fafb;color:#374151;vertical-align:middle;}
 .dt tbody tr:last-child td{border-bottom:none;}.dt tbody tr:hover td{background:#fafafa;}
 .mgmt-footer{flex-shrink:0;padding:10px 24px;font-size:12px;color:#9ca3af;border-top:1px solid #f9fafb;background:#fff;}
+.st-wrap{display:flex;align-items:center;gap:8px;} /* NEW: wrapper for perfect alignment */
 .bon{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#dcfce7;color:#14532d;}
 .boff{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#f3f4f6;color:#6b7280;}
 .bon::before,.boff::before{content:'●';font-size:8px;}
@@ -54,11 +55,7 @@
 
 <div class="mgmt-page">
 
-    <div class="breadcrumb">
-        <a href="{{ route('dashboard') }}">Management Settings</a>
-        <span class="sep">›</span>
-        <span class="current">Position</span>
-    </div>
+    
 
     <div class="sub-tab-bar">
         <a href="{{ route('settings.leaveType') }}"       class="sub-tab-btn">Leave Type</a>
@@ -106,13 +103,15 @@
                         <td style="font-weight:600;color:#111827;">{{ $p->position_name }}</td>
                         <td><span class="cpill">{{ $p->position_code }}</span></td>
                         <td>
-                            <label class="tog">
-                                <input type="checkbox" {{ $p->is_active ? 'checked' : '' }} onchange="toggleSt({{ $p->position_id }},this)">
-                                <span class="tsl"></span>
-                            </label>
-                            <span id="lbl_{{ $p->position_id }}" class="{{ $p->is_active ? 'bon' : 'boff' }}">
-                                {{ $p->is_active ? 'Active' : 'Inactive' }}
-                            </span>
+                            <div class="st-wrap">
+                                <label class="tog">
+                                    <input type="checkbox" {{ $p->is_active ? 'checked' : '' }} onchange="toggleSt({{ $p->position_id }},this)">
+                                    <span class="tsl"></span>
+                                </label>
+                                <span id="lbl_{{ $p->position_id }}" class="{{ $p->is_active ? 'bon' : 'boff' }}">
+                                    {{ $p->is_active ? 'Active' : 'Inactive' }}
+                                </span>
+                            </div>
                         </td>
                         <td>
                             <div class="ac">

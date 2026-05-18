@@ -119,19 +119,27 @@ class ManagementSettingsController extends Controller
         $v = Validator::make($request->all(), [
             'department_name' => [
                 'required', 'string', 'max:100',
-                Rule::unique('departments', 'department_name')
-                    ->whereRaw('LOWER(department_name) = ?', [strtolower(trim($request->department_name))]),
+                Rule::unique('department', 'department_name')
+                    ->where(function ($query) use ($request) {
+                        return $query->whereRaw('LOWER(department_name) = ?', [strtolower(trim($request->department_name))]);
+                    }),
             ],
+            'description' => 'nullable|string',
+            'is_active'   => 'nullable|boolean'
         ], [
             'department_name.unique' => 'A department with that name already exists.',
         ]);
+        
         if ($v->fails()) {
             return response()->json(['success' => false, 'message' => $v->errors()->first()], 422);
         }
+        
         $dept = Department::create([
             'department_name' => trim($request->department_name),
-            'is_active'       => 1,
+            'description'     => $request->description ? trim($request->description) : null,
+            'is_active'       => $request->has('is_active') ? $request->is_active : 1,
         ]);
+        
         return response()->json(['success' => true, 'data' => $dept, 'message' => 'Department added successfully.']);
     }
 
@@ -141,17 +149,28 @@ class ManagementSettingsController extends Controller
         $v    = Validator::make($request->all(), [
             'department_name' => [
                 'required', 'string', 'max:100',
-                Rule::unique('departments', 'department_name')
+                Rule::unique('department', 'department_name')
                     ->ignore($id, 'department_id')
-                    ->whereRaw('LOWER(department_name) = ?', [strtolower(trim($request->department_name))]),
+                    ->where(function ($query) use ($request) {
+                        return $query->whereRaw('LOWER(department_name) = ?', [strtolower(trim($request->department_name))]);
+                    }),
             ],
+            'description' => 'nullable|string',
+            'is_active'   => 'nullable|boolean'
         ], [
             'department_name.unique' => 'A department with that name already exists.',
         ]);
+        
         if ($v->fails()) {
             return response()->json(['success' => false, 'message' => $v->errors()->first()], 422);
         }
-        $dept->update(['department_name' => trim($request->department_name)]);
+        
+        $dept->update([
+            'department_name' => trim($request->department_name),
+            'description'     => $request->description ? trim($request->description) : null,
+            'is_active'       => $request->has('is_active') ? $request->is_active : $dept->is_active,
+        ]);
+        
         return response()->json(['success' => true, 'data' => $dept, 'message' => 'Department updated successfully.']);
     }
 
@@ -165,8 +184,23 @@ class ManagementSettingsController extends Controller
 
     public function destroyDepartment($id)
     {
-        Department::findOrFail($id)->delete();
-        return response()->json(['success' => true, 'message' => 'Department deleted.']);
+        try {
+            Department::findOrFail($id)->delete();
+            return response()->json(['success' => true, 'message' => 'Department deleted.']);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Check for integrity constraint violation (Code 23000)
+            if ($e->getCode() == 23000) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Cannot delete this department because there are employees currently assigned to it. Please reassign those employees first.'
+                ]);
+            }
+            
+            return response()->json([
+                'success' => false, 
+                'message' => 'An unexpected error occurred while deleting the department.'
+            ]);
+        }
     }
 
     /* ══════════════════════════════════
@@ -184,25 +218,35 @@ class ManagementSettingsController extends Controller
             'position_name' => [
                 'required', 'string', 'max:100',
                 Rule::unique('position', 'position_name')
-                    ->whereRaw('LOWER(position_name) = ?', [strtolower(trim($request->position_name))]),
+                    ->where(function ($query) use ($request) {
+                        return $query->whereRaw('LOWER(position_name) = ?', [strtolower(trim($request->position_name))]);
+                    }),
             ],
             'position_code' => [
                 'required', 'string', 'max:20',
                 Rule::unique('position', 'position_code')
-                    ->whereRaw('LOWER(position_code) = ?', [strtolower(trim($request->position_code))]),
+                    ->where(function ($query) use ($request) {
+                        return $query->whereRaw('LOWER(position_code) = ?', [strtolower(trim($request->position_code))]);
+                    }),
             ],
+            'description' => 'nullable|string',
+            'is_active'   => 'nullable|boolean'
         ], [
             'position_name.unique' => 'A position with that name already exists.',
             'position_code.unique' => 'A position with that code already exists.',
         ]);
+        
         if ($v->fails()) {
             return response()->json(['success' => false, 'message' => $v->errors()->first()], 422);
         }
+        
         $pos = Position::create([
             'position_name' => trim($request->position_name),
             'position_code' => strtoupper(trim($request->position_code)),
-            'is_active'     => 1,
+            'description'   => $request->description ? trim($request->description) : null,
+            'is_active'     => $request->has('is_active') ? $request->is_active : 1,
         ]);
+        
         return response()->json(['success' => true, 'data' => $pos, 'message' => 'Position added successfully.']);
     }
 
@@ -214,27 +258,39 @@ class ManagementSettingsController extends Controller
                 'required', 'string', 'max:100',
                 Rule::unique('position', 'position_name')
                     ->ignore($id, 'position_id')
-                    ->whereRaw('LOWER(position_name) = ?', [strtolower(trim($request->position_name))]),
+                    ->where(function ($query) use ($request) {
+                        return $query->whereRaw('LOWER(position_name) = ?', [strtolower(trim($request->position_name))]);
+                    }),
             ],
             'position_code' => [
                 'required', 'string', 'max:20',
                 Rule::unique('position', 'position_code')
                     ->ignore($id, 'position_id')
-                    ->whereRaw('LOWER(position_code) = ?', [strtolower(trim($request->position_code))]),
+                    ->where(function ($query) use ($request) {
+                        return $query->whereRaw('LOWER(position_code) = ?', [strtolower(trim($request->position_code))]);
+                    }),
             ],
+            'description' => 'nullable|string',
+            'is_active'   => 'nullable|boolean'
         ], [
             'position_name.unique' => 'A position with that name already exists.',
             'position_code.unique' => 'A position with that code already exists.',
         ]);
+        
         if ($v->fails()) {
             return response()->json(['success' => false, 'message' => $v->errors()->first()], 422);
         }
+        
         $pos->update([
             'position_name' => trim($request->position_name),
             'position_code' => strtoupper(trim($request->position_code)),
+            'description'   => $request->description ? trim($request->description) : null,
+            'is_active'     => $request->has('is_active') ? $request->is_active : $pos->is_active,
         ]);
+        
         return response()->json(['success' => true, 'data' => $pos, 'message' => 'Position updated successfully.']);
     }
+    
     public function togglePosition($id)
     {
         $pos            = Position::findOrFail($id);
@@ -245,8 +301,23 @@ class ManagementSettingsController extends Controller
 
     public function destroyPosition($id)
     {
-        Position::findOrFail($id)->delete();
-        return response()->json(['success' => true, 'message' => 'Position deleted.']);
+        try {
+            Position::findOrFail($id)->delete();
+            return response()->json(['success' => true, 'message' => 'Position deleted.']);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Check for integrity constraint violation (Code 23000)
+            if ($e->getCode() == 23000) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Cannot delete this position because there are employees currently holding it. Please reassign those employees first.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false, 
+                'message' => 'An unexpected error occurred while deleting the position.'
+            ]);
+        }
     }
 
     /* ══════════════════════════════════════════════════════
