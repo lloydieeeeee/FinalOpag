@@ -26,7 +26,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 });
 
-// ── Authenticated ─────────────────────────────────────────────────────────────
+// ── Authenticated (All Users) ─────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
 
     Route::post('/logout',      [AuthController::class, 'logout'])->name('logout');
@@ -34,7 +34,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-     // ── Profile (all authenticated users) ────────────────────────────────────
+    // ── Profile ───────────────────────────────────────────────────────────────
     Route::get('/profile',           [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile',           [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password',  [ProfileController::class, 'updatePassword'])->name('profile.password');
@@ -45,30 +45,30 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/{id}/read',   [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.count');
 
-    // ── Employee-facing leave ─────────────────────────────────────────────────
+    // ── Employee-facing Leave ─────────────────────────────────────────────────
     Route::get('/application/leave',              [LeaveApplicationController::class, 'index'])->name('application.leave');
     Route::post('/application/leave',             [LeaveApplicationController::class, 'store'])->name('leave.store');
     Route::post('/application/leave/monetize',    [LeaveApplicationController::class, 'storeMonetization'])->name('leave.monetize');
     Route::post('/application/leave/{id}/cancel', [LeaveApplicationController::class, 'cancel'])->name('leave.cancel');
     Route::get('/application/leave/{id}/pdf',     [LeaveApplicationController::class, 'pdf'])->name('leave.pdf');
 
-    // ── Employee-facing half day ──────────────────────────────────────────────
+    // ── Employee-facing Half Day ──────────────────────────────────────────────
     Route::get('/application/halfday',              [HalfDayController::class, 'index'])->name('application.halfday');
     Route::post('/application/halfday',             [HalfDayController::class, 'store'])->name('halfday.store');
     Route::get('/application/halfday/{id}/pdf',     [HalfDayController::class, 'pdf'])->name('halfday.pdf');
     Route::post('/application/halfday/{id}/cancel', [HalfDayController::class, 'cancel'])->name('halfday.cancel');
 
-    // ── Employee-facing payroll ───────────────────────────────────────────────
+    // ── Employee-facing Payroll / Payslips ────────────────────────────────────
     Route::get('/payroll/payslip',              [PayrollController::class, 'payslip'])->name('payroll.payslip');
     Route::get('/payroll/{period}/payslip-pdf', [PayrollController::class, 'payslipPdf'])->name('payroll.payslip.pdf');
 
-   // ── Employee-facing leavecard ───────────────────────────────────────────────
+    // ── Employee-facing Leave Card ────────────────────────────────────────────
     Route::get('/leave-card',                 [UserLeaveCardController::class, 'index'])->name('leave.card');
     Route::get('/leave-card/data',            [UserLeaveCardController::class, 'show'])->name('leave-card.data');
     Route::get('/leave-card/print',           [UserLeaveCardController::class, 'print'])->name('leave-card.print');
     Route::get('/leave-card/old-balance-pdf', [UserLeaveCardController::class, 'oldBalancePdf'])->name('leave-card.old-balance-pdf');
 
-    // ── Admin-only ────────────────────────────────────────────────────────────
+    // ── Admin-only Routes ─────────────────────────────────────────────────────
     Route::middleware('role:admin')->group(function () {
 
         // Employees
@@ -79,20 +79,21 @@ Route::middleware('auth')->group(function () {
         Route::post('/employees/{id}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggle');
         Route::post('employees/{id}/reset-password', [EmployeeController::class, 'resetPassword'])->name('employees.reset-password');
 
-        // Admin leave management
+        // Admin Leave Management
         Route::get('/admin/leave',               [AdminLeaveController::class, 'index'])->name('admin.leave.index');
         Route::post('/admin/leave/{id}/approve', [AdminLeaveController::class, 'approve'])->name('admin.leave.approve');
         Route::post('/admin/leave/{id}/reject',  [AdminLeaveController::class, 'reject'])->name('admin.leave.reject');
         Route::post('/admin/leave/{id}/status',  [AdminLeaveController::class, 'updateStatus'])->name('admin.leave.status');
         Route::get('/admin/leave/{id}/pdf',      [AdminLeaveController::class, 'pdf'])->name('admin.leave.pdf');
 
-        // ── Admin half day management ─────────────────────────────────────────
+        // Admin Half Day Management
         Route::get('/admin/halfday',              [AdminHalfDayController::class, 'index'])->name('admin.halfday.index');
         Route::post('/admin/halfday/{id}/status', [AdminHalfDayController::class, 'updateStatus'])->name('admin.halfday.status');
         Route::get('/admin/halfday/{id}/cert',    [AdminHalfDayController::class, 'cert'])->name('admin.halfday.cert');
 
-        // ── Admin payroll ─────────────────────────────────────────────────────
+        // Admin Payroll Management
         Route::get('/payroll',                                    [PayrollController::class, 'index'])->name('payroll.index');
+        Route::get('/payroll/export-excel',                       [PayrollController::class, 'exportExcel'])->name('payroll.exportExcel');
         Route::get('/payroll/create',                             [PayrollController::class, 'create'])->name('payroll.create');
         Route::post('/payroll',                                   [PayrollController::class, 'store'])->name('payroll.store');
         Route::get('/payroll/manage',                             [PayrollController::class, 'manage'])->name('payroll.manage');
@@ -110,7 +111,7 @@ Route::middleware('auth')->group(function () {
         // Logs (placeholder)
         Route::get('/logs', fn() => view('placeholder'))->name('logs.index');
 
-        // ── Leave Card (Admin) ────────────────────────────────────────────────
+        // Leave Card (Admin)
         Route::prefix('admin/leave-card')->name('leave-card.')->group(function () {
             Route::get('/',                                    [LeaveCardController::class, 'index'])->name('index');
             Route::get('/print-all',                           [LeaveCardController::class, 'printAll'])->name('print-all');
@@ -120,6 +121,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/save',                               [LeaveCardController::class, 'save'])->name('save');
         });
 
+        // Payroll Deductions
         Route::prefix('payroll/deductions')->name('payroll.deductions.')->group(function () {
             Route::get('/',              [PayrollDeductionController::class, 'index'])->name('index');
             Route::post('/',             [PayrollDeductionController::class, 'store'])->name('store');
@@ -129,7 +131,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/reorder',      [PayrollDeductionController::class, 'reorder'])->name('reorder');
         });
 
-        // ── Management Settings ───────────────────────────────────────────────
+        // Management Settings
         Route::prefix('settings')->name('settings.')->group(function () {
 
             Route::get('/', [ManagementSettingsController::class, 'index'])->name('index');

@@ -233,7 +233,7 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
     font-size: 14px; font-weight: 800; color: #111827; letter-spacing: -.2px;
 }
 .pp-topbar-title span { color: #2d5a1b; }
-.pp-topbar-sub { font-size: 11px; color: #9ca3af; margin-top: 1px; }
+.pp-topbar-sub { font-size: 11px; color: #9ca3af; margin: 2px 0 0; }
 .pp-topbar-actions { display: flex; align-items: center; gap: 8px; }
 
 /* Action Buttons */
@@ -597,77 +597,6 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
 .toast.error   { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
 .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-/* ── Signatory Modal ── */
-.sig-modal-overlay {
-    position: fixed; inset: 0; z-index: 1100;
-    background: rgba(0,0,0,.45); backdrop-filter: blur(3px);
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px; opacity: 0; pointer-events: none; transition: opacity .2s;
-}
-.sig-modal-overlay.open { opacity: 1; pointer-events: all; }
-.sig-modal {
-    background: #fff; border-radius: 18px;
-    box-shadow: 0 24px 64px rgba(0,0,0,.2);
-    width: 100%; max-width: 440px;
-    transform: translateY(20px) scale(.97);
-    transition: transform .25s cubic-bezier(.34,1.56,.64,1); overflow: hidden;
-}
-.sig-modal-overlay.open .sig-modal { transform: translateY(0) scale(1); }
-.sig-modal-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 22px 14px;
-    background: linear-gradient(135deg, #fafffe, #f6faf6);
-    border-bottom: 1px solid #f0f2f0;
-}
-.sig-modal-title { font-size: 14px; font-weight: 800; color: #111827; margin: 0; }
-.sig-modal-sub   { font-size: 11px; color: #9ca3af; margin: 2px 0 0; }
-.sig-modal-body  { padding: 22px; }
-.sig-field-group { margin-bottom: 16px; }
-.sig-field-label {
-    display: block; font-size: 10.5px; font-weight: 700; color: #374151;
-    text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px;
-}
-.sig-field-input {
-    width: 100%; padding: 10px 12px;
-    font-size: 13px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif;
-    border: 1.5px solid #e5e7eb; border-radius: 10px;
-    color: #111827; background: #fff; outline: none;
-    transition: border-color .15s, box-shadow .15s;
-}
-.sig-field-input:focus { border-color: #2d5a1b; box-shadow: 0 0 0 3px rgba(45,90,27,.09); }
-.sig-field-hint  { font-size: 10px; color: #9ca3af; margin-top: 4px; }
-.sig-modal-footer {
-    padding: 14px 22px; border-top: 1px solid #f0f2f0;
-    display: flex; gap: 8px; justify-content: flex-end; background: #fafffe;
-}
-.btn-sig-save {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 18px; font-size: 12px; font-weight: 700;
-    color: #fff; background: linear-gradient(135deg, #1a3a1a, #2d5a1b);
-    border: none; border-radius: 9px; cursor: pointer;
-    transition: all .2s; box-shadow: 0 2px 8px rgba(26,58,26,.25);
-}
-.btn-sig-save:hover { transform: translateY(-1px); }
-.btn-sig-save:disabled { opacity: .6; cursor: not-allowed; transform: none; }
-.btn-sig-cancel {
-    padding: 9px 16px; font-size: 12px; font-weight: 600;
-    color: #6b7280; background: #fff;
-    border: 1.5px solid #e5e7eb; border-radius: 9px; cursor: pointer; transition: all .15s;
-}
-.btn-sig-cancel:hover { background: #f9fafb; }
-.sig-note {
-    font-size: 11px; color: #6b7280; padding: 10px 12px;
-    background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
-    margin-bottom: 16px; line-height: 1.5;
-}
-.modal-close-dark {
-    background: #f3f4f6; border: 1.5px solid #e5e7eb;
-    width: 30px; height: 30px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; color: #6b7280; transition: all .15s;
-}
-.modal-close-dark:hover { background: #fee2e2; border-color: #fca5a5; color: #ef4444; }
-
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 1100px) {
@@ -741,24 +670,6 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                     </svg>
                     Export All PDF
                 </a>
-
-                <a href="{{ route('payroll.pdf', $selectedPeriodId) }}"
-                    target="_blank" class="btn-secondary" onclick="event.stopPropagation()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Payroll PDF
-                </a>
-
-                <button type="button" class="btn-secondary" onclick="event.stopPropagation(); openSigModal()"
-                    style="border-color:#bbf7d0;color:#1a3a1a;background:#f0fdf4;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:15px;height:15px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                    Signatory
-                </button>
                 @endif
             </div>
         </div>
@@ -815,11 +726,11 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                 <tbody>
                     @foreach($records as $i => $r)
                     @php
-                        $lastName  = strtoupper($r->employee->last_name ?? '—');
-                        $firstName = $r->employee->first_name ?? '';
+                        $lastName  = strtoupper($r->employee?->last_name ?? '—');
+                        $firstName = $r->employee?->first_name ?? '';
                         $fullName  = $lastName.', '.$firstName;
                         $initials  = substr($lastName,0,1).substr($firstName,0,1);
-                        $posCode   = $r->designation ?? optional($r->employee->position)->position_code ?? 'N/A';
+                        $posCode   = $r->designation ?? $r->employee?->position?->position_code ?? 'N/A';
                         $rid       = $r->payroll_id;
                     @endphp
                     <tr data-name="{{ strtolower($fullName) }}"
@@ -1271,68 +1182,21 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
     </div>
 </div>
 
-{{-- SIGNATORY MODAL --}}
-<div class="sig-modal-overlay" id="sigModal">
-    <div class="sig-modal">
-        <div class="sig-modal-header">
-            <div>
-                <p class="sig-modal-title">Signatory Settings</p>
-                <p class="sig-modal-sub" id="sigModalPeriodLabel">Period: —</p>
-            </div>
-            <button class="modal-close-dark" onclick="closeSigModal()">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        <div class="sig-modal-body">
-            <p class="sig-note">
-                These details appear on the <strong>payslip PDF</strong> and <strong>payroll PDF</strong>
-                as the Payroll Clerk / Signatory. Changes apply to all payslips in the selected period.
-            </p>
-            <div class="sig-field-group">
-                <label class="sig-field-label">Payroll Clerk Name</label>
-                <input type="text" class="sig-field-input" id="sig_clerk_name"
-                    placeholder="e.g. MELINDA R. BARCELONA"
-                    value="{{ optional($currentPeriod)->sig_clerk_name ?? '' }}">
-                <p class="sig-field-hint">Full name in UPPERCASE as it should appear on documents.</p>
-            </div>
-            <div class="sig-field-group">
-                <label class="sig-field-label">Clerk Title / Role</label>
-                <input type="text" class="sig-field-input" id="sig_clerk_title"
-                    placeholder="e.g. AO V / Payroll Clerk"
-                    value="{{ optional($currentPeriod)->sig_clerk_title ?? 'AO V / Payroll Clerk' }}">
-                <p class="sig-field-hint">Position title shown below the name.</p>
-            </div>
-        </div>
-        <div class="sig-modal-footer">
-            <button class="btn-sig-cancel" onclick="closeSigModal()">Cancel</button>
-            <button class="btn-sig-save" id="sigSaveBtn" onclick="saveSignatory()">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:13px;height:13px;">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                Save Signatory
-            </button>
-        </div>
-    </div>
-</div>
-
 <div id="toast-container"></div>
 
 <script>
 const CSRF               = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 const SELECTED_PERIOD_ID = {{ $selectedPeriodId ?? 'null' }};
 const RECORD_UPDATE_URL  = '{{ url('payroll/record') }}';
-const SIGNATORY_URL_BASE = '{{ url('payroll/period') }}/';
-const PERIOD_IS_FINALIZED = {{ (optional($currentPeriod)->status === 'FINALIZED') ? 'true' : 'false' }};
+const PERIOD_IS_FINALIZED = {{ ($currentPeriod?->status === 'FINALIZED') ? 'true' : 'false' }};
 
 const RECORDS = {!! \Illuminate\Support\Js::from(
     $records->mapWithKeys(function($r) use ($currentPeriod) {
-        $empName     = strtoupper($r->employee->last_name ?? '—') . ', ' . ($r->employee->first_name ?? '');
-        $posCode     = $r->designation ?? optional($r->employee->position)->position_code ?? 'N/A';
-        $periodLabel = optional($r->period)->period_label ?? optional($currentPeriod)->period_label ?? '—';
-        $sigName     = strtoupper(optional($currentPeriod)->sig_clerk_name ?? 'MELINDA R. BARCELONA');
-        $sigTitle    = optional($currentPeriod)->sig_clerk_title ?? 'AO V / Payroll Clerk';
+        $empName     = strtoupper($r->employee?->last_name ?? '—') . ', ' . ($r->employee?->first_name ?? '');
+        $posCode     = $r->designation ?? $r->employee?->position?->position_code ?? 'N/A';
+        $periodLabel = $r->period?->period_label ?? $currentPeriod?->period_label ?? '—';
+        $sigName     = strtoupper($currentPeriod?->sig_clerk_name ?? 'MELINDA R. BARCELONA');
+        $sigTitle    = $currentPeriod?->sig_clerk_title ?? 'AO V / Payroll Clerk';
 
         return [(string)$r->payroll_id => [
             'record_id'             => (int)$r->payroll_id,
@@ -1808,60 +1672,8 @@ function showToast(message, type = 'success') {
 
 // ── Keyboard shortcuts ────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
-    if (e.key !== 'Escape') return;
-    if (el('sigModal').classList.contains('open')) closeSigModal();
-    else closePayslipPanel();
+    if (e.key === 'Escape') closePayslipPanel();
 });
-
-// ══ SIGNATORY MODAL ══════════════════════════════════════════════════════
-function openSigModal() {
-    if (!SELECTED_PERIOD_ID) { showToast('Please select a period first.', 'error'); return; }
-    const periodSel   = el('periodSelect');
-    const periodLabel = periodSel ? periodSel.options[periodSel.selectedIndex]?.text : '—';
-    el('sigModalPeriodLabel').textContent = 'Period: ' + periodLabel;
-    el('sigModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
-function closeSigModal() {
-    el('sigModal').classList.remove('open');
-    document.body.style.overflow = '';
-}
-el('sigModal').addEventListener('click', function(e) {
-    if (e.target === this) closeSigModal();
-});
-
-async function saveSignatory() {
-    const btn      = el('sigSaveBtn');
-    const nameVal  = el('sig_clerk_name').value.trim();
-    const titleVal = el('sig_clerk_title').value.trim();
-    if (!SELECTED_PERIOD_ID) { showToast('No period selected.', 'error'); return; }
-    btn.disabled = true; btn.textContent = '…Saving';
-    try {
-        const res = await fetch(SIGNATORY_URL_BASE + SELECTED_PERIOD_ID + '/signatory', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
-            body: JSON.stringify({ sig_clerk_name: nameVal, sig_clerk_title: titleVal }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message ?? data.error ?? 'Save failed');
-        Object.values(RECORDS).forEach(r => {
-            if (r.period_id === SELECTED_PERIOD_ID) {
-                r.sig_name        = nameVal.toUpperCase() || r.sig_name;
-                r.sig_clerk_title = titleVal || 'AO V / Payroll Clerk';
-            }
-        });
-        if (currentRecordId) {
-            el('slipDoc').innerHTML = buildSlipDoc(RECORDS[currentRecordId]);
-        }
-        closeSigModal();
-        showToast('Signatory updated successfully!', 'success');
-    } catch (err) {
-        showToast(err.message ?? 'An error occurred.', 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Save Signatory`;
-    }
-}
 </script>
 
 @endsection

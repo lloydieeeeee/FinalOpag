@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
+// --- EXCEL IMPORTS ---
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
 class PayrollController extends Controller
 {
     const CNG_FIELDS = [
@@ -63,7 +67,7 @@ class PayrollController extends Controller
 
         $isSingle = false;
         if ($records instanceof \App\Models\PayrollRecord) {
-            $records = [$records];
+            $records = collect([$records]);
             $isSingle = true;
         }
 
@@ -95,7 +99,7 @@ class PayrollController extends Controller
                 }
             }
         }
-        return $isSingle ? $records[0] : $records;
+        return $isSingle ? $records->first() : $records;
     }
 
     public function computeFromSalary(float $gross, array $overrides = [], Employee $employee = null): array
@@ -157,7 +161,7 @@ class PayrollController extends Controller
         ];
 
         $hardFields = array_merge($hardDefaults, $hardFields);
-        
+
         foreach ($hardDefaults as $key => $default) {
             if (array_key_exists($key, $overrides)) {
                 $hardFields[$key] = (float) $overrides[$key];
@@ -208,7 +212,6 @@ class PayrollController extends Controller
             $empOverrides = $overrides[$emp->user_id] ?? [];
             $data = $this->computeFromSalary((float) $emp->salary, $empOverrides, $emp);
             $data['designation'] = optional($emp->position)->position_code;
-            
             $data['employee_id'] = $emp->employee_id;
 
             PayrollRecord::updateOrCreate(
@@ -362,8 +365,8 @@ class PayrollController extends Controller
         $dynamicInput = $request->input('dynamic', []);
         if (!empty($dynamicInput)) {
             $dynamic = is_string($record->dynamic_deductions) ? json_decode($record->dynamic_deductions, true) : ($record->dynamic_deductions ?? []);
-            foreach ($dynamicInput as $dedId => $amount) { 
-                $dynamic[(int) $dedId] = round((float) $amount, 2); 
+            foreach ($dynamicInput as $dedId => $amount) {
+                $dynamic[(int) $dedId] = round((float) $amount, 2);
             }
             $record->dynamic_deductions = $dynamic;
         }
@@ -372,15 +375,15 @@ class PayrollController extends Controller
             $deductionConfig = PayrollDeduction::active()->ordered()->get()->keyBy('id');
             $record->recomputeTotals($deductionConfig);
         } else {
-            $totalDeductions = ($record->gsis_ee ?? 0) + ($record->gsis_policy ?? 0) + ($record->gsis_emergency ?? 0) + 
-                               ($record->gsis_real_estate ?? 0) + ($record->gsis_mpl ?? 0) + ($record->gsis_mpl_lite ?? 0) + 
-                               ($record->gsis_gfal ?? 0) + ($record->gsis_computer ?? 0) + ($record->gsis_conso ?? 0) + 
-                               ($record->pagibig_govt ?? 0) + ($record->pagibig_mpl ?? 0) + ($record->pagibig_calamity ?? 0) + 
-                               ($record->philhealth_ee ?? 0) + ($record->withholding_tax ?? 0) + ($record->loan_dbp ?? 0) + 
-                               ($record->loan_lbp ?? 0) + ($record->loan_cngwmpc ?? 0) + ($record->loan_paracle ?? 0) + 
+            $totalDeductions = ($record->gsis_ee ?? 0) + ($record->gsis_policy ?? 0) + ($record->gsis_emergency ?? 0) +
+                               ($record->gsis_real_estate ?? 0) + ($record->gsis_mpl ?? 0) + ($record->gsis_mpl_lite ?? 0) +
+                               ($record->gsis_gfal ?? 0) + ($record->gsis_computer ?? 0) + ($record->gsis_conso ?? 0) +
+                               ($record->pagibig_govt ?? 0) + ($record->pagibig_mpl ?? 0) + ($record->pagibig_calamity ?? 0) +
+                               ($record->philhealth_ee ?? 0) + ($record->withholding_tax ?? 0) + ($record->loan_dbp ?? 0) +
+                               ($record->loan_lbp ?? 0) + ($record->loan_cngwmpc ?? 0) + ($record->loan_paracle ?? 0) +
                                ($record->overpayment ?? 0) + ($record->other_deduction ?? 0);
 
-            $totalAllowances = ($record->allowance_pera ?? 0) + ($record->allowance_rata ?? 0) + 
+            $totalAllowances = ($record->allowance_pera ?? 0) + ($record->allowance_rata ?? 0) +
                                ($record->allowance_ta ?? 0) + ($record->allowance_other ?? 0);
 
             $record->total_deductions = round($totalDeductions, 2);
@@ -403,9 +406,8 @@ class PayrollController extends Controller
             ->get();
         $records = $this->mapOldCngData($records);
 
-        // Fetch ONLY the exact signatories from your database
         $sigs = DB::table('signatory_options')->get()->keyBy('label');
-        
+
         $getSig = function($label) use ($sigs) {
             $s = $sigs->get($label);
             return (object) [
@@ -421,7 +423,6 @@ class PayrollController extends Controller
             'gov'   => $getSig('Governor'),
         ];
 
-        // Override clerk with period-specific data if it was customized during Finalize
         if (!empty($period->sig_clerk_name))  $signatories['clerk']->full_name = $period->sig_clerk_name;
         if (!empty($period->sig_clerk_title)) $signatories['clerk']->title = $period->sig_clerk_title;
 
@@ -459,7 +460,7 @@ class PayrollController extends Controller
         $query = PayrollRecord::with(['employee', 'period'])
             ->where('period_id', $periodObj->period_id);
 
-        if ($request->has('user_id')) {
+        if ($this->isAdmin() && $request->has('user_id')) {
             $query->where('user_id', $request->input('user_id'));
         } else {
             $query->where('user_id', optional($user->employee)->user_id ?? Auth::id());
@@ -486,15 +487,16 @@ class PayrollController extends Controller
         $periods = PayrollPeriod::orderByDesc('year')->orderByDesc('month')->get();
         $selectedPeriodId = $request->input('period_id', optional($periods->first())->period_id);
 
-        $record = $employee
+        $records = $employee
             ? PayrollRecord::with(['employee', 'period'])
                 ->where('user_id', $employee->user_id)
                 ->where('period_id', $selectedPeriodId)
-                ->first()
-            : null;
+                ->get()
+            : collect();
 
-        $record = $this->mapOldCngData($record);
-        return view('payroll.payslip', compact('periods', 'selectedPeriodId', 'record'));
+        $records = $this->mapOldCngData($records);
+
+        return view('payroll.payslip', compact('periods', 'selectedPeriodId', 'records'));
     }
 
     public function updateSignatory(Request $request, $period)
@@ -508,8 +510,16 @@ class PayrollController extends Controller
         return response()->json(['success' => true, 'period' => $period]);
     }
 
+    // ── FIXED: non-admins are redirected to their own payslip view ──────────
     public function manage(Request $request)
     {
+        // Guard: non-admin users must never see this page.
+        // Redirect them to their own payslip view, preserving the period_id.
+        if (!$this->isAdmin()) {
+            $params = $request->has('period_id') ? ['period_id' => $request->query('period_id')] : [];
+            return redirect()->route('payroll.payslip', $params);
+        }
+
         $periods = PayrollPeriod::orderByDesc('period_id')->get();
         $selectedPeriodId = $request->query('period_id') ?? optional($periods->first())->period_id;
         $records = collect();
@@ -593,5 +603,114 @@ class PayrollController extends Controller
         $pdf->loadView($viewName, compact('period', 'records', 'type'));
 
         return $pdf->stream("remittance_{$type}_{$period->period_label}.pdf");
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $periods = PayrollPeriod::orderByDesc('year')->orderByDesc('month')->get();
+        $selectedPeriodId = $request->input('period_id', optional($periods->first())->period_id);
+        $period = $periods->find($selectedPeriodId);
+
+        $records = collect();
+        if ($selectedPeriodId) {
+            $records = PayrollRecord::with(['employee.position'])
+                ->where('period_id', $selectedPeriodId)
+                ->orderBy('user_id')
+                ->get();
+            $records = $this->mapOldCngData($records);
+        }
+
+        $templatePath = storage_path('app/templates/Payroll Layout.xlsx');
+        $spreadsheet = IOFactory::load($templatePath);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        if ($period) {
+            $sheet->setCellValue('C8', strtoupper($period->period_label));
+        }
+
+        $startRow = 10;
+        $recordCount = $records->count();
+
+        if ($recordCount > 1) {
+            $sheet->insertNewRowBefore($startRow + 1, $recordCount - 1);
+        }
+
+        $row = $startRow;
+        $index = 1;
+        foreach ($records as $payroll) {
+            $firstName = optional($payroll->employee)->first_name ?? '';
+            $lastName = optional($payroll->employee)->last_name ?? '';
+            $employeeName = trim($lastName . ', ' . $firstName);
+
+            $position = optional($payroll->employee->position);
+            $fullDesignation = $position->position_name ?? $position->name ?? $position->title ?? $position->position_code ?? $payroll->designation ?? '';
+
+            $sheet->setCellValue('A' . $row, $index);
+            $sheet->setCellValue('B' . $row, optional($payroll->employee)->employee_id ?? '');
+            $sheet->setCellValue('C' . $row, strtoupper($employeeName ?: 'Unknown Employee'));
+            $sheet->setCellValue('D' . $row, strtoupper($fullDesignation));
+
+            $sheet->setCellValue('N' . $row, $payroll->gsis_gfal ?? 0);
+            $sheet->setCellValue('O' . $row, $payroll->gsis_computer ?? 0);
+            $sheet->setCellValue('P' . $row, $payroll->gsis_policy ?? 0);
+
+            $sheet->setCellValue('Q' . $row, $payroll->pagibig_ee ?? 0);
+            $sheet->setCellValue('R' . $row, $payroll->pagibig_govt ?? 0);
+            $sheet->setCellValue('S' . $row, $payroll->pagibig_mpl ?? 0);
+            $sheet->setCellValue('T' . $row, $payroll->pagibig_calamity ?? 0);
+
+            $sheet->setCellValue('U' . $row, $payroll->overpayment ?? 0);
+
+            $sheet->setCellValue('V' . $row, $payroll->philhealth_ee ?? 0);
+            $sheet->setCellValue('W' . $row, $payroll->philhealth_govt ?? 0);
+
+            $sheet->setCellValue('X' . $row, $payroll->withholding_tax ?? 0);
+            $sheet->setCellValue('Y' . $row, $payroll->loan_dbp ?? 0);
+            $sheet->setCellValue('Z' . $row, $payroll->loan_lbp ?? 0);
+
+            $sheet->setCellValue('AB' . $row, $payroll->loan_cngwmpc ?? 0);
+            $sheet->setCellValue('AC' . $row, $payroll->allowance_pera ?? 0);
+            $sheet->setCellValue('AD' . $row, $payroll->allowance_rata ?? 0);
+            $sheet->setCellValue('AE' . $row, $payroll->allowance_ta ?? 0);
+
+            $sheet->setCellValue('AF' . $row, $payroll->net_pay ?? 0);
+
+            $row++;
+            $index++;
+        }
+
+        $sheet->setCellValue('C' . $row, 'TOTAL');
+
+        $sheet->setCellValue('N' . $row, $records->sum('gsis_gfal'));
+        $sheet->setCellValue('O' . $row, $records->sum('gsis_computer'));
+        $sheet->setCellValue('P' . $row, $records->sum('gsis_policy'));
+        $sheet->setCellValue('Q' . $row, $records->sum('pagibig_ee'));
+        $sheet->setCellValue('R' . $row, $records->sum('pagibig_govt'));
+        $sheet->setCellValue('S' . $row, $records->sum('pagibig_mpl'));
+        $sheet->setCellValue('T' . $row, $records->sum('pagibig_calamity'));
+        $sheet->setCellValue('U' . $row, $records->sum('overpayment'));
+        $sheet->setCellValue('V' . $row, $records->sum('philhealth_ee'));
+        $sheet->setCellValue('W' . $row, $records->sum('philhealth_govt'));
+        $sheet->setCellValue('X' . $row, $records->sum('withholding_tax'));
+        $sheet->setCellValue('Y' . $row, $records->sum('loan_dbp'));
+        $sheet->setCellValue('Z' . $row, $records->sum('loan_lbp'));
+        $sheet->setCellValue('AB' . $row, $records->sum('loan_cngwmpc'));
+        $sheet->setCellValue('AC' . $row, $records->sum('allowance_pera'));
+        $sheet->setCellValue('AD' . $row, $records->sum('allowance_rata'));
+        $sheet->setCellValue('AE' . $row, $records->sum('allowance_ta'));
+        $sheet->setCellValue('AF' . $row, $records->sum('net_pay'));
+
+        $response = new StreamedResponse(function () use ($spreadsheet) {
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save('php://output');
+        });
+
+        $filename = "Payroll_Export_" . ($period ? preg_replace('/[^A-Za-z0-9_\-]/', '_', $period->period_label) : 'All') . ".xlsx";
+
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', 'attachment;filename="' . $filename . '"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+
+        return $response;
     }
 }

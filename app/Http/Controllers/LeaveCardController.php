@@ -433,19 +433,59 @@ class LeaveCardController extends Controller
         $employee = Employee::where('employee_id', $request->employee_id)->firstOrFail();
         $userId = $employee->user_id;
 
+        // FIX: If the frontend sends opening_vl/opening_sl as 0 (new/blank card),
+        // resolve them from the prior year's closing balance — exactly the same
+        // priority chain that show() uses to build the $oldBalancePayload.
+        // This ensures the 2026 card opens with 228.414/303.742 instead of 0/0
+        // when the 2025 card's leave_credit_balance row now exists after the FK fix.
+        $openingVlRaw = $request->opening_vl;
+        $openingSlRaw = $request->opening_sl;
+
+        if (($openingVlRaw === null || (float)$openingVlRaw === 0.0) &&
+            ($openingSlRaw === null || (float)$openingSlRaw === 0.0)) {
+
+            // Priority 1 — prior year's closing balance from leave_credit_balance
+            $prevVlRow = DB::table('leave_credit_balance')
+                ->where('employee_id', $request->employee_id)
+                ->where('leave_type_id', 1)
+                ->where('year', $request->year - 1)
+                ->first();
+            $prevSlRow = DB::table('leave_credit_balance')
+                ->where('employee_id', $request->employee_id)
+                ->where('leave_type_id', 2)
+                ->where('year', $request->year - 1)
+                ->first();
+
+            if ($prevVlRow || $prevSlRow) {
+                $openingVlRaw = $prevVlRow ? $prevVlRow->remaining_balance : 0;
+                $openingSlRaw = $prevSlRow ? $prevSlRow->remaining_balance : 0;
+            } else {
+                // Priority 2 — old_balance PDF record
+                $oldBal = DB::table('old_balance')
+                    ->where('employee_id', $request->employee_id)
+                    ->where('reference_year', $request->year)
+                    ->whereNotNull('pdf_file')
+                    ->first();
+                if ($oldBal) {
+                    $openingVlRaw = $oldBal->old_vl_balance;
+                    $openingSlRaw = $oldBal->old_sl_balance;
+                }
+            }
+        }
+
         DB::beginTransaction();
         try {
             /* ── Upsert the card header ── */
             $card = LeaveCard::updateOrCreate(
                 [
-                    'user_id' => $userId, // FIXED: Query by user_id
-                    'year'        => $request->year,
+                    'user_id' => $userId,
+                    'year'    => $request->year,
                 ],
                 [
-                    'employee_id' => $request->employee_id, // Kept for legacy compatibility 
-                    'opening_vl' => $request->opening_vl ?? 0,
-                    'opening_sl' => $request->opening_sl ?? 0,
-                    'created_by' => Auth::id(),
+                    'employee_id' => $request->employee_id,
+                    'opening_vl'  => $openingVlRaw ?? 0,
+                    'opening_sl'  => $openingSlRaw ?? 0,
+                    'created_by'  => Auth::id(),
                 ]
             );
 
@@ -521,8 +561,9 @@ class LeaveCardController extends Controller
              * "As per HR" rows hard-override the running balance,
              * identical to the frontend behaviour.
              * ══════════════════════════════════════════════════════════ */
-            $openingVl = (float) ($request->opening_vl ?? 0);
-            $openingSl = (float) ($request->opening_sl ?? 0);
+            // Use the resolved opening values (auto-populated from prior year if request sent 0)
+            $openingVl = (float) ($openingVlRaw ?? 0);
+            $openingSl = (float) ($openingSlRaw ?? 0);
 
             $runningVl     = $openingVl;
             $runningSl     = $openingSl;
@@ -583,42 +624,49 @@ class LeaveCardController extends Controller
             $totalUsedVl = $totalTakenVl + $totalTardy + $totalWop;
             $totalUsedSl = $totalTakenSl;
 
+            // FIX: `leave_credit_balance` has FK `fk_lcb_user` → employee.user_id (auto-increment PK).
+            // Must use $userId (e.g. 2), NOT $request->employee_id (e.g. 160624).
+            // Passing employee_id into the user_id column caused SQLSTATE[23000] FK violation
+            // and the entire save was rolled back, leaving no balance row for this year —
+            // which is also why the next year's opening balance showed 0.000.
             DB::table('leave_credit_balance')->updateOrInsert(
-    [
-        'employee_id'   => $request->employee_id,
-        'leave_type_id' => 1,
-        'year'          => $request->year,
-    ],
-    [
-        'total_accrued'     => round($openingVl + $totalEarnedVl, 3),
-        'total_used'        => round($totalUsedVl, 3),
-        'remaining_balance' => $finalVl,
-        'updated_at'        => now(),
-    ]
-);
+                [
+                    'user_id'       => $userId,               // FK → employee.user_id (e.g. 2)
+                    'employee_id'   => $request->employee_id, // payroll/govt ID (e.g. 160624)
+                    'leave_type_id' => 1,
+                    'year'          => $request->year,
+                ],
+                [
+                    'total_accrued'     => round($openingVl + $totalEarnedVl, 3),
+                    'total_used'        => round($totalUsedVl, 3),
+                    'remaining_balance' => $finalVl,
+                    'updated_at'        => now(),
+                ]
+            );
 
-// Sync SL balance
-DB::table('leave_credit_balance')->updateOrInsert(
-    [
-        'employee_id'   => $request->employee_id,
-        'leave_type_id' => 2,
-        'year'          => $request->year,
-    ],
-    [
-        'total_accrued'     => round($openingSl + $totalEarnedSl, 3),
-        'total_used'        => round($totalUsedSl, 3),
-        'remaining_balance' => $finalSl,
-        'updated_at'        => now(),
-    ]
-);
+            // Sync SL balance
+            DB::table('leave_credit_balance')->updateOrInsert(
+                [
+                    'user_id'       => $userId,               // FK → employee.user_id (e.g. 2)
+                    'employee_id'   => $request->employee_id, // payroll/govt ID (e.g. 160624)
+                    'leave_type_id' => 2,
+                    'year'          => $request->year,
+                ],
+                [
+                    'total_accrued'     => round($openingSl + $totalEarnedSl, 3),
+                    'total_used'        => round($totalUsedSl, 3),
+                    'remaining_balance' => $finalSl,
+                    'updated_at'        => now(),
+                ]
+            );
 
-
-
-DB::commit();
+            DB::commit();
 
             return response()->json([
                 'success'       => true,
                 'leave_card_id' => $card->leave_card_id,
+                'opening_vl'    => round($openingVl, 3),   // resolved value (may differ from request if auto-populated)
+                'opening_sl'    => round($openingSl, 3),   // resolved value
                 'current_vl'    => round($finalVl, 3),
                 'current_sl'    => round($finalSl, 3),
                 'vl_accrued'    => round($openingVl + $totalEarnedVl, 3),

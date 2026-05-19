@@ -873,10 +873,12 @@ $computeFromConfig = function(string $type, float $value, ?float $limit, float $
         @endif
 
         @if($selectedPeriod)
-          <a href="{{ route('payroll.pdf', $selectedPeriod->period_id) }}" class="btn-outline" target="_blank">
-            <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-            Print Payroll
+          {{-- EXPORT TO EXCEL BUTTON --}}
+          <a href="{{ route('payroll.exportExcel', ['period_id' => $selectedPeriod->period_id]) }}" class="btn-outline">
+            <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Export Excel
           </a>
+
           <a href="{{ route('payroll.payslip-all-pdf', $selectedPeriod->period_id) }}" class="btn-outline" target="_blank">
             <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
             Print All Payslips
@@ -1571,6 +1573,16 @@ const DED_CONFIG   = @json($jsConfig);
 
 /* ── Dirty tracking ── */
 const dirtyRows = new Set();
+
+function markDirty(pid, inputEl) {
+  const row = document.getElementById('row_' + pid);
+  if (!row) return;
+  row.classList.add('row-dirty');
+  if (inputEl) inputEl.classList.add('changed');
+  dirtyRows.add(pid);
+  updateSaveBar();
+  recomputeRow(pid);
+}
 
 function markDirty(pid, inputEl) {
   const row = document.getElementById('row_' + pid);
