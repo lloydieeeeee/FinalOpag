@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Payslip Management')
-@section('page-title', 'Payslip Management')
+@section('title', 'My Payslip')
+@section('page-title', 'My Payslip')
 
 @section('content')
 <style>
@@ -58,42 +58,6 @@ body, input, select, button, textarea { font-family: 'Plus Jakarta Sans', sans-s
     transition: all .15s;
 }
 .period-select:focus { outline: none; border-color: #2d5a1b; box-shadow: 0 0 0 3px rgba(45,90,27,.09); }
-
-.search-wrap { position: relative; min-width: 220px; }
-.search-wrap svg {
-    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-    width: 15px; height: 15px; color: #9ca3af; pointer-events: none;
-}
-.search-input {
-    width: 100%; padding: 10px 14px 10px 36px;
-    font-size: 13px; font-weight: 500;
-    border: 1.5px solid #e9ecef; border-radius: 11px;
-    color: #111827; background: #fff; outline: none;
-    transition: all .15s;
-}
-.search-input:focus { border-color: #2d5a1b; box-shadow: 0 0 0 3px rgba(45,90,27,.09); }
-.search-input::placeholder { color: #9ca3af; }
-
-.btn-primary {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 10px 18px; font-size: 13px; font-weight: 700;
-    color: #fff; background: linear-gradient(135deg, #1a3a1a, #2d5a1b);
-    border: none; border-radius: 11px; cursor: pointer;
-    transition: all .2s; box-shadow: 0 3px 10px rgba(26,58,26,.28);
-    text-decoration: none; white-space: nowrap;
-}
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(26,58,26,.38); color: #fff; }
-.btn-primary svg { width: 15px; height: 15px; flex-shrink: 0; }
-
-.btn-secondary {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 10px 18px; font-size: 13px; font-weight: 600;
-    color: #374151; background: #fff;
-    border: 1.5px solid #e5e7eb; border-radius: 11px; cursor: pointer;
-    transition: all .2s; text-decoration: none; white-space: nowrap;
-}
-.btn-secondary:hover { background: #f9fafb; border-color: #d1d5db; color: #374151; }
-.btn-secondary svg { width: 15px; height: 15px; flex-shrink: 0; }
 
 .stats-bar {
     display: flex; gap: 12px; padding: 12px 26px;
@@ -191,7 +155,7 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
 #pmOverlay.show { opacity: 1; pointer-events: all; }
 
 /* ══════════════════════════════════════════
-   SLIDE-IN PANEL — full screen edit style
+   SLIDE-IN PANEL
 ══════════════════════════════════════════ */
 #payslipPanel {
     position: fixed; top: 0; right: 0; bottom: 0; z-index: 50;
@@ -237,16 +201,6 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
 .pp-topbar-actions { display: flex; align-items: center; gap: 8px; }
 
 /* Action Buttons */
-.btn-finalize {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 16px; font-size: 12px; font-weight: 700;
-    color: #fff; background: linear-gradient(135deg, #059669, #10b981);
-    border: none; border-radius: 9px; cursor: pointer;
-    transition: all .2s; box-shadow: 0 2px 8px rgba(5,150,105,.28);
-    white-space: nowrap;
-}
-.btn-finalize:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(5,150,105,.38); }
-.btn-finalize svg { width: 13px; height: 13px; }
 .btn-preview-pdf {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 9px 16px; font-size: 12px; font-weight: 700;
@@ -256,25 +210,6 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
 }
 .btn-preview-pdf:hover { background: #dcfce7; }
 .btn-preview-pdf svg { width: 13px; height: 13px; }
-.btn-discard {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 16px; font-size: 12px; font-weight: 700;
-    color: #b91c1c; background: #fef2f2;
-    border: 1.5px solid #fca5a5; border-radius: 9px; cursor: pointer;
-    transition: all .15s; white-space: nowrap;
-}
-.btn-discard:hover { background: #fee2e2; }
-.btn-discard svg { width: 13px; height: 13px; }
-.btn-edit-mode {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 16px; font-size: 12px; font-weight: 700;
-    color: #374151; background: #fff;
-    border: 1.5px solid #e5e7eb; border-radius: 9px; cursor: pointer;
-    transition: all .15s; white-space: nowrap;
-}
-.btn-edit-mode:hover { background: #f9fafb; }
-.btn-edit-mode.active { color: #1a3a1a; background: #f0fdf4; border-color: #86efac; }
-.btn-edit-mode svg { width: 13px; height: 13px; }
 
 /* ── Panel Body: two-column split ── */
 .pp-split {
@@ -295,20 +230,6 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
     background: #fafafa; flex-shrink: 0;
 }
 .pp-form-title { font-size: 12px; font-weight: 800; color: #111827; margin: 0 0 8px; }
-.pp-form-search-wrap { position: relative; }
-.pp-form-search-wrap svg {
-    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-    width: 13px; height: 13px; color: #9ca3af; pointer-events: none;
-}
-.pp-form-search {
-    width: 100%; padding: 8px 12px 8px 30px;
-    font-size: 12px; font-weight: 500;
-    border: 1.5px solid #e9ecef; border-radius: 9px;
-    color: #111827; background: #fff; outline: none;
-    transition: all .15s;
-}
-.pp-form-search:focus { border-color: #2d5a1b; box-shadow: 0 0 0 2px rgba(45,90,27,.08); }
-.pp-form-search::placeholder { color: #9ca3af; }
 
 .pp-form-body {
     flex: 1; overflow-y: auto;
@@ -366,12 +287,8 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
     width: 90px; padding: 5px 8px;
     font-size: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace;
     border: 1.5px solid #e5e7eb; border-radius: 7px;
-    color: #111827; background: #fff; outline: none; text-align: right;
-    transition: all .15s;
-}
-.pf-field-input:focus { border-color: #2d5a1b; box-shadow: 0 0 0 2px rgba(45,90,27,.08); }
-.pf-field-input:disabled {
-    background: #f9fafb; color: #9ca3af; cursor: not-allowed;
+    color: #111827; background: #f9fafb; outline: none; text-align: right;
+    cursor: not-allowed;
 }
 .pf-note-badge {
     font-size: 9px; font-weight: 700; color: #9ca3af;
@@ -397,29 +314,6 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
 .pf-total-value.green { color: #166534; }
 .pf-total-value.red   { color: #b91c1c; }
 
-/* Recalculate button */
-.btn-recalc {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    margin: 10px 18px; padding: 10px;
-    font-size: 12px; font-weight: 700;
-    color: #1a3a1a; background: #f0fdf4;
-    border: 1.5px solid #86efac; border-radius: 9px; cursor: pointer;
-    transition: all .15s;
-}
-.btn-recalc:hover { background: #dcfce7; }
-.btn-recalc svg { width: 13px; height: 13px; }
-
-.btn-add-ded {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    margin: 0 18px 10px; padding: 9px;
-    font-size: 11.5px; font-weight: 700;
-    color: #6b7280; background: #fff;
-    border: 1.5px dashed #d1d5db; border-radius: 9px; cursor: pointer;
-    transition: all .15s;
-}
-.btn-add-ded:hover { border-color: #2d5a1b; color: #1a3a1a; background: #f0fdf4; }
-.btn-add-ded svg { width: 12px; height: 12px; }
-
 /* RIGHT: Live Preview */
 .pp-preview-panel {
     flex: 1; display: flex; flex-direction: column;
@@ -437,14 +331,6 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
     display: flex; align-items: center; gap: 6px;
 }
 .pp-preview-label svg { width: 13px; height: 13px; color: #2d5a1b; }
-.pp-changes-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 4px 10px; background: #fef3c7;
-    border: 1px solid #fde68a; border-radius: 20px;
-    font-size: 10px; font-weight: 700; color: #92400e;
-}
-.pp-changes-badge.hidden { display: none; }
-.pp-changes-dot { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; }
 
 .pp-preview-body {
     flex: 1; overflow-y: auto; padding: 24px;
@@ -612,9 +498,9 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
 </style>
 
 <div class="breadcrumb">
-    <a href="{{ route('payroll.index') }}">Payroll</a>
+    <a href="#">Payroll</a>
     <span class="sep">›</span>
-    <span class="current">Payslip Management</span>
+    <span class="current">My Payslip</span>
 </div>
 
 @php
@@ -633,15 +519,15 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                     </svg>
                 </div>
                 <div>
-                    <p class="card-topbar-title">Payslip Management</p>
-                    <p class="card-topbar-sub">View, edit, and export employee payslips by period</p>
+                    <p class="card-topbar-title">My Payslip</p>
+                    <p class="card-topbar-sub">View and export your payslip by period</p>
                 </div>
             </div>
 
             <div class="controls-row">
                 <div class="period-select-wrap">
                     <select class="period-select" id="periodSelect"
-                        onchange="window.location.href='{{ route('payroll.manage') }}?period_id='+this.value">
+                        onchange="window.location.href='{{ route('payroll.payslip') }}?period_id='+this.value">
                         <option value="">— Select Period —</option>
                         @foreach($periods as $p)
                             <option value="{{ $p->period_id }}"
@@ -651,44 +537,19 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                         @endforeach
                     </select>
                 </div>
-
-                @if($records->isNotEmpty())
-                <div class="search-wrap">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
-                    </svg>
-                    <input type="text" class="search-input" id="searchInput"
-                        placeholder="Search employee..." oninput="filterTable(this.value)">
-                </div>
-
-                <a href="{{ route('payroll.payslip.pdf', $selectedPeriodId) }}"
-                    target="_blank" class="btn-primary" onclick="event.stopPropagation()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    Export All PDF
-                </a>
-                @endif
             </div>
         </div>
 
         @if($records->isNotEmpty())
         <div class="stats-bar">
             <div class="stat-chip">
-                <div class="stat-chip-dot" style="background:#3b82f6;"></div>
-                <span class="stat-chip-label">Employees</span>
-                <span class="stat-chip-value" id="statCount">{{ $records->count() }}</span>
-            </div>
-            <div class="stat-chip">
                 <div class="stat-chip-dot" style="background:#10b981;"></div>
-                <span class="stat-chip-label">Total Gross</span>
+                <span class="stat-chip-label">Gross Salary</span>
                 <span class="stat-chip-value">₱{{ number_format($records->sum('gross_salary'), 2) }}</span>
             </div>
             <div class="stat-chip">
                 <div class="stat-chip-dot" style="background:#f59e0b;"></div>
-                <span class="stat-chip-label">Total Net</span>
+                <span class="stat-chip-label">Net Pay</span>
                 <span class="stat-chip-value">₱{{ number_format($records->sum('net_pay'), 2) }}</span>
             </div>
             <div class="stat-chip">
@@ -792,7 +653,7 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
 <div id="pmOverlay" onclick="closePayslipPanel()"></div>
 
 {{-- ═══════════════════════════════════════════════
-     SLIDE-IN PAYSLIP PANEL — Split edit UI
+     SLIDE-IN PAYSLIP PANEL — Read-only UI
 ═══════════════════════════════════════════════ --}}
 <div id="payslipPanel">
     <div class="pp-box">
@@ -807,28 +668,13 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                 </button>
                 <div>
                     <div class="pp-topbar-title">
-                        Edit Payslip – <span id="ppNameTitle">—</span>
+                        Payslip Details – <span id="ppNameTitle">—</span>
                     </div>
                     <div class="pp-topbar-sub" id="ppMetaSub">—</div>
                 </div>
             </div>
 
             <div class="pp-topbar-actions" id="ppActions">
-                <button class="btn-edit-mode" id="btnEditMode" onclick="toggleEditMode()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                    Edit Mode
-                </button>
-
-                <button class="btn-finalize" id="btnFinalize" onclick="savePayslip()" style="display:none;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    Finalize &amp; Save Changes
-                </button>
-
                 <a class="btn-preview-pdf" id="btnPreviewPdf" href="#" target="_blank">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -836,31 +682,16 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                     </svg>
                     Preview Printable PDF
                 </a>
-
-                <button class="btn-discard" id="btnDiscard" onclick="discardChanges()" style="display:none;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                    Discard Changes
-                </button>
             </div>
         </div>
 
         {{-- Split body --}}
         <div class="pp-split">
 
-            {{-- LEFT: Payslip Data Form --}}
+            {{-- LEFT: Payslip Data Form (Read-only) --}}
             <div class="pp-form-panel">
                 <div class="pp-form-header">
-                    <div class="pp-form-title">Payslip Data Form</div>
-                    <div class="pp-form-search-wrap">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
-                        </svg>
-                        <input type="text" class="pp-form-search" placeholder="Search a specific field"
-                            oninput="filterFormFields(this.value)">
-                    </div>
+                    <div class="pp-form-title">Data Breakdown</div>
                 </div>
 
                 <div class="pp-form-body" id="pfBody">
@@ -883,40 +714,31 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                             <div class="pf-field-row" data-label="gross salary">
                                 <span class="pf-field-label">Gross Salary</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_gross_salary"
-                                        data-field="gross_salary" oninput="onFieldInput('gross_salary')" disabled>
+                                    <input type="text" class="pf-field-input" id="f_gross_salary" data-field="gross_salary" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="pera allowance">
                                 <span class="pf-field-label">PERA</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_allowance_pera"
-                                        data-field="allowance_pera" oninput="onFieldInput('allowance_pera')" disabled>
-                                    <span class="pf-note-badge" id="note_allowance_pera">note</span>
+                                    <input type="text" class="pf-field-input" id="f_allowance_pera" data-field="allowance_pera" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="rata allowance">
                                 <span class="pf-field-label">RATA</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_allowance_rata"
-                                        data-field="allowance_rata" oninput="onFieldInput('allowance_rata')" disabled>
-                                    <span class="pf-note-badge" id="note_allowance_rata">note</span>
+                                    <input type="text" class="pf-field-input" id="f_allowance_rata" data-field="allowance_rata" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="transportation allowance ta">
                                 <span class="pf-field-label">Transportation Allowance (TA)</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_allowance_ta"
-                                        data-field="allowance_ta" oninput="onFieldInput('allowance_ta')" disabled>
-                                    <span class="pf-note-badge" id="note_allowance_ta">note</span>
+                                    <input type="text" class="pf-field-input" id="f_allowance_ta" data-field="allowance_ta" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="other allowance">
                                 <span class="pf-field-label">Other Allowance</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_allowance_other"
-                                        data-field="allowance_other" oninput="onFieldInput('allowance_other')" disabled>
-                                    <span class="pf-note-badge" id="note_allowance_other">note</span>
+                                    <input type="text" class="pf-field-input" id="f_allowance_other" data-field="allowance_other" disabled>
                                 </div>
                             </div>
                             <div class="pf-total-row">
@@ -947,41 +769,31 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                             <div class="pf-field-row" data-label="withholding tax">
                                 <span class="pf-field-label">Withholding Tax</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_withholding_tax"
-                                        data-field="withholding_tax" oninput="onFieldInput('withholding_tax')" disabled>
-                                    <span class="pf-note-badge" id="note_withholding_tax">note</span>
+                                    <input type="text" class="pf-field-input" id="f_withholding_tax" data-field="withholding_tax" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="gsis employee share">
                                 <span class="pf-field-label">GSIS Premium (9%)</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_gsis_ee"
-                                        data-field="gsis_ee" oninput="onFieldInput('gsis_ee')" disabled>
-                                    <span class="pf-note-badge" id="note_gsis_ee">note</span>
+                                    <input type="text" class="pf-field-input" id="f_gsis_ee" data-field="gsis_ee" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="pagibig pag-ibig">
                                 <span class="pf-field-label">PAG-IBIG</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_pagibig_govt"
-                                        data-field="pagibig_govt" oninput="onFieldInput('pagibig_govt')" disabled>
-                                    <span class="pf-note-badge" id="note_pagibig_govt">note</span>
+                                    <input type="text" class="pf-field-input" id="f_pagibig_govt" data-field="pagibig_govt" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="philhealth">
                                 <span class="pf-field-label">PhilHealth (2.5%)</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_philhealth_ee"
-                                        data-field="philhealth_ee" oninput="onFieldInput('philhealth_ee')" disabled>
-                                    <span class="pf-note-badge" id="note_philhealth_ee">note</span>
+                                    <input type="text" class="pf-field-input" id="f_philhealth_ee" data-field="philhealth_ee" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="medicare">
                                 <span class="pf-field-label">Medicare</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_gsis_ec"
-                                        data-field="gsis_ec" oninput="onFieldInput('gsis_ec')" disabled>
-                                    <span class="pf-note-badge" id="note_gsis_ec">note</span>
+                                    <input type="text" class="pf-field-input" id="f_gsis_ec" data-field="gsis_ec" disabled>
                                 </div>
                             </div>
 
@@ -990,65 +802,49 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                             <div class="pf-field-row" data-label="ucpb">
                                 <span class="pf-field-label">UCPB</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_loan_cngwmpc"
-                                        data-field="loan_cngwmpc" oninput="onFieldInput('loan_cngwmpc')" disabled>
-                                    <span class="pf-note-badge" id="note_loan_cngwmpc">note</span>
+                                    <input type="text" class="pf-field-input" id="f_loan_cngwmpc" data-field="loan_cngwmpc" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="mpl loan">
                                 <span class="pf-field-label">MPL</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_gsis_mpl"
-                                        data-field="gsis_mpl" oninput="onFieldInput('gsis_mpl')" disabled>
-                                    <span class="pf-note-badge" id="note_gsis_mpl">note</span>
+                                    <input type="text" class="pf-field-input" id="f_gsis_mpl" data-field="gsis_mpl" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="cbcn">
                                 <span class="pf-field-label">CBCN</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_gsis_conso"
-                                        data-field="gsis_conso" oninput="onFieldInput('gsis_conso')" disabled>
-                                    <span class="pf-note-badge" id="note_gsis_conso">note</span>
+                                    <input type="text" class="pf-field-input" id="f_gsis_conso" data-field="gsis_conso" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="mslap">
                                 <span class="pf-field-label">MSLAP</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_gsis_gfal"
-                                        data-field="gsis_gfal" oninput="onFieldInput('gsis_gfal')" disabled>
-                                    <span class="pf-note-badge" id="note_gsis_gfal">note</span>
+                                    <input type="text" class="pf-field-input" id="f_gsis_gfal" data-field="gsis_gfal" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="lbp loan lbp">
                                 <span class="pf-field-label">LBP</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_loan_lbp"
-                                        data-field="loan_lbp" oninput="onFieldInput('loan_lbp')" disabled>
-                                    <span class="pf-note-badge" id="note_loan_lbp">note</span>
+                                    <input type="text" class="pf-field-input" id="f_loan_lbp" data-field="loan_lbp" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="dbp loan">
                                 <span class="pf-field-label">DBP</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_loan_dbp"
-                                        data-field="loan_dbp" oninput="onFieldInput('loan_dbp')" disabled>
-                                    <span class="pf-note-badge" id="note_loan_dbp">note</span>
+                                    <input type="text" class="pf-field-input" id="f_loan_dbp" data-field="loan_dbp" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="cngwmpc">
                                 <span class="pf-field-label">CNGWMPC</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_loan_paracle"
-                                        data-field="loan_paracle" oninput="onFieldInput('loan_paracle')" disabled>
-                                    <span class="pf-note-badge" id="note_loan_paracle">note</span>
+                                    <input type="text" class="pf-field-input" id="f_loan_paracle" data-field="loan_paracle" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="uoli">
                                 <span class="pf-field-label">UOLI</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_overpayment"
-                                        data-field="overpayment" oninput="onFieldInput('overpayment')" disabled>
-                                    <span class="pf-note-badge" id="note_overpayment">note</span>
+                                    <input type="text" class="pf-field-input" id="f_overpayment" data-field="overpayment" disabled>
                                 </div>
                             </div>
 
@@ -1057,41 +853,31 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                             <div class="pf-field-row" data-label="gsis policy loan">
                                 <span class="pf-field-label">GSIS salary Loan</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_gsis_policy"
-                                        data-field="gsis_policy" oninput="onFieldInput('gsis_policy')" disabled>
-                                    <span class="pf-note-badge" id="note_gsis_policy">note</span>
+                                    <input type="text" class="pf-field-input" id="f_gsis_policy" data-field="gsis_policy" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="gsis policy loan">
                                 <span class="pf-field-label">GSIS Policy Loan</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_gsis_emergency"
-                                        data-field="gsis_emergency" oninput="onFieldInput('gsis_emergency')" disabled>
-                                    <span class="pf-note-badge" id="note_gsis_emergency">note</span>
+                                    <input type="text" class="pf-field-input" id="f_gsis_emergency" data-field="gsis_emergency" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="gsis real estate loan">
                                 <span class="pf-field-label">GSIS Real Estate Loan</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_gsis_real_estate"
-                                        data-field="gsis_real_estate" oninput="onFieldInput('gsis_real_estate')" disabled>
-                                    <span class="pf-note-badge" id="note_gsis_real_estate">note</span>
+                                    <input type="text" class="pf-field-input" id="f_gsis_real_estate" data-field="gsis_real_estate" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="gsis mpl lite">
                                 <span class="pf-field-label">GSIS Em. Loan</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_gsis_mpl_lite"
-                                        data-field="gsis_mpl_lite" oninput="onFieldInput('gsis_mpl_lite')" disabled>
-                                    <span class="pf-note-badge" id="note_gsis_mpl_lite">note</span>
+                                    <input type="text" class="pf-field-input" id="f_gsis_mpl_lite" data-field="gsis_mpl_lite" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="gsis computer loan">
                                 <span class="pf-field-label">GSIS Educ Loan</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_gsis_computer"
-                                        data-field="gsis_computer" oninput="onFieldInput('gsis_computer')" disabled>
-                                    <span class="pf-note-badge" id="note_gsis_computer">note</span>
+                                    <input type="text" class="pf-field-input" id="f_gsis_computer" data-field="gsis_computer" disabled>
                                 </div>
                             </div>
 
@@ -1100,25 +886,19 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                             <div class="pf-field-row" data-label="pagibig pag-ibig mpl">
                                 <span class="pf-field-label">Nursery</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_pagibig_mpl"
-                                        data-field="pagibig_mpl" oninput="onFieldInput('pagibig_mpl')" disabled>
-                                    <span class="pf-note-badge" id="note_pagibig_mpl">note</span>
+                                    <input type="text" class="pf-field-input" id="f_pagibig_mpl" data-field="pagibig_mpl" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="pagibig calamity loan">
                                 <span class="pf-field-label">PAG IBIG Loyalty Card</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_pagibig_calamity"
-                                        data-field="pagibig_calamity" oninput="onFieldInput('pagibig_calamity')" disabled>
-                                    <span class="pf-note-badge" id="note_pagibig_calamity">note</span>
+                                    <input type="text" class="pf-field-input" id="f_pagibig_calamity" data-field="pagibig_calamity" disabled>
                                 </div>
                             </div>
                             <div class="pf-field-row" data-label="custom other deduction">
                                 <span class="pf-field-label" id="pf_other_ded_label_display">Custom Deduction</span>
                                 <div class="pf-field-right">
-                                    <input type="text" class="pf-field-input" id="f_other_deduction"
-                                        data-field="other_deduction" oninput="onFieldInput('other_deduction')" disabled>
-                                    <span class="pf-note-badge" id="note_other_deduction">note</span>
+                                    <input type="text" class="pf-field-input" id="f_other_deduction" data-field="other_deduction" disabled>
                                 </div>
                             </div>
 
@@ -1133,23 +913,6 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                         </div>
                     </div>
 
-                    {{-- Recalculate & Add Deduction --}}
-                    <div style="padding:4px 0 8px;">
-                        <button class="btn-recalc" onclick="recalculate()" id="btnRecalc" disabled>
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                            </svg>
-                            Recalculate Net Pay
-                        </button>
-                        <button class="btn-add-ded" id="btnAddDed" style="display:none;">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                            </svg>
-                            Add New Deduction Type
-                        </button>
-                    </div>
-
                 </div>
             </div>
 
@@ -1161,18 +924,14 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                         </svg>
-                        Live PDF Preview
-                    </div>
-                    <div class="pp-changes-badge hidden" id="changesBadge">
-                        <span class="pp-changes-dot"></span>
-                        Changes Pending
+                        PDF Preview
                     </div>
                 </div>
 
                 <div class="pp-preview-body">
                     <div class="slip-doc" id="slipDoc">
                         <div style="text-align:center;padding:60px 20px;color:#9ca3af;font-size:12px;">
-                            Select an employee to preview their payslip.
+                            Select an entry to preview your payslip.
                         </div>
                     </div>
                 </div>
@@ -1185,10 +944,7 @@ table.pm-table td.muted { color: #9ca3af; font-size: 11px; }
 <div id="toast-container"></div>
 
 <script>
-const CSRF               = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 const SELECTED_PERIOD_ID = {{ $selectedPeriodId ?? 'null' }};
-const RECORD_UPDATE_URL  = '{{ url('payroll/record') }}';
-const PERIOD_IS_FINALIZED = {{ ($currentPeriod?->status === 'FINALIZED') ? 'true' : 'false' }};
 
 const RECORDS = {!! \Illuminate\Support\Js::from(
     $records->mapWithKeys(function($r) use ($currentPeriod) {
@@ -1253,11 +1009,8 @@ const DEDUCTION_FIELDS = [
     'overpayment','other_deduction',
 ];
 const ALLOWANCE_FIELDS = ['allowance_pera','allowance_rata','allowance_ta','allowance_other'];
-const NUMERIC_FIELDS   = ['gross_salary', ...DEDUCTION_FIELDS, ...ALLOWANCE_FIELDS];
 
 let currentRecordId = null;
-let editModeActive  = false;
-let hasChanges      = false;
 
 // ── Format helpers ─────────────────────────────────────────────────────────
 function fmt(v) {
@@ -1269,35 +1022,12 @@ function parseVal(str) {
     return parseFloat((str || '0').replace(/,/g, '')) || 0;
 }
 
-// ── Collect live values from form inputs ──────────────────────────────────
-function getLiveData() {
-    if (!currentRecordId) return {};
-    const base = { ...RECORDS[currentRecordId] };
-    document.querySelectorAll('#pfBody .pf-field-input[data-field]').forEach(el => {
-        const f = el.dataset.field;
-        base[f] = parseVal(el.value);
-    });
-    // Recalc totals
-    const ded = DEDUCTION_FIELDS.reduce((s, f) => s + (base[f] || 0), 0);
-    const alw = ALLOWANCE_FIELDS.reduce((s, f) => s + (base[f] || 0), 0);
-    base.total_deductions  = ded;
-    base.total_allowances  = alw;
-    base.net_pay = (base.gross_salary || 0) - ded + alw;
-    return base;
-}
-
 // ── Fill form inputs from a record ────────────────────────────────────────
 function populateForm(r) {
     document.querySelectorAll('#pfBody .pf-field-input[data-field]').forEach(el => {
         const f = el.dataset.field;
         const v = r[f] || 0;
         el.value = fmt(v);
-        // Note badge
-        const nb = document.getElementById('note_' + f);
-        if (nb) {
-            nb.textContent = v > 0 ? fmt(v) : 'note';
-            nb.classList.toggle('has-val', v > 0);
-        }
     });
     refreshFormTotals(r);
 }
@@ -1416,142 +1146,6 @@ function buildSlipDoc(r) {
     </div>`;
 }
 
-// ── Update preview live values without rebuild ─────────────────────────────
-function updatePreviewLive(r) {
-    const setTxt = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
-    setTxt('slipval_gross', fmt(r.gross_salary));
-    setTxt('slipval_ded', fmt(r.total_deductions));
-    setTxt('slipval_net', fmt(r.net_pay));
-}
-
-// ── On any field input ────────────────────────────────────────────────────
-function onFieldInput(field) {
-    const live = getLiveData();
-    refreshFormTotals(live);
-    updatePreviewLive(live);
-    // Update note badge
-    const inp = document.getElementById('f_' + field);
-    const nb  = document.getElementById('note_' + field);
-    if (inp && nb) {
-        const v = parseVal(inp.value);
-        nb.textContent = v > 0 ? fmt(v) : 'note';
-        nb.classList.toggle('has-val', v > 0);
-    }
-    hasChanges = true;
-    el('changesBadge').classList.remove('hidden');
-}
-
-function recalculate() {
-    const live = getLiveData();
-    refreshFormTotals(live);
-    updatePreviewLive(live);
-}
-
-// ── Toggle edit mode ──────────────────────────────────────────────────────
-function toggleEditMode() {
-    if (PERIOD_IS_FINALIZED) { showToast('This period is finalized.', 'error'); return; }
-    editModeActive = !editModeActive;
-
-    const btn = el('btnEditMode');
-    document.querySelectorAll('#pfBody .pf-field-input').forEach(inp => {
-        inp.disabled = !editModeActive;
-    });
-
-    if (editModeActive) {
-        btn.classList.add('active');
-        btn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edit Mode`;
-        el('btnFinalize').style.display = '';
-        el('btnDiscard').style.display  = '';
-        el('btnRecalc').disabled = false;
-        el('btnAddDed').style.display = '';
-    } else {
-        btn.classList.remove('active');
-        btn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edit Mode`;
-        el('btnFinalize').style.display = 'none';
-        el('btnDiscard').style.display  = 'none';
-        el('btnRecalc').disabled = true;
-        el('btnAddDed').style.display = 'none';
-    }
-}
-
-function discardChanges() {
-    if (!currentRecordId) return;
-    editModeActive = false;
-    hasChanges = false;
-    const r = RECORDS[currentRecordId];
-    populateForm(r);
-    el('slipDoc').innerHTML = buildSlipDoc(r);
-    el('changesBadge').classList.add('hidden');
-
-    // Reset buttons
-    const btn = el('btnEditMode');
-    btn.classList.remove('active');
-    btn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edit Mode`;
-    el('btnFinalize').style.display = 'none';
-    el('btnDiscard').style.display  = 'none';
-    el('btnRecalc').disabled = true;
-    el('btnAddDed').style.display = 'none';
-    document.querySelectorAll('#pfBody .pf-field-input').forEach(i => i.disabled = true);
-}
-
-// ── Save ──────────────────────────────────────────────────────────────────
-async function savePayslip() {
-    if (!currentRecordId) return;
-
-    const btn = el('btnFinalize');
-    btn.disabled = true;
-    btn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:13px;height:13px;animation:spin .7s linear infinite;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Saving…`;
-
-    const live = getLiveData();
-    const payload = {};
-    NUMERIC_FIELDS.forEach(f => { payload[f] = live[f] || 0; });
-    payload.other_deduction_label = live.other_deduction_label || '';
-
-    try {
-        const res = await fetch(`${RECORD_UPDATE_URL}/${currentRecordId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
-            body: JSON.stringify(payload),
-        });
-        const data = await res.json();
-
-        if (!res.ok) {
-            if (res.status === 403) throw new Error('This payroll period is finalized and cannot be edited.');
-            if (res.status === 422 && data.errors) throw new Error(Object.values(data.errors).flat()[0] ?? 'Validation error.');
-            throw new Error(data.message ?? data.error ?? 'Save failed.');
-        }
-
-        const saved = data.record ?? data;
-        Object.assign(RECORDS[currentRecordId], saved);
-        hasChanges = false;
-        el('changesBadge').classList.add('hidden');
-
-        // Refresh preview & form
-        const r = RECORDS[currentRecordId];
-        el('slipDoc').innerHTML = buildSlipDoc(r);
-        populateForm(r);
-        updateTableRow(currentRecordId, r);
-
-        // Exit edit mode
-        editModeActive = false;
-        const ebtn = el('btnEditMode');
-        ebtn.classList.remove('active');
-        ebtn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edit Mode`;
-        el('btnFinalize').style.display = 'none';
-        el('btnDiscard').style.display  = 'none';
-        el('btnRecalc').disabled = true;
-        el('btnAddDed').style.display = 'none';
-        document.querySelectorAll('#pfBody .pf-field-input').forEach(i => i.disabled = true);
-
-        showToast('Payslip saved successfully!', 'success');
-    } catch (err) {
-        showToast(err.message ?? 'An error occurred.', 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Finalize &amp; Save Changes`;
-    }
-}
-
 // ── Section toggle ─────────────────────────────────────────────────────────
 function toggleSection(name) {
     const hd   = document.querySelector(`#sec-${name} .pf-section-header`);
@@ -1561,28 +1155,13 @@ function toggleSection(name) {
     body.classList.toggle('hidden', collapsed);
 }
 
-// ── Search form fields ─────────────────────────────────────────────────────
-function filterFormFields(q) {
-    const query = q.toLowerCase().trim();
-    document.querySelectorAll('#pfBody .pf-field-row').forEach(row => {
-        const label = (row.dataset.label || '').toLowerCase();
-        row.style.display = (!query || label.includes(query)) ? '' : 'none';
-    });
-}
-
 // ── Open Panel ─────────────────────────────────────────────────────────────
 function openPayslipPanel(recordId) {
     const key = String(recordId);
     const r   = RECORDS[key];
     if (!r) { showToast('Record not found.', 'error'); return; }
 
-    if (currentRecordId && currentRecordId !== key && hasChanges) {
-        if (!confirm('Discard unsaved changes?')) return;
-    }
-
     currentRecordId = key;
-    editModeActive  = false;
-    hasChanges      = false;
 
     // Header
     el('ppNameTitle').textContent = r.emp_name;
@@ -1592,24 +1171,6 @@ function openPayslipPanel(recordId) {
     // Build form & preview
     populateForm(r);
     el('slipDoc').innerHTML = buildSlipDoc(r);
-    el('changesBadge').classList.add('hidden');
-
-    // Reset edit state
-    document.querySelectorAll('#pfBody .pf-field-input').forEach(i => i.disabled = true);
-    el('btnEditMode').classList.remove('active');
-    el('btnEditMode').innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edit Mode`;
-    el('btnFinalize').style.display = 'none';
-    el('btnDiscard').style.display  = 'none';
-    el('btnRecalc').disabled = true;
-    el('btnAddDed').style.display = 'none';
-
-    if (PERIOD_IS_FINALIZED) {
-        el('btnEditMode').disabled = true;
-        el('btnEditMode').style.opacity = '0.5';
-    } else {
-        el('btnEditMode').disabled = false;
-        el('btnEditMode').style.opacity = '';
-    }
 
     // Open
     el('payslipPanel').classList.add('open');
@@ -1623,37 +1184,6 @@ function closePayslipPanel() {
     el('pmOverlay').classList.remove('show');
     document.body.style.overflow = '';
     currentRecordId = null;
-    editModeActive  = false;
-    hasChanges      = false;
-}
-
-// ── Update table row ──────────────────────────────────────────────────────
-function updateTableRow(recordId, r) {
-    document.querySelectorAll('#pmTable tbody tr').forEach(row => {
-        if (String(row.dataset.rid) !== String(recordId)) return;
-        const cells = row.querySelectorAll('td');
-        if (cells[3])  cells[3].textContent = fmt(r.gross_salary);
-        if (cells[4])  cells[4].textContent = fmt(r.total_deductions);
-        if (cells[5])  cells[5].innerHTML   = `<span class="net-chip">₱${fmt(r.net_pay)}</span>`;
-        if (cells[6])  cells[6].textContent = (r.gsis_ee||0) > 0           ? fmt(r.gsis_ee)         : '—';
-        if (cells[7])  cells[7].textContent = (r.pagibig_govt||0) > 0      ? fmt(r.pagibig_govt)    : '—';
-        if (cells[8])  cells[8].textContent = (r.philhealth_ee||0) > 0     ? fmt(r.philhealth_ee)   : '—';
-        if (cells[9])  cells[9].textContent = (r.withholding_tax||0) > 0   ? fmt(r.withholding_tax) : '—';
-        if (cells[10]) cells[10].textContent= (r.allowance_pera||0) > 0    ? fmt(r.allowance_pera)  : '—';
-    });
-}
-
-// ── Search filter ─────────────────────────────────────────────────────────
-function filterTable(q) {
-    const query = q.toLowerCase().trim();
-    let visible = 0;
-    document.querySelectorAll('#pmTable tbody tr').forEach(row => {
-        const match = !query || (row.dataset.name||'').includes(query) || (row.dataset.id||'').includes(query);
-        row.classList.toggle('hidden-row', !match);
-        if (match) visible++;
-    });
-    const e = el('statCount');
-    if (e) e.textContent = visible;
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────

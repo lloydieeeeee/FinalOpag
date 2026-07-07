@@ -276,7 +276,7 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
         ],
         'CNGWPC Cooperative' => $cngCols,
         'Allowances' => [
-            'allowance_ra' => 'RA (PA Only)', 'allowance_ta' => 'TA (PA Only)'
+            'allowance_rata' => 'RA (PA Only)', 'allowance_ta' => 'TA (PA Only)'
         ]
     ];
 
@@ -296,14 +296,21 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
     /* ─── Filter purely dynamic deductions and allowances ─── */
     $dynamicDeductions = $allDeductions->filter(function($ded) {
         if ($ded->parent_id == 9 || strtoupper($ded->name) === 'CNGWPC') return false;
+        if (in_array(strtoupper($ded->name), ['ROOT', 'INTERMEDIATE', 'ALLOWANCE_OTHER'])) return false; // STRICT BLOCK
         if (method_exists($ded, 'isAllowance') && $ded->isAllowance()) return false;
-        if (method_exists($ded, 'resolveColumn') && $ded->resolveColumn() !== null) return false;
+        if (is_null($ded->parent_id)) return false; // Excludes parent headers
+        if (in_array($ded->id, [33, 34])) return false; // Exclude PhilHealth children
+        $col = method_exists($ded, 'resolveColumn') ? $ded->resolveColumn() : null;
+        if ($col !== null) return false;
         return true;
     });
 
     $dynamicAllowances = $allDeductions->filter(function($ded) {
+        if (in_array(strtoupper($ded->name), ['ROOT', 'INTERMEDIATE', 'ALLOWANCE_OTHER'])) return false; // STRICT BLOCK
         if (method_exists($ded, 'isAllowance') && !$ded->isAllowance()) return false;
-        if (method_exists($ded, 'resolveColumn') && $ded->resolveColumn() !== null) return false;
+        if (is_null($ded->parent_id)) return false; // Excludes parent headers
+        $col = method_exists($ded, 'resolveColumn') ? $ded->resolveColumn() : null;
+        if ($col !== null) return false;
         return true;
     });
 
@@ -318,7 +325,6 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
     $pagibigEeRec = $ded('Employee Share') ?? $ded('pagibig employee share');
     $pagibigGovRec= $ded('Employer Share') ?? $ded("pagibig gov't share");
     
-    // PHILHEALTH FIX KEPT HERE
     $phicEeRec    = $ded('Personal Share')   ?? $ded('philhealth employee share') ?? $ded('philhealth');
     $phicGovtRec  = $ded('Government Share') ?? $ded("philhealth gov't share") ?? $ded('philhealth');
     
@@ -352,8 +358,8 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
         'phicGovtLimit'   => $getLimit($phicGovtRec),
         'peraType'        => $peraRec?->rate_type      ?? 'flat',
         'peraValue'       => (float)($peraRec?->rate_value     ?? 2000),
-        'raType'          => $raRec?->rate_type        ?? 'flat',
-        'raValue'         => (float)($raRec?->rate_value       ?? 9500),
+        'rataType'        => $raRec?->rate_type        ?? 'flat',
+        'rataValue'       => (float)($raRec?->rate_value       ?? 9500),
         'taType'          => $taRec?->rate_type        ?? 'flat',
         'taValue'         => (float)($taRec?->rate_value       ?? 9500),
     ];
@@ -553,7 +559,7 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     <th class="grp-phic no-sort" data-group="phic" colspan="2" style="text-align:center;">PHILHEALTH</th>
 
                     {{-- WITHHOLDING TAX: 1 editable --}}
-                    <th class="grp-wtax no-sort" data-group="wtax" colspan="1" style="text-align:center;">W/TAX</th>
+                    <th class="grp-wtax no-sort" data-group="wtax" colspan="1" style="text-align:center;">WithholdingTAX</th>
 
                     {{-- OTHER LOANS = 5 columns --}}
                     <th class="grp-loans no-sort" data-group="other_loans" colspan="5" style="text-align:center;">OTHER LOANS &amp; DEDUCTIONS</th>
@@ -589,9 +595,9 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     <th class="sub-employee" onclick="sortEmp(5)" style="text-align:right;">Gross Salary <span class="sarr">↕</span></th>
 
                     {{-- GSIS --}}
-                    <th class="sub-gsis" data-group="gsis">Personal Share (9%)</th>
-                    <th class="sub-gsis" data-group="gsis" style="color:#9ca3af !important;">Govt (12%)*</th>
-                    <th class="sub-gsis" data-group="gsis" style="color:#9ca3af !important;">ECF*</th>
+                    <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_ee">Personal Share (9%)</th>
+                    <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_govt" style="color:#9ca3af !important;">Government Share(12%)*</th>
+                    <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_ec" style="color:#9ca3af !important;">ECF*</th>
                     <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_policy">Policy Loan</th>
                     <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_emergency">Emergency</th>
                     <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_real_estate">Real Estate</th>
@@ -602,14 +608,14 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     <th class="sub-gsis no-sort" data-group="gsis" data-col="gsis_conso">Conso</th>
 
                     {{-- PAG-IBIG --}}
-                    <th class="sub-pagibig" data-group="pagibig">Personal Share (₱200)</th>
-                    <th class="sub-pagibig" data-group="pagibig" style="color:#9ca3af !important;">Govt (₱200)*</th>
+                    <th class="sub-pagibig no-sort" data-group="pagibig" data-col="pagibig_ee">Personal Share (₱200)</th>
+                    <th class="sub-pagibig no-sort" data-group="pagibig" data-col="pagibig_govt" style="color:#9ca3af !important;">Government Share(₱200)*</th>
                     <th class="sub-pagibig no-sort" data-group="pagibig" data-col="pagibig_mpl">MPL</th>
                     <th class="sub-pagibig no-sort" data-group="pagibig" data-col="pagibig_calamity">Calamity</th>
 
                     {{-- PhilHealth --}}
-                    <th class="sub-phic" data-group="phic">Personal Share (2.5%)</th>
-                    <th class="sub-phic" data-group="phic" style="color:#9ca3af !important;">Govt (2.5%)*</th>
+                    <th class="sub-phic no-sort" data-group="phic" data-col="philhealth_ee">Personal Share (2.5%)</th>
+                    <th class="sub-phic no-sort" data-group="phic" data-col="philhealth_govt" style="color:#9ca3af !important;">Government Share (2.5%)*</th>
 
                     {{-- W/Tax --}}
                     <th class="sub-wtax no-sort" data-group="wtax" data-col="withholding_tax">W/Tax</th>
@@ -632,8 +638,8 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     @endforeach
 
                     {{-- Allowances --}}
-                    <th class="sub-allowance" data-group="allowance">PERA</th>
-                    <th class="sub-allowance no-sort" data-group="allowance" data-col="allowance_ra" title="Representation Allowance — Provincial Agriculturist only">RA <span style="font-size:8px;opacity:.6;">(PA)</span></th>
+                    <th class="sub-allowance no-sort" data-group="allowance" data-col="allowance_pera">PERA</th>
+                    <th class="sub-allowance no-sort" data-group="allowance" data-col="allowance_rata" title="Representation Allowance — Provincial Agriculturist only">RA <span style="font-size:8px;opacity:.6;">(PA)</span></th>
                     <th class="sub-allowance no-sort" data-group="allowance" data-col="allowance_ta" title="Transportation Allowance — Provincial Agriculturist only">TA <span style="font-size:8px;opacity:.6;">(PA)</span></th>
                     
                     {{-- Dynamic Allowances sub-headers --}}
@@ -675,7 +681,7 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     $positionCode = strtoupper(trim(optional($emp->position)->position_code ?? ''));
                     $isAgri = ($positionCode === 'PA');
                     
-                    $raDefault  = $isAgri ? $computeFromConfig($jsConfig['raType'], $jsConfig['raValue'], null, $gross) : 0.0;
+                    $raDefault  = $isAgri ? $computeFromConfig($jsConfig['rataType'], $jsConfig['rataValue'], null, $gross) : 0.0;
                     $taDefault  = $isAgri ? $computeFromConfig($jsConfig['taType'], $jsConfig['taValue'], null, $gross) : 0.0;
 
                     /* ── CARRIED FORWARD HARDCODED LOANS ── */
@@ -768,10 +774,16 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     <td style="padding:8px;font-size:11px;color:#6b7280;max-width:120px;white-space:normal;line-height:1.3;">{{ optional($emp->department)->department_name ?? '—' }}</td>
                     <td class="num-cell" style="font-weight:800;color:#111827;">{{ number_format($gross,2) }}</td>
 
-                    {{-- ── GSIS Fixed ── --}}
-                    <td class="num-cell" style="color:#1e40af;font-weight:700;">{{ number_format($gsisEe,2) }}</td>
-                    <td class="num-cell employer-col">{{ number_format($gsisGovt,2) }}</td>
-                    <td class="num-cell employer-col">{{ number_format($gsisEc,2) }}</td>
+                    {{-- ── GSIS (Now Fully Editable) ── --}}
+                    <td class="editable-cell" data-col="gsis_ee" data-field="gsis_ee" onclick="event.stopPropagation()">
+                        <input type="text" inputmode="decimal" value="{{ number_format($gsisEe, 2) }}" data-default="{{ number_format($gsisEe, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)" style="color:#1e40af;font-weight:700;">
+                    </td>
+                    <td class="editable-cell" data-col="gsis_govt" data-field="gsis_govt" onclick="event.stopPropagation()">
+                        <input type="text" inputmode="decimal" value="{{ number_format($gsisGovt, 2) }}" data-default="{{ number_format($gsisGovt, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)" style="color:#9ca3af;font-style:italic;">
+                    </td>
+                    <td class="editable-cell" data-col="gsis_ec" data-field="gsis_ec" onclick="event.stopPropagation()">
+                        <input type="text" inputmode="decimal" value="{{ number_format($gsisEc, 2) }}" data-default="{{ number_format($gsisEc, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)" style="color:#9ca3af;font-style:italic;">
+                    </td>
 
                     {{-- ── GSIS Editable Loans ── --}}
                     <td class="editable-cell" data-col="gsis_policy"      data-field="gsis_policy"      onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_gsis_policy, 2) }}"      data-default="{{ number_format($v_gsis_policy, 2) }}"      class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
@@ -783,29 +795,23 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     <td class="editable-cell" data-col="gsis_computer"    data-field="gsis_computer"    onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_gsis_computer, 2) }}"    data-default="{{ number_format($v_gsis_computer, 2) }}"    class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
                     <td class="editable-cell" data-col="gsis_conso"       data-field="gsis_conso"       onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_gsis_conso, 2) }}"       data-default="{{ number_format($v_gsis_conso, 2) }}"       class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
 
-                    {{-- ── PAG-IBIG EE: editable if Not Fixed, else static ── --}}
-                    @php $pagibigEeIsTypable = ($pagibigEeRec?->type === 'Not Fixed'); @endphp
-                    @if($pagibigEeIsTypable)
+                    {{-- ── PAG-IBIG (Now Fully Editable) ── --}}
                     <td class="editable-cell" data-col="pagibig_ee" data-field="pagibig_ee" onclick="event.stopPropagation()">
                         <input type="text" inputmode="decimal" value="{{ number_format($pagibigEe, 2) }}" data-default="{{ number_format($pagibigEe, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)" style="color:#7c3aed;font-weight:700;">
                     </td>
-                    @else
-                    <td class="num-cell" style="color:#7c3aed;font-weight:700;">{{ number_format($pagibigEe,2) }}</td>
-                    @endif
-                    <td class="num-cell employer-col">{{ number_format($pagibigGov,2) }}</td>
+                    <td class="editable-cell" data-col="pagibig_govt" data-field="pagibig_govt" onclick="event.stopPropagation()">
+                        <input type="text" inputmode="decimal" value="{{ number_format($pagibigGov, 2) }}" data-default="{{ number_format($pagibigGov, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)" style="color:#9ca3af;font-style:italic;">
+                    </td>
                     <td class="editable-cell" data-col="pagibig_mpl"      data-field="pagibig_mpl"      onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_pagibig_mpl, 2) }}"      data-default="{{ number_format($v_pagibig_mpl, 2) }}"      class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
                     <td class="editable-cell" data-col="pagibig_calamity" data-field="pagibig_calamity" onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_pagibig_calamity, 2) }}" data-default="{{ number_format($v_pagibig_calamity, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
 
-                    {{-- ── PhilHealth EE: editable if Not Fixed, else static ── --}}
-                    @php $phicEeIsTypable = ($phicEeRec?->type === 'Not Fixed'); @endphp
-                    @if($phicEeIsTypable)
+                    {{-- ── PhilHealth (Now Fully Editable) ── --}}
                     <td class="editable-cell" data-col="philhealth_ee" data-field="philhealth_ee" onclick="event.stopPropagation()">
                         <input type="text" inputmode="decimal" value="{{ number_format($phicEe, 2) }}" data-default="{{ number_format($phicEe, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)" style="color:#0891b2;font-weight:700;">
                     </td>
-                    @else
-                    <td class="num-cell" style="color:#0891b2;font-weight:700;">{{ number_format($phicEe,2) }}</td>
-                    @endif
-                    <td class="num-cell employer-col">{{ number_format($phicGovt,2) }}</td>
+                    <td class="editable-cell" data-col="philhealth_govt" data-field="philhealth_govt" onclick="event.stopPropagation()">
+                        <input type="text" inputmode="decimal" value="{{ number_format($phicGovt, 2) }}" data-default="{{ number_format($phicGovt, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)" style="color:#9ca3af;font-style:italic;">
+                    </td>
 
                     {{-- ── Withholding Tax ── --}}
                     <td class="editable-cell" data-col="withholding_tax"  data-field="withholding_tax"  onclick="event.stopPropagation()"><input type="text" inputmode="decimal" value="{{ number_format($v_withholding_tax, 2) }}"  data-default="{{ number_format($v_withholding_tax, 2) }}"  class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)"></td>
@@ -832,13 +838,15 @@ input[type="checkbox"] { width: 15px; height: 15px; accent-color: #1a3a1a; curso
                     </td>
                     @endforeach
 
-                    {{-- ── PERA: always fixed ── --}}
-                    <td class="num-cell" style="color:#065f46;font-weight:700;">{{ number_format($pera,2) }}</td>
+                    {{-- ── PERA: (Now Editable) ── --}}
+                    <td class="editable-cell" data-col="allowance_pera" data-field="allowance_pera" onclick="event.stopPropagation()">
+                        <input type="text" inputmode="decimal" value="{{ number_format($pera, 2) }}" data-default="{{ number_format($pera, 2) }}" class="loan-input" oninput="recalcRow(this)" onfocus="focusCell(this)" onblur="blurCell(this)" style="color:#065f46;font-weight:700;">
+                    </td>
 
                     {{-- ── RA: editable for PA, locked (0) for others ── --}}
                     <td class="editable-cell {{ $isAgri ? 'agri-allowance' : 'agri-locked' }}"
-                        data-col="allowance_ra"
-                        data-field="allowance_ra"
+                        data-col="allowance_rata"
+                        data-field="allowance_rata"
                         onclick="event.stopPropagation()">
                         <input type="text" inputmode="decimal"
                                value="{{ number_format($raDefault, 2) }}"
@@ -1159,17 +1167,14 @@ let _isDuplicate = false;
 let tableState = JSON.parse(localStorage.getItem('payroll_draft') || '{}');
 
 function saveSessionState() {
-    sessionStorage.setItem('payroll_step', '2');
-    sessionStorage.setItem('payroll_month', document.getElementById('s1Month').value);
-    sessionStorage.setItem('payroll_year', document.getElementById('s1Year').value);
-    sessionStorage.setItem('payroll_label', document.getElementById('s1Label').value);
+    localStorage.setItem('payroll_step', '2');
+    localStorage.setItem('payroll_month', document.getElementById('s1Month').value);
+    localStorage.setItem('payroll_year', document.getElementById('s1Year').value);
+    localStorage.setItem('payroll_label', document.getElementById('s1Label').value);
 }
 
 function clearSessionState() {
-    sessionStorage.removeItem('payroll_step');
-    sessionStorage.removeItem('payroll_month');
-    sessionStorage.removeItem('payroll_year');
-    sessionStorage.removeItem('payroll_label');
+    localStorage.removeItem('payroll_step');
 }
 
 function saveRowState(row) {
@@ -1352,10 +1357,10 @@ function closeManageColumnsModal() {
 }
 
 const HARD_DEDUCTION_FIELDS = [
-    'gsis_policy','gsis_emergency','gsis_real_estate',
+    'gsis_ee', 'gsis_policy','gsis_emergency','gsis_real_estate',
     'gsis_mpl','gsis_mpl_lite','gsis_gfal','gsis_computer','gsis_conso',
-    'pagibig_mpl','pagibig_calamity',
-    'philhealth_ee','pagibig_ee',
+    'pagibig_ee', 'pagibig_mpl','pagibig_calamity',
+    'philhealth_ee',
     'withholding_tax',
     'loan_dbp','loan_lbp','loan_paracle','overpayment','other_deduction',
     'cng_capital_share', 'cng_kiddie_savings', 'cng_savings', 'cng_regular_loan',
@@ -1397,8 +1402,8 @@ function goToStep2(isRestoring = false) {
     if (!isRestoring) {
         const newMonth = document.getElementById('s1Month').value;
         const newYear = document.getElementById('s1Year').value;
-        const oldMonth = sessionStorage.getItem('payroll_month');
-        const oldYear = sessionStorage.getItem('payroll_year');
+        const oldMonth = localStorage.getItem('payroll_month');
+        const oldYear = localStorage.getItem('payroll_year');
         
         if (oldMonth && oldYear && (oldMonth !== newMonth || oldYear !== newYear)) {
             localStorage.removeItem('payroll_draft');
@@ -1425,6 +1430,8 @@ function goToStep2(isRestoring = false) {
     document.getElementById('bc3').style.display    = '';
     document.getElementById('bc2').style.fontWeight = '400';
     
+    // 🚨 Ensures data is re-populated automatically upon reaching Step 2
+    restoreTableState(); 
     updateCounts();
 }
 
@@ -1551,7 +1558,9 @@ function recalcRow(input, skipSave = false) {
     if (!netCell) return;
 
     const gross     = parseFloat(netCell.dataset.gross)     || 0;
-    const gsisEe    = parseFloat(netCell.dataset.gsisEe)    || 0;
+    
+    const gsisEeCell = row.querySelector('[data-field="gsis_ee"] input');
+    const gsisEe = gsisEeCell ? 0 : (parseFloat(netCell.dataset.gsisEe) || 0);
     
     const pagibigEeCell = row.querySelector('[data-field="pagibig_ee"] input');
     const pagibigEe = pagibigEeCell ? 0 : (parseFloat(netCell.dataset.pagibigEe) || 0);
@@ -1559,9 +1568,10 @@ function recalcRow(input, skipSave = false) {
     const phicEeCell = row.querySelector('[data-field="philhealth_ee"] input');
     const phicEe    = phicEeCell ? 0 : (parseFloat(netCell.dataset.phicEe) || 0);
 
-    const pera      = parseFloat(netCell.dataset.pera)      || 0;
+    const peraCell = row.querySelector('[data-field="allowance_pera"] input');
+    const pera = peraCell ? getRawVal(peraCell.value) : (parseFloat(netCell.dataset.pera) || 0);
 
-    const raCell = row.querySelector('[data-field="allowance_ra"] input');
+    const raCell = row.querySelector('[data-field="allowance_rata"] input');
     const taCell = row.querySelector('[data-field="allowance_ta"] input');
     
     // Strip commas for internal calculation!
@@ -1608,8 +1618,8 @@ function resetRow(userId) {
 
     row.querySelectorAll('.loan-input').forEach(inp => {
         const field = inp.closest('[data-field]')?.dataset.field;
-        if (field === 'allowance_ra' && isAgri) {
-            inp.value = computeFixed(DED_CONFIG.raType, DED_CONFIG.raValue, null, parseFloat(row.dataset.salary)||0).toLocaleString('en-US',{minimumFractionDigits:2});
+        if (field === 'allowance_rata' && isAgri) {
+            inp.value = computeFixed(DED_CONFIG.rataType, DED_CONFIG.rataValue, null, parseFloat(row.dataset.salary)||0).toLocaleString('en-US',{minimumFractionDigits:2});
         } else if (field === 'allowance_ta' && isAgri) {
             inp.value = computeFixed(DED_CONFIG.taType, DED_CONFIG.taValue, null, parseFloat(row.dataset.salary)||0).toLocaleString('en-US',{minimumFractionDigits:2});
         } else if (!inp.disabled) {
@@ -1824,9 +1834,9 @@ function openEmpPanel(row) {
         ) +
         mkCard('M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
             'GSIS',
-            mkInfo('Personal Share (9%)', fmtPHP(gsisEe), '#1e40af') +
-            mkInfo("Govt Share (12%) *", fmtPHP(gsisGovt), '#9ca3af') +
-            mkInfo('ECF *', fmtPHP(gsisEc), '#9ca3af') +
+            mkEdit('Personal Share (9%)', 'gsis_ee') +
+            mkEdit('Govt Share (12%) *', 'gsis_govt') +
+            mkEdit('ECF *', 'gsis_ec') +
             mkEdit('Policy Loan',    'gsis_policy') +
             mkEdit('Emergency Loan', 'gsis_emergency') +
             mkEdit('Real Estate',    'gsis_real_estate') +
@@ -1838,15 +1848,15 @@ function openEmpPanel(row) {
         ) +
         mkCard('M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
             'Pag-IBIG',
-            mkInfo('Personal Share (₱200)', fmtPHP(pagibigEe), '#7c3aed') +
-            mkInfo("Govt Share (₱200) *", fmtPHP(pagibigGov), '#9ca3af') +
+            mkEdit('Personal Share', 'pagibig_ee') +
+            mkEdit('Govt Share *', 'pagibig_govt') +
             mkEdit('MPL Loan',      'pagibig_mpl') +
             mkEdit('Calamity Loan', 'pagibig_calamity')
         ) +
         mkCard('M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
             'PhilHealth',
-            mkInfo('Personal Share (2.5%)', fmtPHP(phicEe), '#0891b2') +
-            mkInfo("Govt Share (2.5%) *", fmtPHP(phicGovt), '#9ca3af')
+            mkEdit('Personal Share', 'philhealth_ee') +
+            mkEdit('Govt Share *', 'philhealth_govt')
         ) +
         mkCard('M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
             'Withholding Tax &amp; Other Loans',
@@ -1860,8 +1870,8 @@ function openEmpPanel(row) {
         coopCard + extraDedCard +
         mkCard('M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
             'Allowances',
-            mkInfo('PERA', fmtPHP(pera), '#065f46') +
-            mkEditAgri('RA (Representation Allowance)', 'allowance_ra') +
+            mkEdit('PERA', 'allowance_pera') +
+            mkEditAgri('RA (Representation Allowance)', 'allowance_rata') +
             mkEditAgri('TA (Transportation Allowance)', 'allowance_ta')
         ) + extraAddCard +
         `<p style="font-size:10px;color:#9ca3af;text-align:center;padding:8px 16px 4px;">
@@ -1992,7 +2002,7 @@ function submitPayroll() {
     // Wipe drafts upon successful submission
     localStorage.removeItem('payroll_draft');
     localStorage.removeItem('payroll_excluded_draft');
-    sessionStorage.removeItem('payroll_step');
+    localStorage.removeItem('payroll_step');
 
     document.getElementById('submitForm').submit();
 }
@@ -2019,11 +2029,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     applyHiddenCols();
 
-    // Only restore if user was currently inside Step 2
-    if (sessionStorage.getItem('payroll_step') === '2') {
-        const sm = sessionStorage.getItem('payroll_month');
-        const sy = sessionStorage.getItem('payroll_year');
-        const sl = sessionStorage.getItem('payroll_label');
+    // Now checks ultra-secure localStorage instead of volatile sessionStorage
+    if (localStorage.getItem('payroll_step') === '2') {
+        const sm = localStorage.getItem('payroll_month');
+        const sy = localStorage.getItem('payroll_year');
+        const sl = localStorage.getItem('payroll_label');
         
         if(sm) document.getElementById('s1Month').value = sm;
         if(sy) document.getElementById('s1Year').value = sy;
@@ -2033,8 +2043,7 @@ document.addEventListener('DOMContentLoaded', () => {
         checkDuplicate();
         
         if (!_isDuplicate) {
-            goToStep2(true); // true = skip wiping drafts, we want to restore them!
-            restoreTableState(); // Reload the data
+            goToStep2(true); // Automatically goes to Step 2 and restores the table
         } else {
             clearSessionState();
         }

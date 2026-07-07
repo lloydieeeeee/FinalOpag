@@ -1429,7 +1429,7 @@ function saveDeduction() {
 /* ── DELETE ── */
 function askDelete(id, name) {
     deletingId = id;
-    document.getElementById('confirmName').textContent = `"${name}" will be permanently deleted.`;
+    document.getElementById('confirmName').textContent = `"${name}" will be removed from the list.`;
     document.getElementById('confirmModal').classList.add('show');
 }
 function closeConfirm() {

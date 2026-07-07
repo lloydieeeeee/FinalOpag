@@ -74,6 +74,40 @@
             ($field && !empty(trim($record->{$field} ?? '')))
                 ? trim($record->{$field})
                 : $default;
+
+        // ── PERA / RA / TA combined allowance logic ──────────────────────
+        // Collect each value
+        $pera = (float)($record->allowance_pera ?? 0);
+        $ra   = (float)($record->allowance_rata ?? 0);
+        $ta   = (float)($record->allowance_ta   ?? 0);
+        $peraRaTaTotal = $pera + $ra + $ta;
+
+        // Build a smart label showing only parts that have a non-zero value
+        $peraRaTaParts = [];
+        if ($pera > 0) $peraRaTaParts[] = 'PERA';
+        if ($ra   > 0) $peraRaTaParts[] = 'RA';
+        if ($ta   > 0) $peraRaTaParts[] = 'TA';
+
+        // If nothing has a value, fall back to showing "PERA/RA/TA" (but amount = 0.00)
+        $peraRaTaLabel = count($peraRaTaParts) > 0
+            ? implode('/', $peraRaTaParts)
+            : 'PERA/RA/TA';
+
+        // Show this combined row only when any of them is active OR has a non-zero value
+        $peraRaTaActive = ($peraRaTaTotal > 0)
+            || $allComponents->contains(fn($c) => in_array($c->resolveColumn(), ['allowance_pera','allowance_rata','allowance_ta']) && $c->is_active);
+
+        // Gather all OTHER allowances — exclude anything that is PERA, RA, or TA
+        // by BOTH column name and deduction name, since resolveColumn() may return null
+        // for some DB configurations, causing the filter to miss them.
+        $peraRaTaCols  = ['allowance_pera', 'allowance_rata', 'allowance_ta'];
+        $peraRaTaNames = ['pera', 'ra', 'ta', 'allowance_pera', 'allowance_rata', 'allowance_ta'];
+        $otherAllowances = $allowanceConfig->filter(function($allow) use ($peraRaTaCols, $peraRaTaNames) {
+            $col  = $allow->resolveColumn();
+            $name = strtolower(trim($allow->name));
+            return !in_array($col, $peraRaTaCols) && !in_array($name, $peraRaTaNames);
+        });
+        // ─────────────────────────────────────────────────────────────────
     @endphp
 
     <div class="page-col">
@@ -111,8 +145,17 @@
                 <td class="c-amt">{{ $f($record->gross_salary) }}</td>
             </tr>
 
-            {{-- Smart Dynamic Allowances --}}
-            @foreach($allowanceConfig as $allow)
+            {{-- Combined PERA/RA/TA row — smart label shows only non-zero parts --}}
+            @if($peraRaTaActive)
+            <tr class="row-bold">
+                <td class="c-lbl">{{ $peraRaTaLabel }}</td>
+                <td class="c-ul"></td>
+                <td class="c-amt">{{ $f($peraRaTaTotal) }}</td>
+            </tr>
+            @endif
+
+            {{-- Any other dynamic allowances (not pera/ra/ta) --}}
+            @foreach($otherAllowances as $allow)
                 @php
                     $col = $allow->resolveColumn();
                     $val = $col ? (float)($record->{$col} ?? 0) : (float)($dynData[$allow->id] ?? 0);
