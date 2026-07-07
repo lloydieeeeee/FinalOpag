@@ -37,31 +37,31 @@ class LeaveCardController extends Controller
      * SHOW — JSON payload for the editor panel
      *
      * MONTH DIVIDER RULE:
-     *   Regular leaves  → grouped by application_date (filing date)
-     *   Half-day leaves → grouped by date_of_absence (absence date)
+     * Regular leaves  → grouped by application_date (filing date)
+     * Half-day leaves → grouped by date_of_absence (absence date)
      *
-     *   Examples:
-     *     Filed Mar 31, leave Apr 1–5  → March divider ✓
-     *     Filed Apr 1,  leave Mar 28   → April divider ✓
-     *     Half-day absence Mar 11      → March divider ✓
+     * Examples:
+     * Filed Mar 31, leave Apr 1–5  → March divider ✓
+     * Filed Apr 1,  leave Mar 28   → April divider ✓
+     * Half-day absence Mar 11      → March divider ✓
      *
      * HALF-DAY COLUMN MAPPING:
-     *   Half-day (0.5 days) → tardy_undertime column
-     *   This deducts from VL via the same formula recalcAll() uses.
-     *   VL type  → tardy_undertime (deducts VL)
-     *   SL type  → taken_sl (deducts SL) ← handled in autoImportApproved() frontend
+     * Half-day (0.5 days) → tardy_undertime column
+     * This deducts from VL via the same formula recalcAll() uses.
+     * VL type  → tardy_undertime (deducts VL)
+     * SL type  → taken_sl (deducts SL) ← handled in autoImportApproved() frontend
      *
      * ALL STATUSES FETCHED:
-     *   Both regular and half-day applications are fetched for ALL statuses.
-     *   The frontend autoImportApproved() filters to APPROVED before inserting.
-     *   Non-approved records are needed so excluded/tombstoned IDs can be
-     *   properly tracked and re-recognised on reload.
+     * Both regular and half-day applications are fetched for ALL statuses.
+     * The frontend autoImportApproved() filters to APPROVED before inserting.
+     * Non-approved records are needed so excluded/tombstoned IDs can be
+     * properly tracked and re-recognised on reload.
      *
      * SORT ORDER:
-     *   Both regular and half-day applications are sorted by created_at ASC
-     *   after merging, so the sheet order reflects the actual order in which
-     *   records were created in the DB — half-days will no longer pile up at
-     *   the bottom after all regular leaves.
+     * Both regular and half-day applications are sorted by created_at ASC
+     * after merging, so the sheet order reflects the actual order in which
+     * records were created in the DB — half-days will no longer pile up at
+     * the bottom after all regular leaves.
      * ═══════════════════════════════════════════════ */
     public function show(int $employeeId, int $year)
     {
@@ -211,19 +211,19 @@ class LeaveCardController extends Controller
          * status === 'APPROVED' before inserting any rows.
          *
          * Columns used:
-         *   half_day_id      → unique ID, prefixed 'hd_' on the frontend
-         *   employee_id      → to scope per employee
-         *   leave_type_id    → joined to leave_type for type_name / type_code
-         *   date_of_absence  → used as both start_date and end_date
-         *   time_period      → AM or PM, shown in details_of_leave
-         *   application_date → filing date (same day as absence for half-days)
-         *   status           → PENDING / APPROVED / REJECTED / CANCELLED
-         *   created_at       → used for merge-sort with regular leaves
+         * half_day_id      → unique ID, prefixed 'hd_' on the frontend
+         * employee_id      → to scope per employee
+         * leave_type_id    → joined to leave_type for type_name / type_code
+         * date_of_absence  → used as both start_date and end_date
+         * time_period      → AM or PM, shown in details_of_leave
+         * application_date → filing date (same day as absence for half-days)
+         * status           → PENDING / APPROVED / REJECTED / CANCELLED
+         * created_at       → used for merge-sort with regular leaves
          *
          * Column mapping on the leave card sheet:
-         *   VL half-day → tardy_undertime (0.5) — deducts from VL balance
-         *   SL half-day → taken_sl (0.5)         — deducts from SL balance
-         *   The frontend autoImportApproved() handles this distinction via type_code.
+         * VL half-day → tardy_undertime (0.5) — deducts from VL balance
+         * SL half-day → taken_sl (0.5)         — deducts from SL balance
+         * The frontend autoImportApproved() handles this distinction via type_code.
          * ══════════════════════════════════════════════════════════════ */
         $halfDayApplications = DB::table('half_day as hd')
             ->join('leave_type as lt', 'lt.leave_type_id', '=', 'hd.leave_type_id')
@@ -339,22 +339,22 @@ class LeaveCardController extends Controller
          * Maps every saved leave_card_entry row back to the frontend
          * format. Key points:
          *
-         *   leave_application_id → used to populate importedLeaveIds
-         *                          for regular leaves on reload
+         * leave_application_id → used to populate importedLeaveIds
+         * for regular leaves on reload
          *
-         *   half_day_id          → used to populate importedLeaveIds
-         *                          (as 'hd_N') for half-day entries on reload
-         *                          REQUIRES the half_day_id column to exist
-         *                          (added by migration)
+         * half_day_id          → used to populate importedLeaveIds
+         * (as 'hd_N') for half-day entries on reload
+         * REQUIRES the half_day_id column to exist
+         * (added by migration)
          *
-         *   date_particulars === '--- EXCLUDED ---'
-         *                      → tombstone row; frontend adds IDs to
-         *                        excludedLeaveIds so they are never
-         *                        re-imported after deletion
+         * date_particulars === '--- EXCLUDED ---'
+         * → tombstone row; frontend adds IDs to
+         * excludedLeaveIds so they are never
+         * re-imported after deletion
          *
-         *   'as per hr' particulars → hr_vl_balance / hr_sl_balance
-         *                             returned so frontend restores
-         *                             the hard-override on reload
+         * 'as per hr' particulars → hr_vl_balance / hr_sl_balance
+         * returned so frontend restores
+         * the hard-override on reload
          * ══════════════════════════════════════════════════════════════ */
         $entries = LeaveCardEntry::where('leave_card_id', $card->leave_card_id)
                         ->orderBy('entry_order')
@@ -384,6 +384,8 @@ class LeaveCardController extends Controller
                                 'status'               => $e->status,
                                 'leave_application_id' => $e->leave_application_id,
                                 'half_day_id'          => $e->half_day_id ?? null, // ← from migration column
+                                'manual_leave_type_id' => $e->manual_leave_type_id, // ── ADDED ──
+                                'manual_days_taken'    => $e->manual_days_taken,    // ── ADDED ──
                                 'is_manual'            => $e->is_manual,
                             ];
                         });
@@ -538,6 +540,9 @@ class LeaveCardController extends Controller
                     // Requires the half_day_id column added by migration.
                     'half_day_id'          => $isSep ? null : ($entry['half_day_id'] ?? null),
 
+                    'manual_leave_type_id' => $isSep ? null : ($entry['manual_leave_type_id'] ?? null), // ── ADDED ──
+                    'manual_days_taken'    => $isSep ? null : ($entry['manual_days_taken'] ?? null),    // ── ADDED ──
+
                     'is_manual'            => (int) ($entry['is_manual'] ?? 1),
                     'created_by'           => Auth::id(),
                 ]);
@@ -548,15 +553,15 @@ class LeaveCardController extends Controller
              *
              * Mirrors the frontend recalcAll() formula exactly:
              *
-             *   VL running = opening_vl
-             *              + earned_vl
-             *              - taken_vl
-             *              - tardy_undertime   ← half-day VL lands here
-             *              - leave_wop
+             * VL running = opening_vl
+             * + earned_vl
+             * - taken_vl
+             * - tardy_undertime   ← half-day VL lands here
+             * - leave_wop
              *
-             *   SL running = opening_sl
-             *              + earned_sl
-             *              - taken_sl          ← half-day SL lands here
+             * SL running = opening_sl
+             * + earned_sl
+             * - taken_sl          ← half-day SL lands here
              *
              * "As per HR" rows hard-override the running balance,
              * identical to the frontend behaviour.

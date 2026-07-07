@@ -40,6 +40,7 @@ class LeaveApplicationController extends Controller
             if (!$vlBalance) {
                 $vlBalance = LeaveCreditBalance::create([
                     'user_id'           => $userId,
+                    'employee_id'       => $employee->employee_id, // ── FIXED: Added employee_id ──
                     'leave_type_id'     => $vlType->leave_type_id,
                     'year'              => $year,
                     'total_accrued'     => 0,
@@ -59,6 +60,7 @@ class LeaveApplicationController extends Controller
             if (!$slBalance) {
                 $slBalance = LeaveCreditBalance::create([
                     'user_id'           => $userId,
+                    'employee_id'       => $employee->employee_id, // ── FIXED: Added employee_id ──
                     'leave_type_id'     => $slType->leave_type_id,
                     'year'              => $year,
                     'total_accrued'     => 0,
@@ -246,7 +248,12 @@ class LeaveApplicationController extends Controller
 
         // ── Balance check ─────────────────────────────────────────────────
         $creditBalance = LeaveCreditBalance::firstOrCreate(
-            ['user_id' => $userId, 'leave_type_id' => $leaveType->leave_type_id, 'year' => $year],
+            [
+                'user_id'       => $userId, 
+                'employee_id'   => $employee->employee_id, // ── FIXED: Added employee_id ──
+                'leave_type_id' => $leaveType->leave_type_id, 
+                'year'          => $year
+            ],
             ['total_accrued' => 0, 'total_used' => 0, 'remaining_balance' => 0]
         );
 

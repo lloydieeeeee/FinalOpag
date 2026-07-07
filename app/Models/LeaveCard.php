@@ -65,6 +65,8 @@ class LeaveCardEntry extends Model
         'status',
         'leave_application_id',
         'half_day_id',          // ← added for half-day tombstone tracking
+        'manual_leave_type_id', // ── ADDED ──
+        'manual_days_taken',    // ── ADDED ──
         'is_manual',
         'created_by',
     ];
