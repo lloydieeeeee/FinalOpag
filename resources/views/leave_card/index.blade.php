@@ -1281,7 +1281,10 @@ function renderRows(entries) {
         recalcAll();
     }
 
-function appendDataRow(tbody, entry = {}, isNew = false) {
+/* ════ REFACTORED: build a <tr> element without appending it ════
+   appendDataRow() now just calls this + appendChild.
+   insertRowBefore() calls this + insertBefore. ════ */
+function createDataRowElement(entry = {}, isNew = false) {
     rowCounter++;
     const id        = entry.entry_id || `new_${rowCounter}`;
     const isHalfDay = !!(entry.is_half_day);
@@ -1348,17 +1351,37 @@ function appendDataRow(tbody, entry = {}, isNew = false) {
         <td><input type="number" class="cell-input" data-col="tardy_undertime" step="0.001" value="${v(entry.tardy_undertime)}" oninput="onCellChange()"></td>
         <td class="cell-balance" data-col="balance_vl">${v(entry.balance_vl) || '—'}</td>
         <td class="cell-balance" data-col="balance_sl">${v(entry.balance_sl) || '—'}</td>
-        <td><input type="text" class="cell-input remarks-input" data-col="remarks" value="${escHtml(entry.remarks || '')}" oninput="markDirty()"></td>
+        <td><input type="text" class="cell-input remarks-input" data-col="remarks" value="${escHtml(entry.remarks || '')}" placeholder="e.g. 4 Wellness Leave" oninput="markDirty()"></td>
         <td style="position:relative;">
             ${autoBadgeHtml}
             <input type="text" class="cell-input status-input" data-col="status" value="${escHtml(entry.status || '')}" style="width:${showNewBadge ? 'calc(100% - 44px)' : '100%'}" oninput="markDirty()">
         </td>
-        <td>
-            <button class="del-row-btn" onclick="deleteRow(this.closest('tr'))">
+        <td style="white-space:nowrap;">
+            <button class="del-row-btn" style="color:#2d5a1b;" onclick="insertRowBefore(this)" title="Insert row above">
+                <svg style="width:12px;height:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </button>
+            <button class="del-row-btn" onclick="deleteRow(this.closest('tr'))" title="Delete row">
                 <svg style="width:12px;height:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </button>
         </td>`;
-    tbody.appendChild(tr);
+    return tr;
+}
+
+/* Kept for backward compatibility — everywhere else calls this to append at the end */
+function appendDataRow(tbody, entry = {}, isNew = false) {
+    tbody.appendChild(createDataRowElement(entry, isNew));
+}
+
+/* ════ NEW: insert a blank row directly above the clicked row ════ */
+function insertRowBefore(btn) {
+    const tr = btn.closest('tr');
+    if (!tr) return;
+    const newRow = createDataRowElement({}, false);
+    tr.parentElement.insertBefore(newRow, tr);
+    renumberRows();
+    recalcAll();
+    markDirty();
+    showLcToast('Row Inserted', 'A blank row was added above.', 'info');
 }
 
 /* Fires on any numeric cell change — recalcs AND marks dirty */

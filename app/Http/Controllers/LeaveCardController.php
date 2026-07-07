@@ -494,8 +494,36 @@ class LeaveCardController extends Controller
             /* ── Delete all existing entries then re-insert ── */
             LeaveCardEntry::where('leave_card_id', $card->leave_card_id)->delete();
 
+            // ── Leave types that carry an annual day-limit (e.g. Wellness Leave,
+            //    Special Privilege Leave). Used below to auto-link manually typed
+            //    remarks (e.g. "Wellness Leave") to a real leave type + day count,
+            //    so the annual limit tracker on the application form reflects
+            //    manually recorded leave card entries, not just online applications.
+            $limitedLeaveTypes = LeaveType::where('is_active', 1)
+                ->whereNotNull('max_days')
+                ->get(['leave_type_id', 'type_name']);
+
             foreach (($request->entries ?? []) as $entry) {
                 $isSep = (bool) ($entry['is_separator'] ?? false);
+
+                // ── Auto-detect manual leave-type usage from the remarks text ──
+                $manualLeaveTypeId = null;
+                $manualDaysTaken   = null;
+                if (!$isSep
+                    && (int) ($entry['is_manual'] ?? 1) === 1
+                    && empty($entry['leave_application_id'])
+                    && empty($entry['half_day_id'])
+                    && !empty($entry['remarks'])
+                ) {
+                    $remarksLower = strtolower(trim($entry['remarks']));
+                    foreach ($limitedLeaveTypes as $lt) {
+                        if ($remarksLower !== '' && str_contains($remarksLower, strtolower($lt->type_name))) {
+                            $manualLeaveTypeId = $lt->leave_type_id;
+                            $manualDaysTaken   = 1; // each manual row represents one leave instance
+                            break;
+                        }
+                    }
+                }
 
                 LeaveCardEntry::create([
                     'leave_card_id'    => $card->leave_card_id,
@@ -540,8 +568,10 @@ class LeaveCardController extends Controller
                     // Requires the half_day_id column added by migration.
                     'half_day_id'          => $isSep ? null : ($entry['half_day_id'] ?? null),
 
-                    'manual_leave_type_id' => $isSep ? null : ($entry['manual_leave_type_id'] ?? null), // ── ADDED ──
-                    'manual_days_taken'    => $isSep ? null : ($entry['manual_days_taken'] ?? null),    // ── ADDED ──
+                    // Prefer an explicit value from the payload (future-proofing for a
+                    // real leave-type picker), falling back to the auto-detected match.
+                    'manual_leave_type_id' => $isSep ? null : ($entry['manual_leave_type_id'] ?? $manualLeaveTypeId),
+                    'manual_days_taken'    => $isSep ? null : ($entry['manual_days_taken'] ?? $manualDaysTaken),
 
                     'is_manual'            => (int) ($entry['is_manual'] ?? 1),
                     'created_by'           => Auth::id(),

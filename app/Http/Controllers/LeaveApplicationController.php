@@ -115,6 +115,31 @@ class LeaveApplicationController extends Controller
             ->pluck('total_used', 'leave_type_id')
             ->toArray();
 
+        // Manually recorded Leave Card rows (e.g. remarks typed as "Wellness Leave")
+        // are auto-linked to a leave type by LeaveCardController@save. Fold those
+        // days in too, so the annual limit shown here reflects leave that was
+        // recorded directly on the Leave Card, not just online applications.
+        $manualUsedDaysThisYear = DB::table('leave_card_entry')
+            ->join('leave_card', 'leave_card.leave_card_id', '=', 'leave_card_entry.leave_card_id')
+            ->where('leave_card.user_id', $userId)
+            ->where('leave_card.year', $year)
+            ->whereNotNull('leave_card_entry.manual_leave_type_id')
+            ->where(function ($q) {
+                // Match the Leave Card legend: Rejected/Cancelled/Recalled rows
+                // are reference-only and don't count against the balance/limit.
+                // Rows with no status set yet are treated as counting (default).
+                $q->whereNull('leave_card_entry.status')
+                  ->orWhereNotIn('leave_card_entry.status', ['CANCELLED', 'REJECTED', 'RECALLED']);
+            })
+            ->groupBy('leave_card_entry.manual_leave_type_id')
+            ->selectRaw('leave_card_entry.manual_leave_type_id, SUM(leave_card_entry.manual_days_taken) as total_used')
+            ->pluck('total_used', 'manual_leave_type_id')
+            ->toArray();
+
+        foreach ($manualUsedDaysThisYear as $ltId => $days) {
+            $usedDaysThisYear[$ltId] = ($usedDaysThisYear[$ltId] ?? 0) + (float) $days;
+        }
+
         $maxDaysJson = LeaveType::where('is_active', 1)
             ->get()
             ->keyBy('leave_type_id')
